@@ -242,6 +242,8 @@ const CodeLibrary = ({ query, setQuery, focusId, clearFocus }) => {
 
 export default function EngineeringModule({ project, analysis, update, readOnly, projectId, setProject }) {
   const [eng, setEng] = useState(null);
+  const [engState, setEngState] = useState("computing");
+  const [engError, setEngError] = useState("");
   const [tab, setTab] = useState("grid");
   const [libQuery, setLibQuery] = useState("");
   const [libFocus, setLibFocus] = useState("");
@@ -253,13 +255,16 @@ export default function EngineeringModule({ project, analysis, update, readOnly,
   }, []);
 
   useEffect(() => {
+    let cancelled = false;
+    const controller = new AbortController();
+    setEngState("computing");
     const t = setTimeout(() => {
       api
-        .post("/engineering/analyse", { project })
-        .then(({ data }) => setEng(data))
-        .catch((e) => toast.error(apiError(e.response?.data?.detail)));
+        .post("/engineering/analyse", { project }, { signal: controller.signal })
+        .then(({ data }) => { if (!cancelled) { setEng(data); setEngState("fresh"); setEngError(""); } })
+        .catch((e) => { if (!cancelled) { setEngState("stale"); setEngError(apiError(e.response?.data?.detail)); } });
     }, 300);
-    return () => clearTimeout(t);
+    return () => { cancelled = true; controller.abort(); clearTimeout(t); };
   }, [project]);
 
   const openLibrary = useCallback((code, libraryId) => {
@@ -276,14 +281,17 @@ export default function EngineeringModule({ project, analysis, update, readOnly,
       p.engineering = { ...(p.engineering || {}), green_checklist: g };
     });
 
-  const cfgv = useMemo(() => eng?.config || {}, [eng]);
+  const cfgv = useMemo(() => ({ ...(eng?.config || {}), ...(project.engineering || {}) }), [eng, project.engineering]);
   const mod = eng?.modules?.[tab];
 
-  if (!eng) return <p className="text-sm text-slate-500" data-testid="engineering-loading">Computing IS/NBC modules…</p>;
+  if (!eng) return <p role="status" className="text-sm text-slate-600" data-testid="engineering-loading">{engState === "stale" ? `Engineering could not be calculated: ${engError}` : "Computing IS/NBC modules…"}</p>;
 
   return (
     <LibraryContext.Provider value={openLibrary}>
       <div className="space-y-4">
+        {engState !== "fresh" && <p role="status" data-testid="engineering-freshness-status" className="border-l-2 border-amber-400 bg-amber-50 p-3 text-xs text-amber-900">
+          {engState === "stale" ? `Engineering results are out of date. ${engError}` : "Updating engineering checks… previous results are not current."}
+        </p>}
         <Section
           title="Shared project data (feeds every module)"
           description="Enter once — city derives seismic zone, wind speed and rainfall; soil derives SBC and φ."

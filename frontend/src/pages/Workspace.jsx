@@ -1,11 +1,7 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { toast } from "sonner";
-import {
-  Map, Building2, Calculator, Car, ClipboardList, Wallet, ShieldCheck, FileText, History, CalendarClock,
-  Globe2, Box, Ruler, TrendingUp, Sparkles, Gauge, Shapes, DraftingCompass, Activity, Landmark,
-  BrainCircuit, ShoppingCart, Leaf,
-} from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { api, apiError } from "../lib/api";
 import { TopBar } from "../components/TopBar";
 import { MetricsStrip } from "../components/MetricsStrip";
@@ -14,6 +10,9 @@ import AptPanel from "../components/AptPanel";
 import { ProjectNav } from "../components/ProjectNav";
 import ErrorBoundary from "../components/ErrorBoundary";
 import SiteModule from "../modules/SiteModule";
+import { WORKSPACE_CATALOG } from "../lib/workspaceCatalog";
+import { CalculationNotice } from "../components/CalculationNotice";
+import { Button } from "../components/ui/button";
 
 // Loaded on demand.
 const GisModule = lazy(() => import("../modules/GisModule"));
@@ -34,46 +33,21 @@ const GenerativeStudioModule = lazy(() => import("../modules/GenerativeStudioMod
 const BimModule = lazy(() => import("../modules/BimModule"));
 const AutonomousStudioModule = lazy(() => import("../modules/AutonomousStudioModule"));
 const TownshipModule = lazy(() => import("../modules/TownshipModule"));
-const SmartCityModule = lazy(() => import("../modules/SmartCityModule"));
 const DigitalTwinModule = lazy(() => import("../modules/DigitalTwinModule"));
-const AiOperatingSystemModule = lazy(() => import("../modules/AiOperatingSystemModule"));
 const ProcurementMarketModule = lazy(() => import("../modules/ProcurementMarketModule"));
 const UrbanSustainabilityModule = lazy(() => import("../modules/UrbanSustainabilityModule"));
 
-const GROUPS = [
-  ["site", "Site", [
-    ["plot", "Plot & Setbacks", Map, SiteModule],
-    ["gis", "GIS Intelligence", Globe2, GisModule],
-    ["township", "Township & Master Plan", Landmark, TownshipModule],
-  ]],
-  ["design", "Design", [
-    ["autonomous-studio", "Quick Generation", Sparkles, AutonomousStudioModule],
-    ["planning", "Apartment Planning", Building2, PlanningModule],
-    ["parking", "Parking", Car, ParkingModule],
-    ["studio", "Generative Studio", Shapes, GenerativeStudioModule],
-    ["3d", "3D Visualisation", Box, ThreeDModule],
-  ]],
-  ["engineering-bim", "Engineering & BIM", [
-    ["calculations", "Calculations", Calculator, CalculationsModule],
-    ["engineering", "IS/NBC Engineering", Ruler, EngineeringModule],
-    ["bim", "BIM & CAD Interchange", DraftingCompass, BimModule],
-    ["digital-twin", "Digital Twin & Smart Site", Activity, DigitalTwinModule],
-  ]],
-  ["cost-procurement", "Cost & Procurement", [
-    ["boq", "BOQ & Quantities", ClipboardList, BoqModule],
-    ["cost", "Cost Estimation", Wallet, CostModule],
-    ["procurement", "Smart Procurement & Market", ShoppingCart, ProcurementMarketModule],
-    ["programme", "Programme & CPM", CalendarClock, ProgrammeModule],
-    ["finance", "Feasibility & ROI", TrendingUp, FinanceModule],
-  ]],
-  ["deliver-esg", "Deliver & ESG", [
-    ["compliance", "Compliance", ShieldCheck, ComplianceModule],
-    ["urban-sustainability", "Green Building & ESG", Leaf, UrbanSustainabilityModule],
-    ["data-health", "Data Reliability", Gauge, DataHealthModule],
-    ["reports", "Reports", FileText, ReportsModule],
-    ["collaboration", "Versions & Team", History, CollaborationModule],
-  ]],
-];
+const COMPONENTS = {
+  plot: SiteModule, gis: GisModule, township: TownshipModule,
+  "autonomous-studio": AutonomousStudioModule, planning: PlanningModule, parking: ParkingModule,
+  studio: GenerativeStudioModule, "3d": ThreeDModule, calculations: CalculationsModule,
+  engineering: EngineeringModule, bim: BimModule, "digital-twin": DigitalTwinModule,
+  boq: BoqModule, cost: CostModule, procurement: ProcurementMarketModule,
+  programme: ProgrammeModule, finance: FinanceModule, compliance: ComplianceModule,
+  "urban-sustainability": UrbanSustainabilityModule, "data-health": DataHealthModule,
+  reports: ReportsModule, collaboration: CollaborationModule,
+};
+const GROUPS = WORKSPACE_CATALOG.map(g => [g.id, g.label, g.modules.map(m => [m.id, m.name, m.icon, COMPONENTS[m.id]])]);
 
 const MODULES = GROUPS.flatMap(([, , items]) => items);
 
@@ -95,7 +69,7 @@ const GROUP_LABEL = Object.fromEntries(GROUPS.map(([g, label]) => [g, label]));
 const EDITABLE = [
   "name", "client", "location", "plot_reference", "status", "plot", "towers", "parking", "config",
   "quantity_ratios", "rates", "labour_rates", "equipment_rates", "utility_config", "compliance_rules",
-  "engineering",
+  "engineering", "finance", "solar", "cost_adders", "wastage_pct",
   // The programme config holds the user's per-task edits; without it a reload silently
   // discards them and the table quietly reverts to the generated plan.
   "schedule",
@@ -125,15 +99,22 @@ export default function Workspace() {
   const [analysedAt, setAnalysedAt] = useState(null);
   const [duration, setDuration] = useState(null);
   const dirty = useRef(0);   // edit generation, not a boolean -- see saveNow
+  const savedSnapshot = useRef(null);
+  const saving = useRef(false);
+  const saveBlocked = useRef(false);
+  const [saveMessage, setSaveMessage] = useState("");
+  const [loadError, setLoadError] = useState("");
+  const [analysisError, setAnalysisError] = useState("");
 
   useEffect(() => {
     api
       .get(`/projects/${projectId}`)
       .then(({ data }) => {
+        savedSnapshot.current = data;
         setAccessRole(data.access_role);
         setProject(data);
       })
-      .catch((e) => toast.error(apiError(e.response?.data?.detail)));
+      .catch((e) => setLoadError(apiError(e.response?.data?.detail)));
   }, [projectId]);
 
   // Live recalculation.
@@ -151,21 +132,25 @@ export default function Workspace() {
   useEffect(() => {
     if (!project) return;
     let cancelled = false;
+    const controller = new AbortController();
     setAnalysisState((prev) => (prev === "stale" ? "stale" : "recomputing"));
 
     const run = () => {
       api
-        .post("/analyse", { project })
+        .post("/analyse", { project }, { signal: controller.signal })
         .then(({ data }) => {
           if (cancelled) return;
           analyseRetries.current = 0;
           setAnalysis(data);
           setAnalysedAt(new Date());
           setAnalysisState("fresh");
+          setAnalysisError("");
         })
-        .catch(() => {
+        .catch((e) => {
           if (cancelled) return;
           setAnalysisState("stale");
+          setAnalysisError(apiError(e.response?.data?.detail));
+          if (e.response?.status === 422) return;
           const wait = Math.min(2000 * 2 ** analyseRetries.current, 30000);
           analyseRetries.current += 1;
           analyseTimer.current = setTimeout(run, wait);
@@ -175,6 +160,7 @@ export default function Workspace() {
     analyseTimer.current = setTimeout(run, 250);
     return () => {
       cancelled = true;
+      controller.abort();
       clearTimeout(analyseTimer.current);
     };
   }, [project]);
@@ -200,21 +186,31 @@ export default function Workspace() {
 
   const saveNow = useCallback(async () => {
     const snapshot = latest.current;
-    if (!snapshot || !dirty.current) return;
+    if (!snapshot || !dirty.current || saving.current || saveBlocked.current) return;
+    saving.current = true;
     // Claim the current edit generation. Anything the user types after this line bumps it
     // again, so the save cannot mark those edits clean.
     const generation = dirty.current;
     setSaveState("saving");
     const updates = {};
     EDITABLE.forEach((k) => {
-      if (snapshot[k] !== undefined) updates[k] = snapshot[k];
+      if (snapshot[k] !== undefined && JSON.stringify(snapshot[k]) !== JSON.stringify(savedSnapshot.current?.[k])) updates[k] = snapshot[k];
     });
+    if (!Object.keys(updates).length) {
+      dirty.current = 0;
+      saving.current = false;
+      setSaveState("saved");
+      return;
+    }
     try {
       // The revision this edit started from. The server writes only if the document is
       // still at it, so a save can no longer replace a whole subtree — the tower list, the
       // plot — that someone else changed while this tab was editing.
       const { data } = await api.put(`/projects/${projectId}`, { updates, rev: snapshot.rev });
       retries.current = 0;
+      savedSnapshot.current = { ...snapshot, rev: data.rev };
+      latest.current = { ...latest.current, rev: data.rev };
+      setSaveMessage("");
       if (data && data.rev !== undefined) setProject((prev) => ({ ...prev, rev: data.rev }));
       if (dirty.current === generation) {
         dirty.current = false;
@@ -223,42 +219,29 @@ export default function Workspace() {
         setSaveState("saving");        // more arrived while this was in flight
       }
     } catch (e) {
-      // 409 is not a failure to retry: retrying the same body would overwrite the other
-      // edit, which is the thing the check exists to prevent. Take the server's copy, put
-      // this tab's fields back on top of it, and let the next tick save that.
+      // Never automatically overlay the stale local document onto someone else's edit.
       if (e.response?.status === 409) {
-        try {
-          const { data: server } = await api.get(`/projects/${projectId}`);
-          setProject((prev) => {
-            const merged = { ...server };
-            EDITABLE.forEach((k) => {
-              if (prev[k] !== undefined) merged[k] = prev[k];
-            });
-            return merged;
-          });
-          toast.message("Someone else changed this project", {
-            description: "Their version was loaded and your edits reapplied on top. Check the "
-                       + "tabs you were working in before saving again.",
-          });
-          setSaveState("saving");
-          saveTimer.current = setTimeout(saveNow, 1200);
-        } catch {
-          setSaveState("error");
-          saveTimer.current = setTimeout(saveNow, 5000);
-        }
+        saveBlocked.current = true;
+        setSaveState("conflict");
+        setSaveMessage("The server has a newer revision. Your local edits have NOT overwritten it. Export your draft, then load the server version and reapply the intended changes.");
+        clearTimeout(saveTimer.current);
         return;
       }
       setSaveState("error");
+      setSaveMessage(apiError(e.response?.data?.detail));
+      if ([400, 403, 422].includes(e.response?.status)) return;
       // Back off and keep trying rather than dropping the work on the floor.
       const wait = Math.min(2000 * 2 ** retries.current, 30000);
       retries.current += 1;
       if (retries.current === 1) toast.error(apiError(e.response?.data?.detail));
       saveTimer.current = setTimeout(saveNow, wait);
+    } finally {
+      saving.current = false;
     }
   }, [projectId]);
 
   useEffect(() => {
-    if (!project || !dirty.current) return;
+    if (!project || !dirty.current || saveBlocked.current) return;
     setSaveState("saving");
     clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(saveNow, 900);
@@ -315,6 +298,20 @@ export default function Workspace() {
     });
   }, []);
 
+  const exportDraft = () => {
+    const url = URL.createObjectURL(new Blob([JSON.stringify(latest.current, null, 2)], { type: "application/json" }));
+    const link = document.createElement("a"); link.href = url; link.download = "aptimizer-unsaved-draft.json"; link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
+  const reloadServer = async () => {
+    if (!window.confirm("Replace local edits with the server version? Export your draft first if you need to keep them.")) return;
+    try {
+      const { data } = await api.get(`/projects/${projectId}`);
+      dirty.current = 0; saveBlocked.current = false; savedSnapshot.current = data; latest.current = data;
+      setProject(data); setSaveState("saved"); setSaveMessage("");
+    } catch (e) { toast.error(apiError(e.response?.data?.detail)); }
+  };
+
   const readOnly = accessRole === "viewer";
   const Current = useMemo(() => (MODULES.find((m) => m[0] === active) || MODULES[0])?.[3], [active]);
 
@@ -337,7 +334,7 @@ export default function Workspace() {
       <div className="min-h-screen bg-slate-50">
         <TopBar />
         <div className="p-10 text-sm text-slate-500" data-testid="workspace-loading">
-          Loading project…
+          {loadError ? <div role="alert" data-testid="workspace-load-error">{loadError}<Button className="ml-4" onClick={() => window.location.reload()} data-testid="workspace-load-retry">Retry</Button></div> : "Loading project…"}
         </div>
       </div>
     );
@@ -364,10 +361,11 @@ export default function Workspace() {
             }`}
             data-testid="save-indicator"
             title={saveState === "error"
-              ? "Could not save. Retrying automatically — your work is not lost."
+              ? "Not saved. Check the error below."
+              : saveState === "conflict" ? "Saving paused — a newer revision exists."
               : saveState === "saving" ? "Saving…" : "All changes saved"}
           >
-            {saveState === "error" ? "retrying" : saveState}
+            {saveState === "error" ? "not saved" : saveState}
           </span>
           <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded-sm bg-slate-100" data-testid="access-role-badge">
             {accessRole}
@@ -382,6 +380,14 @@ export default function Workspace() {
         onOpenPalette={() => setPaletteOpen(true)}
       />
 
+      {saveMessage && <div role="alert" className="border-b border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900" data-testid="workspace-save-warning">
+        <p>{saveMessage}</p><div className="mt-2 flex flex-wrap gap-2"><Button size="sm" variant="outline" onClick={exportDraft} data-testid="workspace-export-draft">Export local draft</Button>
+        {saveState === "conflict" && <Button size="sm" variant="outline" onClick={reloadServer} data-testid="workspace-load-server">Load server version</Button>}</div>
+      </div>}
+      {analysisState !== "fresh" && <div role="status" className={`border-b px-4 py-2 text-xs ${analysisState === "stale" ? "bg-amber-50 text-amber-900" : "bg-blue-50 text-blue-800"}`} data-testid="workspace-analysis-status">
+        {analysisState === "stale" ? `Results are out of date. ${analysisError || "Recalculation failed."} Correct invalid inputs before relying on these figures.` : "Recalculating… displayed results may reflect earlier inputs."}
+      </div>}
+
       <div className="flex flex-1 min-h-0">
         <aside
           className="w-56 shrink-0 bg-white border-r border-slate-200 hidden md:block"
@@ -392,6 +398,7 @@ export default function Workspace() {
         </aside>
 
         <main className="flex-1 min-w-0 p-4 md:p-6 space-y-4" data-testid={`module-panel-${active}`}>
+          <CalculationNotice basis={analysis?.calculation_basis} onReview={() => setActive("data-health")} />
           {Current && (
             <ErrorBoundary compact key={active} title={`Error in ${active} module`}>
               <Suspense fallback={<ModuleLoading />}>

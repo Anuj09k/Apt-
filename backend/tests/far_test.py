@@ -31,7 +31,7 @@ def test_the_arithmetic_actually_divides_out(ctx):
     _, a, d = ctx
     plot = a["areas"]["plot_area_sqm"]
     builtup = a["areas"]["builtup_area_sqm"]
-    assert round(builtup / plot, 3) == d["far"]
+    assert d["far"] == pytest.approx(builtup / plot, rel=1e-12)
     assert f"{builtup:,.2f}" in d["substitution"]
     assert f"{plot:,.2f}" in d["substitution"]
 

@@ -8,7 +8,7 @@
    matches; body must stay transparent or it would paint over the canvas. */
 html {
     background-color: #ffffff;
-    overflow-x: hidden;
+    overflow-x: clip;
     max-width: 100vw;
 }
 
@@ -19,12 +19,12 @@ body {
     -moz-osx-font-smoothing: grayscale;
     color: #0f172a;
     background-color: transparent;
-    overflow-x: hidden;
+    overflow-x: clip;
     max-width: 100vw;
 }
 
 #root {
-    overflow-x: hidden;
+    overflow-x: clip;
     max-width: 100vw;
 }
 

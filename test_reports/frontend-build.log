@@ -1,0 +1,53 @@
+yarn run v1.22.22
+$ craco build
+Creating an optimized production build...
+Compiled successfully.
+
+File sizes after gzip:
+
+  295.66 kB  build/static/js/main.75a33e09.js
+  263.27 kB  build/static/js/802.00353775.chunk.js
+  95.5 kB    build/static/js/124.21e97ea3.chunk.js
+  23.58 kB   build/static/css/main.a0be6a2c.css
+  17.42 kB   build/static/js/89.acb4e218.chunk.js
+  16.43 kB   build/static/js/843.e671d69c.chunk.js
+  14.34 kB   build/static/js/360.b228f679.chunk.js
+  11.13 kB   build/static/js/574.50753a67.chunk.js
+  9.45 kB    build/static/js/903.152f4e00.chunk.js
+  8.44 kB    build/static/js/538.491ce0bb.chunk.js
+  7.65 kB    build/static/js/385.2d270c3a.chunk.js
+  7.55 kB    build/static/js/885.63da7f7d.chunk.js
+  7.38 kB    build/static/js/146.c7cd6cb8.chunk.js
+  7 kB       build/static/js/596.8566d34d.chunk.js
+  6.68 kB    build/static/js/275.b9ce90bb.chunk.js
+  6.58 kB    build/static/js/207.2249c259.chunk.js
+  6.18 kB    build/static/js/662.ba186e5f.chunk.js
+  5.69 kB    build/static/js/40.ba5b2967.chunk.js
+  5.53 kB    build/static/js/688.e43d9588.chunk.js
+  5.49 kB    build/static/js/760.5de2c131.chunk.js
+  5.47 kB    build/static/js/895.d9b2a49e.chunk.js
+  5.46 kB    build/static/js/845.376a7c28.chunk.js
+  4.93 kB    build/static/js/35.0d96fefd.chunk.js
+  4.46 kB    build/static/js/310.e6771f6d.chunk.js
+  4.29 kB    build/static/js/998.0f00a84e.chunk.js
+  3.81 kB    build/static/js/149.e25929fc.chunk.js
+  3.79 kB    build/static/js/492.8b85cb97.chunk.js
+  3.42 kB    build/static/js/125.f7e77177.chunk.js
+  3.37 kB    build/static/js/295.5a94ed7d.chunk.js
+  2.95 kB    build/static/js/532.f6562aa0.chunk.js
+  2.72 kB    build/static/js/10.b490cf6b.chunk.js
+
+The project was built assuming it is hosted at /.
+You can control this with the homepage field in your package.json.
+
+The build folder is ready to be deployed.
+You may serve it with a static server:
+
+  npm install -g serve
+  serve -s build
+
+Find out more about deployment here:
+
+  https://cra.link/deployment
+
+Done in 39.73s.

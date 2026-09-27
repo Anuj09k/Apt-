@@ -10,24 +10,24 @@ export const TopBar = ({ children }) => {
 
   return (
     <header className="border-b border-slate-200 bg-white" data-testid="top-bar">
-      <div className="flex items-center gap-4 px-5 h-14">
-        <Link to="/projects" className="flex items-center gap-2" data-testid="brand-link">
-          <Brand markClass="h-8 w-auto" />
+      <div className="flex min-h-14 flex-wrap items-center gap-x-2 gap-y-2 px-3 py-2 sm:gap-x-4 sm:px-5">
+        <Link to="/projects" className="flex shrink-0 items-center gap-2" data-testid="brand-link">
+          <Brand testid="topbar-brand" markClass="h-7 w-auto" wordClass="text-[13px] sm:text-[15px]" />
         </Link>
-        <div className="flex-1 min-w-0">{children}</div>
-        <nav className="flex items-center gap-1">
-          <Button variant="ghost" size="sm" className="text-xs h-8" onClick={() => navigate("/projects")} data-testid="nav-projects">
-            <LayoutGrid className="h-3.5 w-3.5 mr-1.5" /> Projects
+        {children && <div className="order-3 w-full min-w-0 sm:order-none sm:w-auto sm:flex-1">{children}</div>}
+        <nav aria-label="Account navigation" className="ml-auto flex shrink-0 items-center gap-0.5">
+          <Button variant="ghost" size="sm" className="text-xs h-8 px-2" title="Projects" aria-label="Projects" onClick={() => navigate("/projects")} data-testid="nav-projects">
+            <LayoutGrid className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Projects</span>
           </Button>
           {user?.role === "admin" && (
-            <Button variant="ghost" size="sm" className="text-xs h-8" onClick={() => navigate("/admin")} data-testid="nav-admin">
-              <Shield className="h-3.5 w-3.5 mr-1.5" /> Users
+            <Button variant="ghost" size="sm" className="text-xs h-8 px-2" title="Users" aria-label="Users" onClick={() => navigate("/admin")} data-testid="nav-admin">
+              <Shield className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Users</span>
             </Button>
           )}
-          <Button variant="ghost" size="sm" className="text-xs h-8" onClick={() => navigate("/profile")} data-testid="nav-profile">
-            <User className="h-3.5 w-3.5 mr-1.5" />
-            {user?.name || "Profile"}
-            <span className="ml-1.5 px-1.5 py-0.5 bg-slate-100 rounded-sm text-[10px] uppercase font-mono">
+          <Button variant="ghost" size="sm" className="text-xs h-8 px-2" title="Profile" aria-label="Profile" onClick={() => navigate("/profile")} data-testid="nav-profile">
+            <User className="h-3.5 w-3.5" />
+            <span className="hidden max-w-28 truncate sm:inline">{user?.name || "Profile"}</span>
+            <span className="hidden lg:inline ml-1.5 px-1.5 py-0.5 bg-slate-100 rounded-sm text-[10px] uppercase font-mono">
               {user?.role}
             </span>
           </Button>
@@ -36,6 +36,8 @@ export const TopBar = ({ children }) => {
             size="sm"
             className="text-xs h-8 rounded-sm"
             data-testid="logout-btn"
+            aria-label="Sign out"
+            title="Sign out"
             onClick={async () => {
               await logout();
               navigate("/login");

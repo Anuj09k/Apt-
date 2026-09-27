@@ -1,5 +1,20 @@
 """Civil engineering calculation engine. Pure functions over a project document."""
 import math
+from input_validation import validate_project
+from calculation_basis import calculation_basis
+from decimal import Decimal, ROUND_HALF_UP
+
+
+def configured(mapping, key, default):
+    value = mapping.get(key)
+    return default if value is None else value
+
+
+def money_product(*values):
+    result = Decimal("1")
+    for value in values:
+        result *= Decimal(str(value))
+    return float(result.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
 
 import iscodes
 import layout as layoutlib
@@ -15,13 +30,15 @@ def polygon_area_sqm(coords):
         return 0.0
     lat0 = sum(c[0] for c in coords) / len(coords)
     k = math.cos(math.radians(lat0))
-    pts = [(c[1] * 111320.0 * k, c[0] * 110540.0) for c in coords]
-    total = 0.0
+    # Local origin avoids catastrophic cancellation of large global products.
+    lng0 = coords[0][1]
+    pts = [((c[1] - lng0) * 111320.0 * k, (c[0] - lat0) * 110540.0) for c in coords]
+    terms = []
     for i in range(len(pts)):
         x1, y1 = pts[i]
         x2, y2 = pts[(i + 1) % len(pts)]
-        total += x1 * y2 - x2 * y1
-    return abs(total) / 2.0
+        terms.append(x1 * y2 - x2 * y1)
+    return abs(math.fsum(terms)) / 2.0
 
 
 def plot_metrics(plot):
@@ -30,9 +47,9 @@ def plot_metrics(plot):
     if area <= 0:
         area = float(plot.get("length") or 0) * float(plot.get("width") or 0)
     return {
-        "plot_area_sqm": round(area, 2),
-        "plot_area_acres": round(area / 4046.86, 4),
-        "plot_area_hectare": round(area / 10000.0, 4),
+        "plot_area_sqm": area,
+        "plot_area_acres": area / 4046.8564224,
+        "plot_area_hectare": area / 10000.0,
         "orientation_deg": float(plot.get("orientation_deg") or 0),
         "vertices": len(coords),
         "road_edges": plot.get("road_edges") or [],
@@ -41,19 +58,19 @@ def plot_metrics(plot):
 
 def tower_metrics(tower, cfg):
     floors = int(tower.get("floors") or 0)
-    fh = float(tower.get("floor_height") or 3.0)
+    fh = float(configured(tower, "floor_height", 3.0))
     units = tower.get("units") or []
     units_per_floor = sum(int(u.get("count") or 0) for u in units)
     carpet_per_floor = sum(float(u.get("carpet_area") or 0) * int(u.get("count") or 0) for u in units)
     balcony_per_floor = sum(float(u.get("balcony_area") or 0) * int(u.get("count") or 0) for u in units)
-    wall_factor = float(cfg.get("wall_thickness_factor") or 0.10)
-    loading = float(cfg.get("common_area_loading") or 0.25)
+    wall_factor = float(configured(cfg, "wall_thickness_factor", 0.10))
+    loading = float(configured(cfg, "common_area_loading", 0.25))
 
     corridor_area = float(tower.get("corridor_width") or 0) * float(tower.get("corridor_length") or 0)
     stair_area = sum(float(s.get("width") or 0) * float(s.get("width") or 0) * 2.6 * int(s.get("count") or 0)
                      for s in (tower.get("staircases") or []))
     lift_area = sum(int(l.get("count") or 0) * 4.5 for l in (tower.get("lifts") or []))
-    service_core_per_floor = round(corridor_area + stair_area + lift_area, 2)
+    service_core_per_floor = math.fsum((corridor_area, stair_area, lift_area))
 
     carpet = carpet_per_floor * floors
     builtup_per_floor = (carpet_per_floor + balcony_per_floor) * (1 + wall_factor) + service_core_per_floor
@@ -72,15 +89,15 @@ def tower_metrics(tower, cfg):
         "name": tower.get("name"),
         "floors": floors,
         "floor_height": fh,
-        "height_m": round(floors * fh, 2),
+        "height_m": floors * fh,
         "units_per_floor": units_per_floor,
         "total_units": units_per_floor * floors,
         "footprint_sqm": float(tower.get("footprint_area") or 0),
-        "carpet_sqm": round(carpet, 2),
-        "balcony_sqm": round(balcony_per_floor * floors, 2),
-        "builtup_per_floor_sqm": round(builtup_per_floor, 2),
-        "builtup_sqm": round(builtup, 2),
-        "super_builtup_sqm": round(super_builtup, 2),
+        "carpet_sqm": carpet,
+        "balcony_sqm": balcony_per_floor * floors,
+        "builtup_per_floor_sqm": builtup_per_floor,
+        "builtup_sqm": builtup,
+        "super_builtup_sqm": super_builtup,
         "service_core_per_floor_sqm": service_core_per_floor,
         "common_area_sqm": common_area,
         "occupants": occupants,
@@ -100,7 +117,7 @@ def area_metrics(project):
     towers = [tower_metrics(t, cfg) for t in (project.get("towers") or [])]
 
     society_amenities = project.get("society_amenities") or []
-    society_amenities_sqm = round(sum(float(a.get("area") or 0) for a in society_amenities), 2)
+    society_amenities_sqm = math.fsum(float(a.get("area") or 0) for a in society_amenities)
 
     plot_area = max(float(pm.get("plot_area_sqm") or 0.0), 0.0)
     carpet = max(sum(t["carpet_sqm"] for t in towers), 0.0)
@@ -113,7 +130,7 @@ def area_metrics(project):
 
     ground_coverage_pct = (footprint / plot_area * 100) if plot_area > 0 else 0
     far = (builtup / plot_area) if plot_area > 0 else 0
-    fsi = far * float(cfg.get("fsi_factor") or 1.0)
+    fsi = far * float(configured(cfg, "fsi_factor", 1.0))
     open_space = max(plot_area - footprint, 0)
 
     return {
@@ -121,21 +138,21 @@ def area_metrics(project):
         "towers": towers,
         "plot_area_sqm": plot_area,
         "plot_area_acres": pm["plot_area_acres"],
-        "carpet_area_sqm": round(carpet, 2),
-        "builtup_area_sqm": round(builtup, 2),
-        "super_builtup_area_sqm": round(super_builtup, 2),
-        "common_area_sqm": round(common, 2),
+        "carpet_area_sqm": carpet,
+        "builtup_area_sqm": builtup,
+        "super_builtup_area_sqm": super_builtup,
+        "common_area_sqm": common,
         "society_amenities_sqm": society_amenities_sqm,
-        "ground_footprint_sqm": round(footprint, 2),
-        "ground_coverage_pct": round(ground_coverage_pct, 2),
-        "far": round(far, 3),
-        "fsi": round(fsi, 3),
-        "open_space_sqm": round(open_space, 2),
-        "open_space_pct": round((open_space / plot_area * 100) if plot_area else 0, 2),
+        "ground_footprint_sqm": footprint,
+        "ground_coverage_pct": ground_coverage_pct,
+        "far": far,
+        "fsi": fsi,
+        "open_space_sqm": open_space,
+        "open_space_pct": (open_space / plot_area * 100) if plot_area else 0,
         "total_units": units,
         "occupants": occupants,
-        "density_units_per_acre": round((units / pm["plot_area_acres"]) if pm["plot_area_acres"] else 0, 2),
-        "density_persons_per_hectare": round((occupants / pm["plot_area_hectare"]) if pm["plot_area_hectare"] else 0, 2),
+        "density_units_per_acre": (units / pm["plot_area_acres"]) if pm["plot_area_acres"] else 0,
+        "density_persons_per_hectare": (occupants / pm["plot_area_hectare"]) if pm["plot_area_hectare"] else 0,
         "total_floors": max([t["floors"] for t in towers] or [0]),
         "max_height_m": max([t["height_m"] for t in towers] or [0]),
     }
@@ -287,11 +304,13 @@ def quantities(project, areas, use_takeoff=True):
     units = areas["total_units"] or 0
 
     derived = None
+    fallback_reason = None
     if use_takeoff and (areas.get("towers") or []):
         try:
             derived = takeofflib.structural_takeoff(project, areas)
-        except Exception:          # a take-off failure must not take the whole bill down
+        except Exception:
             derived = None
+            fallback_reason = "Structural take-off was unavailable. Quantities use ratio-based estimates; do not treat them as a measured bill."
 
     rows = []
     for key, (label, unit, ratio_key, basis) in MATERIAL_META.items():
@@ -303,10 +322,10 @@ def quantities(project, areas, use_takeoff=True):
             qty = float(derived["totals"].get(tk) or 0) * factor
             source = "take-off"
         rows.append({"key": key, "label": label, "unit": unit, "ratio_key": ratio_key,
-                     "ratio": r, "basis": basis, "quantity": round(qty, 2), "source": source})
+                     "ratio": r, "basis": basis, "quantity": qty, "source": source})
 
     return {"ratios": ratios, "items": rows, "basis_area_sqm": area, "basis_units": units,
-            "takeoff": derived, "derived": bool(derived)}
+            "takeoff": derived, "derived": bool(derived), "fallback_reason": fallback_reason}
 
 
 # Site wastage, as a share of the delivered quantity. Cut-and-bend loss on steel, spillage
@@ -340,26 +359,26 @@ def boq(project, areas, qty):
         w = float(wastage.get(i["key"]) or 0)
         ordered = i["quantity"] * (1 + w / 100.0)
         materials.append({**i, "rate": rate, "wastage_pct": w,
-                          "quantity_ordered": round(ordered, 2),
-                          "amount": round(ordered * rate, 2)})
+                          "quantity_ordered": ordered,
+                          "amount": money_product(ordered, rate)})
     material_total = round(sum(m["amount"] for m in materials), 2)
 
     labour = []
     for key, label, src, output_per_day, wage in LABOUR_TRADES:
         base_qty = qmap.get(src, {}).get("quantity", 0)
-        wage = float((project.get("labour_rates") or {}).get(key) or wage)
-        mandays = round(base_qty / output_per_day, 1) if output_per_day else 0
+        wage = float(configured(project.get("labour_rates") or {}, key, wage))
+        mandays = base_qty / output_per_day if output_per_day else 0
         labour.append({"key": key, "label": label, "unit": "man-days", "quantity": mandays,
-                       "rate": wage, "amount": round(mandays * wage, 2)})
+                       "rate": wage, "amount": money_product(mandays, wage)})
     labour_total = round(sum(l["amount"] for l in labour), 2)
 
     equipment = []
     for key, label, src, divisor, rate in EQUIPMENT:
         base = areas["builtup_area_sqm"] if src == "area" else qmap.get(src, {}).get("quantity", 0)
-        days = round(base / divisor, 1) if divisor else 0
-        rate = float((project.get("equipment_rates") or {}).get(key) or rate)
+        days = base / divisor if divisor else 0
+        rate = float(configured(project.get("equipment_rates") or {}, key, rate))
         equipment.append({"key": key, "label": label, "unit": "days", "quantity": days,
-                          "rate": rate, "amount": round(days * rate, 2)})
+                          "rate": rate, "amount": money_product(days, rate)})
     equipment_total = round(sum(e["amount"] for e in equipment), 2)
 
     works = round(material_total + labour_total + equipment_total, 2)
@@ -375,7 +394,7 @@ def boq(project, areas, qty):
                        ("escalation_pct", "Price escalation"),
                        ("gst_pct", "GST on works contract")):
         pct = float(add.get(key) or 0)
-        amount = round(running * pct / 100.0, 2)
+        amount = money_product(running, pct, 0.01)
         adders.append({"key": key, "label": label, "pct": pct, "amount": amount,
                        "on": round(running, 2)})
         running = round(running + amount, 2)
@@ -651,9 +670,9 @@ def far_derivation(project, areas):
     cfg = project.get("config") or {}
     plot_area = float(areas["plot_area_sqm"] or 0)
     builtup = float(areas["builtup_area_sqm"] or 0)
-    wall_factor = float(cfg.get("wall_thickness_factor") or 0.10)
-    loading = float(cfg.get("common_area_loading") or 0.25)
-    fsi_factor = float(cfg.get("fsi_factor") or 1.0)
+    wall_factor = float(configured(cfg, "wall_thickness_factor", 0.10))
+    loading = float(configured(cfg, "common_area_loading", 0.25))
+    fsi_factor = float(configured(cfg, "fsi_factor", 1.0))
 
     towers = [{
         "name": t.get("name"), "floors": t.get("floors"),
@@ -682,8 +701,8 @@ def far_derivation(project, areas):
         if rule.get("id") in ("far_max", "fsi_max") and rule.get("enabled", True):
             limits[rule["id"]] = rule
 
-    far = round(builtup / plot_area, 3) if plot_area else 0.0
-    fsi = round(far * fsi_factor, 3)
+    far = builtup / plot_area if plot_area else 0.0
+    fsi = far * fsi_factor
     cap = float(limits.get("far_max", {}).get("threshold") or 0)
 
     return {
@@ -716,8 +735,8 @@ def far_derivation(project, areas):
         "permissible": {
             "far_cap": cap,
             "governing_control": limits.get("far_max", {}).get("label", "not set"),
-            "headroom_ratio": round(cap - far, 3) if cap else None,
-            "headroom_sqm": round((cap - far) * plot_area, 1) if cap and plot_area else None,
+            "headroom_ratio": cap - far if cap else None,
+            "headroom_sqm": (cap - far) * plot_area if cap and plot_area else None,
             "used_pct": round(far / cap * 100, 1) if cap else None,
         },
         "no_deductions_note": (
@@ -735,8 +754,8 @@ def area_derivation(project, areas):
     society amenities add-on, and reconciles the implied multiplier for easy manual verification.
     """
     cfg = project.get("config") or {}
-    wall_factor = float(cfg.get("wall_thickness_factor") or 0.10)
-    loading = float(cfg.get("common_area_loading") or 0.25)
+    wall_factor = float(configured(cfg, "wall_thickness_factor", 0.10))
+    loading = float(configured(cfg, "common_area_loading", 0.25))
     society_amenities = project.get("society_amenities") or []
     society_amenities_sqm = float(areas.get("society_amenities_sqm") or 0)
 
@@ -807,8 +826,8 @@ def area_derivation(project, areas):
             },
             "wall_allowance_floor_sqm": round(walls_floor, 2),
             "builtup_per_floor_sqm": round(builtup_floor, 2),
-            "builtup_sqm": round(t_builtup, 2),
-            "super_builtup_sqm": round(t_super, 2),
+            "builtup_sqm": t_builtup,
+            "super_builtup_sqm": t_super,
             "loading_factor": loading,
             "loading_added_sqm": round(t_super - t_builtup, 2),
         })
@@ -854,7 +873,7 @@ def area_derivation(project, areas):
             {
                 "step": 4,
                 "title": "Built-up Area (Plinth Area)",
-                "formula": "[(Carpet + Balcony) × 1.10 + Service Core] × Floors",
+                "formula": f"[(Carpet + Balcony) × {1 + wall_factor:g} + Service Core] × Floors",
                 "explanation": "Total structural slab area constructed across all floors of all towers.",
                 "result": f"= {builtup_sqm:,.2f} m²",
             },
@@ -893,6 +912,7 @@ def area_derivation(project, areas):
 
 
 def analyse(project):
+    validate_project(project)
     areas = area_metrics(project)
     park = parking_metrics(project, areas)
     qty = quantities(project, areas)
@@ -905,6 +925,7 @@ def analyse(project):
     comp = compliance(project, areas, park)
     return {
         "areas": areas, "parking": park, "quantities": qty, "boq": bill,
+        "calculation_basis": calculation_basis(project, qty),
         "cost": {
             "material": bill["material_total"], "labour": bill["labour_total"],
             "equipment": bill["equipment_total"], "total": bill["grand_total"],

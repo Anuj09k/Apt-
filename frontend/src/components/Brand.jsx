@@ -22,9 +22,10 @@ export function Brand({
   wordClass = "text-[15px]",
   light = false,
   showWord = true,
+  testid = "brand",
 }) {
   return (
-    <span className={`inline-flex items-center gap-2 ${className}`} data-testid="brand">
+    <span className={`inline-flex items-center gap-2 ${className}`} data-testid={testid}>
       <BrandMark className={markClass} light={light} />
       {showWord && (
         <span className={`font-semibold tracking-tight ${light ? "text-white" : "text-[#102a4d]"} ${wordClass}`}>

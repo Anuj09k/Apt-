@@ -1,0 +1,50 @@
+// Shared by navigation and the public directory. Parameter labels reflect the
+// actual module inputs/outputs; the directory is a curated index, not certification.
+import { Map, Building2, Calculator, Car, ClipboardList, Wallet, ShieldCheck, FileText, History, CalendarClock, Globe2, Box, Ruler, TrendingUp, Sparkles, Gauge, Shapes, DraftingCompass, Activity, Landmark, ShoppingCart, Leaf } from "lucide-react";
+
+const input = (name, unit, basis) => ({ name, unit, basis, kind: "Input" });
+const computed = (name, unit, basis) => ({ name, unit, basis, kind: "Calculated" });
+const estimate = (name, unit, basis) => ({ name, unit, basis, kind: "Estimate" });
+export const WORKSPACE_CATALOG = [
+  { id: "site", label: "Site", icon: Map, modules: [
+    { id: "plot", name: "Plot & Setbacks", icon: Map, note: "Boundary geometry and development controls.", parameters: [
+      input("Plot boundary", "lat / lng", "Drawn coordinates; a new project's boundary is a placeholder."), input("Front, rear & side setbacks", "m", "Project development controls; confirm local byelaws."), input("Road width & orientation", "m / °", "Road-edge classification and site orientation."), computed("Plot area & buildable envelope", "m²", "Local planar polygon measurement; not a cadastral survey.") ] },
+    { id: "gis", name: "GIS Intelligence", icon: Globe2, note: "Terrain, surroundings and environmental context.", parameters: [
+      input("Study radius", "m", "Surroundings query radius."), estimate("Elevation, slope & flood context", "m / %", "Depends on external data coverage and resolution."), computed("Sun path", "°", "Location and time-based solar geometry."), estimate("Rooftop solar yield", "kWh / year", "Roof area, regional insolation and system assumptions.") ] },
+    { id: "township", name: "Township & Master Plan", icon: Landmark, note: "Parcel zoning and mixed-use planning.", parameters: [
+      input("Parcel allocation", "%", "Land-use distribution across the township."), computed("Zoning & circulation", "m²", "Generated master-plan geometry; requires planning review.") ] },
+  ] },
+  { id: "design", label: "Design", icon: Building2, modules: [
+    { id: "autonomous-studio", name: "Quick Generation", icon: Sparkles, note: "Rapid concept schemes from project constraints.", parameters: [input("Generation brief", "text", "Site and scheme constraints."), estimate("Generated scheme", "concept", "Candidate layout, not an approved construction drawing.") ] },
+    { id: "planning", name: "Apartment Planning", icon: Building2, note: "Unit mix, floor plates and circulation.", parameters: [
+      input("Floor count & floor height", "floors / m", "Tower-level inputs."), input("Unit mix, carpet & balcony area", "units / m²", "Per-unit areas multiplied by units and floors."), input("Corridors, stairs & lifts", "m / count", "Circulation dimensions and vertical cores."), computed("Unit yield & Vastu checks", "count / checks", "Generated layouts and configured rules.") ] },
+    { id: "parking", name: "Parking", icon: Car, note: "Demand, capacity and accessible provision.", parameters: [
+      input("ECS norm & visitor allocation", "ECS / %", "Authority-specific demand settings."), input("Basement levels & bay area", "levels / m²", "Parking capacity inputs."), input("Ramp slope, width & turning radius", "% / m", "Ramp geometry checks."), computed("Required, provided & EV bays", "bays", "Demand rounded up to whole parking spaces.") ] },
+    { id: "studio", name: "Generative Studio", icon: Shapes, note: "Facade, landscape and parking alternatives.", parameters: [input("Facade & landscape constraints", "settings", "Project-specific generation inputs."), estimate("Design alternatives", "concept", "Parametric options requiring design review.") ] },
+    { id: "3d", name: "3D Visualisation", icon: Box, note: "Inspect the spatial arrangement of the scheme.", parameters: [input("Tower position & rotation", "m / °", "Placement within the project site."), computed("Massing & floor stacking", "model", "Visual geometry from current project data.") ] },
+  ] },
+  { id: "engineering-bim", label: "Engineering & BIM", icon: Ruler, modules: [
+    { id: "calculations", name: "Calculations", icon: Calculator, note: "Area statements with arithmetic derivations.", parameters: [
+      input("Wall allowance & common-area loading", "ratio", "Configurable estimating factors; explicit zero is preserved."), input("FSI factor", "×", "Configured multiplier applied to FAR."), computed("Carpet, built-up & saleable area", "m²", "Unit areas, floor counts, service-core model and loading."), computed("FAR & ground coverage", "ratio / %", "Built-up ÷ plot area; footprint ÷ plot area × 100.") ] },
+    { id: "engineering", name: "IS/NBC Engineering", icon: Ruler, note: "Code-referenced preliminary engineering checks.", parameters: [
+      input("City, soil & exposure", "classification", "Reference values require site-specific confirmation."), input("Concrete grade & aggregate size", "MPa / mm", "Material specifications for member and mix calculations."), input("Slab thickness & structural grid", "mm / m", "Preliminary structural dimensions."), estimate("Gravity loads & seismic base shear", "kN", "IS 875 / IS 1893 simplified model, not a full structural solver."), estimate("Foundation & column sizing", "mm / kPa", "Preliminary sizing; verify against geotechnical and structural design."), estimate("Water demand, STP & rainwater", "L/day / kLD", "Occupancy norms, rainfall, runoff and configured demand."), computed("Fire & accessibility checks", "checks", "Configured geometry tested against supported NBC rules.") ] },
+    { id: "bim", name: "BIM & CAD Interchange", icon: DraftingCompass, note: "Drawing and model interchange.", parameters: [input("CAD geometry & layer mapping", "DXF", "Imported drawing geometry and project mapping."), computed("DXF & IFC exports", "files", "Generated from the current model; inspect before downstream use.") ] },
+    { id: "digital-twin", name: "Digital Twin & Smart Site", icon: Activity, note: "Construction status and telemetry scenarios.", parameters: [input("Milestones & sensor readings", "project data", "Use verified readings; sample telemetry is not a live site feed."), estimate("Progress & site indicators", "% / status", "Derived from the provided or simulated dataset.") ] },
+  ] },
+  { id: "cost-procurement", label: "Cost & Procurement", icon: Wallet, modules: [
+    { id: "boq", name: "BOQ & Quantities", icon: ClipboardList, note: "Material, labour and equipment schedules.", parameters: [input("Quantity ratios & wastage", "ratio / %", "Editable estimating assumptions."), estimate("Concrete, steel & finishes", "m³ / kg / m²", "Structural take-off when available; ratio-based estimates are labelled.") ] },
+    { id: "cost", name: "Cost Estimation", icon: Wallet, note: "Rates and an itemised project cost.", parameters: [input("Material, labour & equipment rates", "INR", "Project rates; defaults are not supplier quotations."), input("Overheads, contingency & GST", "%", "Sequential cost adders."), estimate("Total & per-unit cost", "INR / INR per unit", "Quantities × rates plus configured cost adders.") ] },
+    { id: "procurement", name: "Smart Procurement & Market", icon: ShoppingCart, note: "Procurement scenarios and market context.", parameters: [input("Material demand & suppliers", "quantity / records", "Procurement planning inputs."), estimate("Price outlook & order schedule", "INR / dates", "Indicative market scenarios, not guaranteed live quotes.") ] },
+    { id: "programme", name: "Programme & CPM", icon: CalendarClock, note: "Dependencies, critical path and schedule options.", parameters: [input("Task durations & dependencies", "days / tasks", "Project activity network."), input("Start & target completion", "dates", "Programme timing constraints."), computed("Critical path & float", "days", "CPM on the supplied activity network.") ] },
+    { id: "finance", name: "Feasibility & ROI", icon: TrendingUp, note: "Cash flow and investment scenarios.", parameters: [input("Sale rate, land & financing", "INR / %", "Project feasibility assumptions."), estimate("Revenue, ROI, IRR & payback", "INR / % / months", "Cash-flow model; financial outcomes are forecasts.") ] },
+  ] },
+  { id: "deliver-esg", label: "Deliver & ESG", icon: ShieldCheck, modules: [
+    { id: "compliance", name: "Compliance", icon: ShieldCheck, note: "Rule-by-rule checks and remaining headroom.", parameters: [input("Byelaw thresholds", "rule-specific", "Authority-specific limits and enabled rules."), computed("Pass/fail & headroom", "checks / ratio", "Configured checks are not statutory approval.") ] },
+    { id: "urban-sustainability", name: "Green Building & ESG", icon: Leaf, note: "Carbon, sustainability and resilience scenarios.", parameters: [input("Green checklist & material factors", "points / factors", "Project evidence and emission factors."), estimate("Embodied carbon & green score", "tCO₂e / points", "Indicative assessment, not IGBC or GRIHA certification.") ] },
+    { id: "data-health", name: "Data Reliability", icon: Gauge, note: "Completeness, freshness and consistency.", parameters: [computed("Input coverage & stale results", "% / status", "Checks input availability and version consistency, not engineering correctness.") ] },
+    { id: "reports", name: "Reports", icon: FileText, note: "Project documents and quantity workbooks.", parameters: [computed("Project reports & BOQ workbook", "PDF / XLSX", "Generated project snapshots; engineer review required.") ] },
+    { id: "collaboration", name: "Versions & Team", icon: History, note: "Project history and shared working.", parameters: [input("Team roles & saved versions", "access / revision", "Shared project access and version snapshots."), computed("Activity & scheme comparison", "history / deltas", "Recorded changes and comparisons of selected versions.") ] },
+  ] },
+];
+export const WORKSPACE_MODULES = WORKSPACE_CATALOG.flatMap(group => group.modules);
+export const PARAMETER_COUNT = WORKSPACE_MODULES.reduce((total, module) => total + module.parameters.length, 0);

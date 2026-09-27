@@ -1,25 +1,14 @@
-import KineticGrid from "@/components/ui/kinetic-grid";
 
 /**
  * AppBackground
  *
- * The single, app-wide instance of the kinetic grid. Mounted once in App so
- * it survives route changes (remounting would restart the animation, and
- * lose the resize/DPR setup, on every navigation) and sits behind all page
- * content.
- *
- * KineticGrid's own wrapper defaults to a normal-flow `min-h-screen` block
- * (right for the "wraps page content" demo usage) -- here there's no content
- * to wrap, so the overrides below take it out of document flow entirely:
- * fixed to the viewport, behind everything (-z-10), and never intercepting
- * clicks meant for real UI.
+ * Static drafting grid. The previous hidden, continuously rendering canvas
+ * competed with the hero and recalculations even behind opaque app surfaces.
  */
 const AppBackground = () => {
   return (
-    <KineticGrid
-      theme="light"
-      className="fixed inset-0 -z-10 min-h-0 pointer-events-none"
-    />
+    <div aria-hidden="true" className="fixed inset-0 -z-10 pointer-events-none"
+      style={{ backgroundImage: "linear-gradient(#dbe5ed55 1px, transparent 1px), linear-gradient(90deg, #dbe5ed55 1px, transparent 1px)", backgroundSize: "40px 40px" }} />
   );
 };
 

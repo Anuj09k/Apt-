@@ -58,6 +58,7 @@ import digital_twin as digitaltwinlib
 import ai_os as aioslib
 import procurement_market as procurementlib
 import urban_sustainability as urbansustlib
+from input_validation import ProjectInputError, validate_project
 
 client = AsyncIOMotorClient(
     os.environ['MONGO_URL'],
@@ -110,6 +111,11 @@ app = FastAPI(title="Aptimizer API",
               openapi_url="/openapi.json" if _API_DOCS else None,
               lifespan=lifespan)
 api = APIRouter(prefix="/api")
+
+
+@app.exception_handler(ProjectInputError)
+async def project_input_error(request: Request, exc: ProjectInputError):
+    return JSONResponse(status_code=422, content={"detail": str(exc), "issues": exc.issues})
 
 
 @app.exception_handler(Exception)
@@ -387,14 +393,14 @@ async def get_project(project_id: str, user: dict = Depends(get_current_user)):
 
 @api.put("/projects/{project_id}")
 async def patch_project(project_id: str, body: ProjectPatch, user: dict = Depends(get_current_user)):
-    await load_project(project_id, user, write=True)
+    current_project = await load_project(project_id, user, write=True)
     allowed = {"name", "client", "location", "plot_reference", "status", "plot", "towers", "parking",
                "config", "quantity_ratios", "rates", "labour_rates", "equipment_rates",
                "utility_config", "compliance_rules", "gis", "engineering", "society_amenities",
                # The programme config carries the user's per-task edits, so it has to be
                # saved with the project: a snapshot must reproduce the programme the user
                # actually approved, not the generated one underneath it.
-               "schedule", "finance", "solar",
+               "schedule", "finance", "solar", "cost_adders", "wastage_pct",
                # Setbacks live under dev_controls and are the one stored value the site
                # envelope is built from. It was in neither this set nor the frontend's
                # editable list, so every setback edit was silently discarded on reload.
@@ -407,6 +413,7 @@ async def patch_project(project_id: str, body: ProjectPatch, user: dict = Depend
     updates = {k: v for k, v in body.updates.items() if k in allowed}
     if not updates:
         raise HTTPException(status_code=400, detail="No valid fields to update")
+    validate_project({**current_project, **updates})
     updates["updated_at"] = now_iso()
 
     # Optimistic concurrency.
@@ -428,7 +435,7 @@ async def patch_project(project_id: str, body: ProjectPatch, user: dict = Depend
             status_code=409,
             detail=f"This project was changed by someone else while you were editing "
                    f"(you had revision {body.rev}, it is now {current.get('rev', 0)}). "
-                   f"Your view has been refreshed — reapply your change.")
+                   f"Saving was paused; reload the server version before reapplying your change.")
 
     await log_activity(project_id, user, "project.updated",
                        body.note or ", ".join(k for k in updates if k != "updated_at"))
@@ -3195,11 +3202,9 @@ app.include_router(api)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        os.environ.get("FRONTEND_URL", "http://localhost:3000"),
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-    ],
+    allow_origins=list({origin.strip().rstrip("/") for origin in
+                        [os.environ["FRONTEND_URL"], *os.environ.get("CORS_ORIGINS", "").split(",")]
+                        if origin.strip() and origin.strip() != "*"}),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

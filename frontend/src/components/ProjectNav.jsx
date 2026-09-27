@@ -48,13 +48,13 @@ const DESCRIPTIONS = {
   calculations: "Loads, areas, carpet-to-saleable, and derived design quantities",
   engineering: "Structural member sizing checked against IS and NBC codes",
   bim: "DXF, DWG, and IFC import/export for AutoCAD and Revit interop",
-  "digital-twin": "IoT sensor feeds, 4D construction progress, and facility telemetry",
+  "digital-twin": "Construction progress and provided or simulated telemetry scenarios",
   boq: "Comprehensive bills of quantities derived from designed structures",
   cost: "Unit rates, material wastage, and itemised cost breakdown",
-  procurement: "Live metro commodity prices (steel/cement) and order calendar",
+  procurement: "Indicative material pricing and procurement planning scenarios",
   programme: "CPM critical path schedule, float analysis, and build timeline",
   finance: "Revenue projections, developer margin, IRR, and break-even model",
-  compliance: "Rule-by-rule statutory validation against planning bye-laws",
+  compliance: "Supported checks against configured planning controls; not statutory approval",
   "urban-sustainability": "Green building rating (IGBC/GRIHA), solar yield, and carbon footprint",
   "data-health": "Telemetry integrity verification and stale data audit across models",
   reports: "Export statutory drawings, BOQ spreadsheets, and design dossiers",
@@ -166,7 +166,7 @@ export function ProjectNav({ groups, active, onPick, onOpenPalette }) {
               <SheetContent className="overflow-y-auto">
                 <SheetHeader>
                   <SheetTitle>
-                    <Brand markClass="h-7 w-auto" wordClass="text-[14px]" />
+                    <Brand testid="project-nav-sheet-brand" markClass="h-7 w-auto" wordClass="text-[14px]" />
                   </SheetTitle>
                 </SheetHeader>
                 <div className="my-6 flex flex-col gap-6">
