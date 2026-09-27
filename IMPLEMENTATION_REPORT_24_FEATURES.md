@@ -49,7 +49,7 @@ commit per block.
 Four pre-existing test files are excluded from the gate and were **not** touched:
 `gis_test.py`, `engineering_test.py`, `rbac_v2_test.py`, `backend_test.py`. All four are
 live integration tests that hit a remote preview URL
-(`https://aptimizer-build.preview.emergentagent.com`) rather than local code, and all four
+(`https://apt-sync-changes.preview.emergentagent.com`) rather than local code, and all four
 failed the same way before this work began.
 
 ---
