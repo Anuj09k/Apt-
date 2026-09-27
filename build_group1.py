@@ -1,0 +1,256 @@
+"""
+Builds the comprehensive dictionary of all 417 built features
+with easy-to-remember memory anchors and plain-English human meanings.
+"""
+
+import json
+
+# Group 1: Categories 1-5 (User/Project, Plot, Apartment, Civil Calculations, Parking)
+GROUP_1 = {
+    "User & Project Management": {
+        "User Registration & Login": (
+            "Digital Front Door",
+            "Lets authorized architects, engineers, and clients sign up and securely log in with encrypted passwords and protected sessions."
+        ),
+        "Role-Based Access Control": (
+            "Permission Badges",
+            "Controls who can view, edit, approve, or admin a project, ensuring team members only access what they are cleared for."
+        ),
+        "User Profiles": (
+            "Digital Business Card",
+            "Stores personal credentials, company affiliations, license numbers, and interface preferences for seamless teamwork."
+        ),
+        "Project Creation": (
+            "Blank Blueprint",
+            "Initializes a new real estate project workspace with site location, client objectives, and regional municipal rules."
+        ),
+        "Project Dashboard": (
+            "Mission Control Desk",
+            "A high-level bird's-eye overview displaying key metrics, live tower counts, FSI consumption, and overall project health."
+        ),
+        "Project Versioning": (
+            "Blueprint Time Machine",
+            "Automatically saves timestamped milestone snapshots so you can revisit, restore, or fork any earlier design iteration."
+        ),
+        "Version Comparison": (
+            "Spot-the-Difference",
+            "Compares two design revisions side by side to reveal exactly what changed in carpet area, construction cost, or compliance."
+        ),
+        "Project Sharing": (
+            "Shareable Worksite Link",
+            "Enables instant collaboration with external consultants, investors, or authorities via secure read-only or editing links."
+        ),
+        "Project Activity History": (
+            "Black-Box Audit Trail",
+            "Logs every single modification, calculation, and export with who performed it and when for absolute accountability."
+        ),
+        "Public Compliance Link": (
+            "Municipal Inspector Pass",
+            "Generates a tamper-proof, read-only web portal for sanctioning authorities and RERA inspectors to verify code compliance."
+        ),
+        "Admin Console": (
+            "Superuser Cockpit",
+            "Gives organization administrators master control over user seats, team permissions, license tiers, and API usage."
+        ),
+        "Autosave & Recompute": (
+            "Live Safety Net",
+            "Silently saves every parameter change in real time and automatically recalculates all civil engineering formulas instantly."
+        ),
+    },
+    "Plot Management": {
+        "Manual Plot Entry": (
+            "Custom Plot Sketchpad",
+            "Allows users to type in exact boundary lengths, corner coordinates, and bearings directly from land deed survey records."
+        ),
+        "Polygon Plot Creation": (
+            "Point-and-Click Land Boundary",
+            "Draws any irregular multi-sided parcel of land by clicking coordinate pins on an interactive canvas."
+        ),
+        "Plot Dimensions": (
+            "Digital Tape Measure",
+            "Computes and displays the exact linear distance and bearing for every perimeter boundary segment."
+        ),
+        "Plot Orientation": (
+            "True-North Compass",
+            "Rotates the site relative to true North to guide solar exposure, microclimate wind direction, and Vastu alignment."
+        ),
+        "Plot Boundary Editing": (
+            "Rubber-Band Resizer",
+            "Lets you drag, insert, or delete boundary corner nodes dynamically as updated land survey measurements arrive."
+        ),
+        "Plot Area Calculation": (
+            "Instant Land Surveyor",
+            "Accurately computes the total parcel footprint in square meters, square feet, acres, and hectares."
+        ),
+        "Road Access Definition": (
+            "Main Gate Gateway",
+            "Identifies which plot boundaries face public roadways and records entry points for vehicular traffic and emergency services."
+        ),
+        "Road-Edge Classification": (
+            "Street Hierarchy Tagger",
+            "Classifies adjoining roads by width and traffic tier (arterial, collector, internal lane) to dictate statutory building setbacks."
+        ),
+        "Coordinate (Lat/Lng) Entry": (
+            "GPS Satellite Anchor",
+            "Pins the site's exact real-world geographic coordinates onto Earth for GIS mapping, elevation analysis, and local climate data."
+        ),
+        "Polygon Repair & Validation": (
+            "Self-Healing Boundary",
+            "Detects self-intersecting lines, duplicate vertices, or gaps in parcel drawings and automatically fixes them into valid geometry."
+        ),
+    },
+    "Apartment Planning": {
+        "Apartment Type Selection": (
+            "Apartment Menu",
+            "Lets you pick standard unit layouts from 1BHK, 2BHK, 3BHK, 4BHK flats, duplexes, and luxury penthouses."
+        ),
+        "Tower Planning": (
+            "Skyscraper Block Builder",
+            "Configures structural tower heights, core layouts, floor plates, and positions them strategically across the plot."
+        ),
+        "Floor Planning": (
+            "Storey Stacker",
+            "Organizes vertical floor configurations, distinguishing typical living floors from podiums, amenities, and refuge decks."
+        ),
+        "Room Planning": (
+            "Living Space Sizer",
+            "Sizes and arranges individual living rooms, bedrooms, kitchens, and bathrooms to meet functional ergonomics."
+        ),
+        "Corridor Planning": (
+            "Hallway Highway",
+            "Designs central circulation passages to ensure effortless resident travel and fire-code emergency exit clearance."
+        ),
+        "Staircase Planning": (
+            "Fire Escape Lifeline",
+            "Calculates riser, tread, flight width, and travel distances to guarantee safe everyday and emergency stairwells."
+        ),
+        "Lift Planning": (
+            "Elevator Bank Sizer",
+            "Determines required passenger, stretcher, and service elevators based on building height and peak-hour waiting times."
+        ),
+        "Balcony Planning": (
+            "Fresh-Air Extension",
+            "Places cantilevered private balconies while automatically verifying local statutory FSI deduction allowances."
+        ),
+        "Common Area Planning": (
+            "Shared Spaces Designer",
+            "Allocates entrance lobbies, meter rooms, refuge platforms, and utility shafts across the residential floor plate."
+        ),
+        "Unit Mix Definition": (
+            "Sales Inventory Balance",
+            "Sets target unit ratios (e.g., 40% 2BHK, 50% 3BHK, 10% 4BHK) to align construction directly with market buyer demand."
+        ),
+        "Procedural Room Layout Generator": (
+            "AI Interior Architect",
+            "Algorithmic layout generator that auto-arranges rooms within unit boundaries to optimize natural lighting and privacy."
+        ),
+        "Whole-Tower Floor Plate Generation": (
+            "Single-Click Floor Plate",
+            "Generates an entire balanced floor plate with multiple apartment units clustered around a unified structural core in seconds."
+        ),
+        "Layout Validation & Retry": (
+            "Automatic Quality Inspector",
+            "Scans generated layouts for overlapping walls, unlit rooms, or narrow hallways, automatically re-running until perfect."
+        ),
+    },
+    "Civil Engineering Calculations": {
+        "Plot Area": (
+            "Total Land Footprint",
+            "The certified total base surface area of the property parcel used for all statutory master ratio derivations."
+        ),
+        "Carpet Area": (
+            "True Usable Space",
+            "The net usable floor area bounded by internal walls where residents can lay carpet and live, strictly RERA-compliant."
+        ),
+        "Built-up Area": (
+            "Outer Wall Boundary Area",
+            "Carpet area plus external wall thicknesses, private balconies, and dedicated utility shafts."
+        ),
+        "Super Built-up Area": (
+            "Saleable Market Area",
+            "Built-up area plus a proportionate share of shared lobbies, corridors, elevator banks, and club facilities."
+        ),
+        "Ground Coverage": (
+            "Earth Footprint Ratio",
+            "The percentage of raw ground covered by building footprints versus landscaped open earth."
+        ),
+        "FAR Calculation": (
+            "Floor Area Multiplier",
+            "Ratio of total gross building floor area to the plot size, indicating how much total floor area can be constructed."
+        ),
+        "FSI Calculation": (
+            "Vertical Expansion Index",
+            "Floor Space Index determining the statutory limit of permissible constructed area on the parcel."
+        ),
+        "Open Space Calculation": (
+            "Breathe & Green Space",
+            "Calculates total unbuilt outdoor space left for greenery, recreational pathways, and emergency vehicle movement."
+        ),
+        "Density Calculation": (
+            "Crowd & Tenancy Gauge",
+            "Computes dwelling units per hectare and population density to ensure local municipal infrastructure can support the development."
+        ),
+        "Area Derivation Audit Trail": (
+            "Formula Traceability Log",
+            "Shows the exact mathematical equations and inputs used to derive every single square meter across the project."
+        ),
+        "FAR Derivation Breakdown": (
+            "FSI Component Ledger",
+            "Deconstructs FSI into base rights, paid premium FSI, TDR allowances, and free-of-FSI incentive spaces."
+        ),
+    },
+    "Parking Planning": {
+        "Basement Parking": (
+            "Subterranean Car Deck",
+            "Plans efficient multi-level underground parking layouts around structural columns and ventilation shafts."
+        ),
+        "Ground Parking": (
+            "Surface Driveway Bays",
+            "Maps out convenient outdoor parking spaces along perimeter roads and visitor drop-off zones."
+        ),
+        "Visitor Parking": (
+            "Guest Arrival Stalls",
+            "Reserves mandatory dedicated parking bays near tower entrances specifically for visiting guests and deliveries."
+        ),
+        "EV Parking": (
+            "Electric Vehicle Chargers",
+            "Allocates specialized parking stalls equipped with electric charging infrastructure and electrical load allowances."
+        ),
+        "Accessible Parking": (
+            "Disabled-Friendly Stalls",
+            "Wider parking bays positioned right next to elevator lobbies with step-free wheelchair access routes."
+        ),
+        "Parking Capacity Calculator": (
+            "Total Vehicle Counter",
+            "Calculates the total number of cars, two-wheelers, and cycles accommodated across all parking zones."
+        ),
+        "Parking Efficiency Analysis": (
+            "Square-Foot-Per-Car Score",
+            "Measures total parking floor area divided by bays to ensure minimal wasted space and maximum vehicle density."
+        ),
+        "Ramp Planning": (
+            "Slope & Clearance Grader",
+            "Designs vehicle entry and exit ramps with safe gradients (1:8 to 1:10) and adequate turning radii to prevent scraping."
+        ),
+        "Carpet-Band State-Aware Norms": (
+            "Rule-Based Parking Quota",
+            "Auto-calculates required parking spots based on apartment carpet area tiers and local state bylaws."
+        ),
+        "Per-Tower Demand & Supply": (
+            "Tower Parking Ledger",
+            "Tracks exact parking bay allocations tower-by-tower so every residential wing meets its own statutory parking needs."
+        ),
+        "Shared Site Parking Pool": (
+            "Central Parking Hub",
+            "Aggregates and balances parking bays across the entire site to optimize multi-tower visitor and commercial shared parking."
+        ),
+        "ECS Conversion": (
+            "Equivalent Car Unit Sizer",
+            "Converts two-wheelers, cycles, and transport vans into standardized Equivalent Car Spaces (ECS) for statutory approval."
+        ),
+    },
+}
+
+with open("plain_english_group1.json", "w", encoding="utf-8") as f:
+    json.dump(GROUP_1, f, indent=2)
+print("Group 1 saved.")

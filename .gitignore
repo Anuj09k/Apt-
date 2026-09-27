@@ -1,0 +1,144 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# IDE and editors
+.idea/
+.vscode/
+
+# Dependencies
+node_modules/
+/node_modules
+/.pnp
+.pnp.js
+.yarn/install-state.gz
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# Testing
+/coverage
+
+# Next.js
+/.next/
+/out/
+next-env.d.ts
+*.tsbuildinfo
+
+# Production builds
+/build
+dist/
+dist
+
+# Environment files (comprehensive coverage)
+
+*token.json*
+*credentials.json*
+
+# Logs and debug files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+dump.rdb
+
+# System files
+.DS_Store
+*.pem
+
+# Python
+__pycache__/
+*pyc*
+venv/
+.venv/
+
+# Development tools
+chainlit.md
+.chainlit
+.ipynb_checkpoints/
+.ac
+
+# Deployment
+.vercel
+
+# Data and databases
+agenthub/agents/youtube/db
+
+# Archive files and large assets
+**/*.zip
+**/*.tar.gz
+**/*.tar
+**/*.tgz
+*.pack
+*.deb
+*.dylib
+
+# Build caches
+.cache/
+
+memory/test_credentials.md
+
+# Mobile development
+android-sdk/frontend/node_modules/.cache/default-development/6.pack
+frontend/node_modules/.cache/default-development/6.pack
+.env
+.env.*
+*.env
+credentials.json
+*.key
+.credentials
+frontend/node_modules/.cache/default-development/7.pack
+frontend/node_modules/.cache/default-development/11.pack
+frontend/node_modules/.cache/default-development/0.pack
+frontend/node_modules/.cache/default-development/2.pack
+frontend/node_modules/.cache/default-development/4.pack
+frontend/node_modules/.cache/default-development/3.pack
+frontend/node_modules/.cache/default-development/5.pack
+frontend/node_modules/.cache/default-development/8.pack
+frontend/node_modules/.cache/default-development/9.pack
+
+# Local tooling / runtime artifacts (not part of the app)
+backend_dev.log
+frontend_dev.log
+# Same intent as the two above, by glob: a dev server's stderr lands in whatever the
+# operator redirected it to, and frontend_err.log slipped past two exact names.
+*_dev.log
+*_err.log
+.emergent/
+.freebuff/
+.claude/settings.local.json
+
+# macOS AppleDouble sidecars and editor/sync temp artifacts. Several hundred of
+# these accumulate beside real sources and must never be committed.
+._*
+.!*!*
+
+# Code corpus and its derived search index. BIS standards and the National
+# Building Code are copyrighted; the corpus under codes_corpus/ is the operator's
+# own licensed copy of that text and must never be committed. codes_index/ is
+# built from it — vectors, chunks and a manifest — so it carries the same text by
+# another name. Both are local to a deployment; rebuild with
+# `cd backend && python -m codesearch build`.
+backend/codes_corpus/
+backend/codes_index/
+
+# Local dev scripts under backend/. None is imported by the app or by the test suite --
+# verified by importing server and checking sys.modules, not by grepping -- so none of
+# them can break a deployment by being absent. They are one-off probes and measurement
+# harnesses kept on the working copy.
+#
+# To keep any of them in the repo after all:  git add -f backend/<name>.py
+backend/baseline.py
+backend/containcheck.py
+backend/e2e.py
+backend/kdbg.py
+backend/plancheck.py
+backend/probe.py
+backend/revtest.py
+backend/roadprobe.py
+backend/run_check.py
+backend/shape.py
+backend/sweep.py
+
+# Keep the documented template; real secrets stay ignored above.
+!.env.example

@@ -1,0 +1,4710 @@
+{
+  "1": [
+    {
+      "type": "feature",
+      "text": "Built and running",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Partially built",
+      "status": "partial",
+      "rgb": [
+        0.784314,
+        0.498039,
+        0.039216
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Planned",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    }
+  ],
+  "2": [
+    {
+      "type": "feature",
+      "text": "Development controls and setbacks.",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "A real site layout engine.",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Vastu and generative architecture.",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Programme and scheduling.",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Development finance.",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Data reliability.",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "IS and NBC code intelligence.",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Genetic refinement of tower placement. Placement is greedy grid packing only. The fitness function and GA",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Approval workflow, comments and reviews, and workflow automation in V4.",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "All BIM interoperability in V5. There is no IFC, DWG, DXF, Revit or AutoCAD export.",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Digital twin, IoT and construction monitoring in V5.",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "The Aptimizer X operating system layer. Several X features exist in partial form because a V2.5 or V3 module",
+      "status": "partial",
+      "rgb": [
+        0.784314,
+        0.498039,
+        0.039216
+      ]
+    }
+  ],
+  "3": [
+    {
+      "type": "feature",
+      "text": "APT, the optimisers and the AI advisors are reachable from every module, and each draws on",
+      "status": "unknown",
+      "rgb": [
+        0.101961,
+        0.101961,
+        0.101961
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "The checks run continuously against every module, but the report is placed in Deliver on",
+      "status": "unknown",
+      "rgb": [
+        0.101961,
+        0.101961,
+        0.101961
+      ]
+    }
+  ],
+  "4": [
+    {
+      "type": "feature",
+      "text": "124 built",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "0 partial",
+      "status": "partial",
+      "rgb": [
+        0.784314,
+        0.498039,
+        0.039216
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "0 planned",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "section",
+      "title": "User & Project Management"
+    },
+    {
+      "type": "feature",
+      "text": "User Registration & Login",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Role-Based Access Control",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "User Profiles",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Project Creation",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Project Dashboard",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Project Versioning",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Version Comparison",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Project Sharing",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Project Activity History",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Public Compliance Link",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Admin Console",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Autosave & Recompute",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "section",
+      "title": "Plot Management"
+    },
+    {
+      "type": "feature",
+      "text": "Manual Plot Entry",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Polygon Plot Creation",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Plot Dimensions",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Plot Orientation",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Plot Boundary Editing",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Plot Area Calculation",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Road Access Definition",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Road-Edge Classification",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Polygon Repair & Validation",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "section",
+      "title": "Apartment Planning"
+    },
+    {
+      "type": "feature",
+      "text": "Apartment Type Selection",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Tower Planning",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Floor Planning",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Room Planning",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Corridor Planning",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Staircase Planning",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Lift Planning",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Balcony Planning",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Common Area Planning",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Unit Mix Definition",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Procedural Room Layout Generator",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Whole-Tower Floor Plate Generation",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Layout Validation & Retry",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "section",
+      "title": "Civil Engineering Calculations"
+    },
+    {
+      "type": "feature",
+      "text": "Plot Area",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Carpet Area",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Built-up Area",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Super Built-up Area",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Ground Coverage",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "FAR Calculation",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "FSI Calculation",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Open Space Calculation",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Density Calculation",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Area Derivation Audit Trail",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "FAR Derivation Breakdown",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "section",
+      "title": "Parking Planning"
+    },
+    {
+      "type": "feature",
+      "text": "Basement Parking",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Ground Parking",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Visitor Parking",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "EV Parking",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Accessible Parking",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Parking Capacity Calculator",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Parking Efficiency Analysis",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Ramp Planning",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Carpet-Band State-Aware Norms",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Per-Tower Demand & Supply",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Shared Site Parking Pool",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "ECS Conversion",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    }
+  ],
+  "5": [
+    {
+      "type": "section",
+      "title": "Utility Planning"
+    },
+    {
+      "type": "feature",
+      "text": "Water Demand",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Underground Tank",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Overhead Tank",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "STP Planning",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "WTP Planning",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Rainwater Harvesting",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Electrical Room",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Pump Room",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "section",
+      "title": "Quantity Estimation"
+    },
+    {
+      "type": "feature",
+      "text": "Concrete",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Cement",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Steel",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Bricks/Blocks",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Sand",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Aggregate",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Tiles",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Paint",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Doors",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Windows",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Plumbing",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Electrical",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Waterproofing",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Finishing Materials",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "section",
+      "title": "BOQ"
+    },
+    {
+      "type": "feature",
+      "text": "Automatic Bill of Quantities",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Material Summary",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Labour Summary",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Equipment Summary",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "BOQ PDF Export",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "BOQ Excel Export",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Structure-Derived Quantity Take-off",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Column & Beam Section Sizing",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Mix Proportion Derivation",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Take-off Sanity Checks",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "section",
+      "title": "Cost Estimation"
+    },
+    {
+      "type": "feature",
+      "text": "Material Cost",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Labour Cost",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Equipment Cost",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Construction Cost",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Cost per Flat",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Cost per sq m",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Budget Summary",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Wastage Allowance",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Preliminaries",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Overhead & Profit",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Contingency",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Escalation",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "GST",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "section",
+      "title": "Compliance Engine"
+    },
+    {
+      "type": "feature",
+      "text": "FAR Validation",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "FSI Validation",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Stair Width",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Corridor Width",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Lift Compliance",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Fire Exit Checks",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Accessibility Checks",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Setback Validation",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Height vs Road Width Rule",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Open Space vs Height Rule",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Clause-Referenced Results",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Compliance Margin Warnings",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "section",
+      "title": "Reports"
+    },
+    {
+      "type": "feature",
+      "text": "BOQ Report",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Cost Report",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Quantity Report",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Parking Report",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Compliance Report",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Executive Summary",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "PDF Export",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Per-Tower Report Sections",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Excel Workbook Export",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    }
+  ],
+  "6": [
+    {
+      "type": "feature",
+      "text": "25 built",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "1 partial",
+      "status": "partial",
+      "rgb": [
+        0.784314,
+        0.498039,
+        0.039216
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "1 planned",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "section",
+      "title": "GIS & Site Intelligence"
+    },
+    {
+      "type": "feature",
+      "text": "OpenStreetMap Support",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "GIS Coordinate Input",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Polygon Drawing",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Plot Boundary Detection",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Existing Building Detection",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Road Detection",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Road Width Detection",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Green Area Detection",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Water Body Detection",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Terrain Analysis",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Elevation Analysis",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Slope Analysis",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Flood Risk Analysis",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Wind Analysis",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Sun Path Analysis",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Solar Position & Sun Events",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Annual Insolation",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Solar Potential",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Transit Proximity Analysis",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Accessibility Analysis",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Site Suitability Score",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Infrastructure Analysis",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Buildability Analysis",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "AI Site Analysis",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Overpass Feature Caching",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Google Maps Integration",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Satellite Imagery Basemap",
+      "status": "partial",
+      "rgb": [
+        0.784314,
+        0.498039,
+        0.039216
+      ]
+    }
+  ],
+  "7": [
+    {
+      "type": "feature",
+      "text": "113 built",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "0 partial",
+      "status": "partial",
+      "rgb": [
+        0.784314,
+        0.498039,
+        0.039216
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "1 planned",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "section",
+      "title": "Development Controls & Setbacks"
+    },
+    {
+      "type": "feature",
+      "text": "Per-Edge Inward Setback Application",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Setback Minimums from Plot Area",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Height-Driven Open Space Table",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Height vs Road Width Limit",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Recommended Controls Engine",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Setback Verification & Warnings",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Development Control Overrides",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Yield Recommendation",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "section",
+      "title": "Site Layout Engine"
+    },
+    {
+      "type": "feature",
+      "text": "Buildable Envelope Generation",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Polygon Repair & Cleaning",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Local Tangent-Plane Projection",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Road Network Reservation",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Perimeter Ring Roads",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Internal Spine & Driveways",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Straight-Line Corridor Geometry",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Largest Inscribed Block Detection",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Amenity Block Placement",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Green & Open Space Reservation",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Greedy Grid Tower Packing",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Footprint & Rotation Sweep",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Inter-Tower Spacing Enforcement",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Tower Count & Height Caps",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Boundary Containment Guarantee",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Shared Fitness Scoring",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Layout Recommendation Endpoint",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Engine Versioning & Signatures",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Genetic Refinement of Placement",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "section",
+      "title": "Vastu & Generative Architecture"
+    },
+    {
+      "type": "feature",
+      "text": "Vastu Sector Mapping",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Sector-Anchored Unit Packing",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Unit Programme Generation",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Vastu Audit per Unit",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "MEP Position Audit",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Sector Report",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Vastu-Aligned Floor Plates",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Architectural Template Generation",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Plan Realism Check",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Room Aspect & Dimension Checks",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "section",
+      "title": "Programme & Scheduling"
+    },
+    {
+      "type": "feature",
+      "text": "Activity Generation from Quantities",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "CPM Forward & Backward Pass",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Critical Path Identification",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Total & Free Float",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Float Verification",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Work Calendar & Holidays",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Duration from Output Rates",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Crew Efficiency Modelling",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Wage Premium Modelling",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Prop Removal Safety Rules",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Schedule Safety Audit",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Scheduled Date Audit",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Task Overrides & Edits",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Target Date Solver",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Cash Flow Curve",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Resource Histogram",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Line of Balance",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Milestones",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Gantt Visualisation",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    }
+  ],
+  "8": [
+    {
+      "type": "section",
+      "title": "Development Finance"
+    },
+    {
+      "type": "feature",
+      "text": "Saleable Area Derivation",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Revenue Model",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "S-Curve Cost Spread",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Monthly Cash Flow",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "NPV",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "IRR",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Break-even Point",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Preliminaries per Month",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Finance Configuration",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "section",
+      "title": "Data Reliability & Assurance"
+    },
+    {
+      "type": "feature",
+      "text": "Plot Data Check",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Development Controls Check",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Tower Data Check",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Site Layout Check",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "GIS Data Check",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Parking Check",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Engineering Check",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Finance Check",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Programme Check",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Data Freshness Tracking",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Cross-Module Consistency Checks",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Compliance Margin Reporting",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Module Warning Rollup",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Overall Trust Score",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Data Health Report Export",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "section",
+      "title": "IS & NBC Code Intelligence"
+    },
+    {
+      "type": "feature",
+      "text": "Central Code Constant Registry",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "74-Entry Clause Registry",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Clause Text Corpus Ingestion",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Clause Chunking & Indexing",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Code Search Endpoint",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Code Question Answering",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Citation Extraction",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Citation Verification Against Registry",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Cited Extracts in Answers",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Green Building Preliminary Rating",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Column Grid Optimizer",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Embodied Carbon",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Plantation Plan",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "section",
+      "title": "3D & Visualisation"
+    },
+    {
+      "type": "feature",
+      "text": "3D Site Model",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Tower Massing",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Road & Plot Rendering",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Amenity & Clubhouse Rendering",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Central Park & Landscape",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Floor Plate Viewer",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Site Diagrams",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Blueprint View",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Live Metrics Strip",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Command Palette",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    }
+  ],
+  "9": [
+    {
+      "type": "feature",
+      "text": "55 built",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "0 partial",
+      "status": "partial",
+      "rgb": [
+        0.784314,
+        0.498039,
+        0.039216
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "0 planned",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "section",
+      "title": "AI Planner"
+    },
+    {
+      "type": "feature",
+      "text": "Automatic Layout Generation",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Smart Tower Placement",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Apartment Mix Optimisation",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Floor Optimisation",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Open Space Optimisation",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "section",
+      "title": "AI Civil Engineer"
+    },
+    {
+      "type": "feature",
+      "text": "Civil Design Suggestions",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "FAR Optimisation",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "FSI Optimisation",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Utility Optimisation",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Parking Optimisation",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "section",
+      "title": "AI Structural Advisor"
+    },
+    {
+      "type": "feature",
+      "text": "Column Grid Suggestions",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Beam Layout Suggestions",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Foundation Recommendations",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Structural Risk Warnings",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "section",
+      "title": "AI Quantity Surveyor"
+    },
+    {
+      "type": "feature",
+      "text": "Quantity Optimisation",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Waste Reduction",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Steel Cutting Optimisation",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Tile Waste Optimisation",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "BOQ Optimisation",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "section",
+      "title": "AI Cost Engineer"
+    },
+    {
+      "type": "feature",
+      "text": "Cost Prediction",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Budget Optimisation",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Cost Comparison",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Cost Saving Suggestions",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Grade Sweep Analysis",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "section",
+      "title": "AI Sustainability"
+    },
+    {
+      "type": "feature",
+      "text": "Green Building Score",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Carbon Footprint",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Solar Potential",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Water Efficiency",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Tree Plantation Suggestions",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "section",
+      "title": "AI Business Consultant"
+    },
+    {
+      "type": "feature",
+      "text": "ROI Analysis",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Profit Forecast",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Project Feasibility",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Break-even Analysis",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "section",
+      "title": "AI Recommendation Engine"
+    },
+    {
+      "type": "feature",
+      "text": "Design Improvements",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Engineering Suggestions",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Cost Optimisation",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Material Recommendations",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    }
+  ],
+  "10": [
+    {
+      "type": "section",
+      "title": "APT: In-App AI Assistant"
+    },
+    {
+      "type": "feature",
+      "text": "Project Q",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Civil Engineering Guidance",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Report Explanation",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Scenario Comparison",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Streaming Responses",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Module-Aware Opening Questions",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Project State Context Builder",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Context & Analysis Caching",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Query Classification",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Capability Questions",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Chat Threads & History",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Citation Verification",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Provider Fallback & Retry",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "section",
+      "title": "Scenario Comparison"
+    },
+    {
+      "type": "feature",
+      "text": "Compare Layouts",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Compare Costs",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Compare Parking",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Compare Sustainability",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Compare ROI",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    }
+  ],
+  "11": [
+    {
+      "type": "feature",
+      "text": "7 built",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "3 partial",
+      "status": "partial",
+      "rgb": [
+        0.784314,
+        0.498039,
+        0.039216
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "3 planned",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "section",
+      "title": "Collaboration & Workflow"
+    },
+    {
+      "type": "feature",
+      "text": "Multi-user Collaboration",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Project Sharing",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Team Roles",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Version Control",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Activity Logs",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Task Assignment",
+      "status": "partial",
+      "rgb": [
+        0.784314,
+        0.498039,
+        0.039216
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Approval Workflow",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Comments & Reviews",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Workflow Automation",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "section",
+      "title": "Engineering Decision Support"
+    },
+    {
+      "type": "feature",
+      "text": "Construction Timeline",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Labour Planning",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Equipment Planning",
+      "status": "partial",
+      "rgb": [
+        0.784314,
+        0.498039,
+        0.039216
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Utility Network Planning",
+      "status": "partial",
+      "rgb": [
+        0.784314,
+        0.498039,
+        0.039216
+      ]
+    }
+  ],
+  "12": [
+    {
+      "type": "feature",
+      "text": "0 built",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "0 partial",
+      "status": "partial",
+      "rgb": [
+        0.784314,
+        0.498039,
+        0.039216
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "13 planned",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "section",
+      "title": "BIM Readiness"
+    },
+    {
+      "type": "feature",
+      "text": "IFC Export",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "DWG Export",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "DXF Export",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Revit Compatibility",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "AutoCAD Compatibility",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "section",
+      "title": "Digital Twin Preparation"
+    },
+    {
+      "type": "feature",
+      "text": "IoT Readiness",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Smart Sensor Integration",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Progress Tracking",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Quality Monitoring",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Safety Monitoring",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Delay Prediction",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Predictive Maintenance",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Facility Management",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    }
+  ],
+  "13": [
+    {
+      "type": "feature",
+      "text": "0 built",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "22 partial",
+      "status": "partial",
+      "rgb": [
+        0.784314,
+        0.498039,
+        0.039216
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "33 planned",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "section",
+      "title": "AI Operating System"
+    },
+    {
+      "type": "feature",
+      "text": "AI Engineering Copilot",
+      "status": "partial",
+      "rgb": [
+        0.784314,
+        0.498039,
+        0.039216
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "AI Engineering Consultant",
+      "status": "partial",
+      "rgb": [
+        0.784314,
+        0.498039,
+        0.039216
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Engineering Knowledge Graph",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Engineering Memory",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Engineering Decision Log",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Explainable AI",
+      "status": "partial",
+      "rgb": [
+        0.784314,
+        0.498039,
+        0.039216
+      ]
+    },
+    {
+      "type": "section",
+      "title": "Intelligent Planning"
+    },
+    {
+      "type": "feature",
+      "text": "One-Click Project Generation",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "AI Layout Generator",
+      "status": "partial",
+      "rgb": [
+        0.784314,
+        0.498039,
+        0.039216
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "AI Township Planner",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Mixed-Use Development Planning",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Apartment Capacity Prediction",
+      "status": "partial",
+      "rgb": [
+        0.784314,
+        0.498039,
+        0.039216
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Land Suitability Analysis",
+      "status": "partial",
+      "rgb": [
+        0.784314,
+        0.498039,
+        0.039216
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Smart Building Recommendations",
+      "status": "partial",
+      "rgb": [
+        0.784314,
+        0.498039,
+        0.039216
+      ]
+    },
+    {
+      "type": "section",
+      "title": "GIS & Urban Intelligence"
+    },
+    {
+      "type": "feature",
+      "text": "City Growth Prediction",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Land Value Prediction",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Infrastructure Growth Prediction",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Climate Analysis",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Disaster Risk Analysis",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Earthquake Analysis",
+      "status": "partial",
+      "rgb": [
+        0.784314,
+        0.498039,
+        0.039216
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Flood Analysis",
+      "status": "partial",
+      "rgb": [
+        0.784314,
+        0.498039,
+        0.039216
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Wind Analysis",
+      "status": "partial",
+      "rgb": [
+        0.784314,
+        0.498039,
+        0.039216
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Noise & Pollution Analysis",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "section",
+      "title": "Smart Procurement"
+    },
+    {
+      "type": "feature",
+      "text": "Live Material Prices",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Material Price Forecasting",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Supplier Intelligence",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Procurement Calendar",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Inventory Planning",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "section",
+      "title": "Financial Intelligence"
+    },
+    {
+      "type": "feature",
+      "text": "Cash Flow Planning",
+      "status": "partial",
+      "rgb": [
+        0.784314,
+        0.498039,
+        0.039216
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Lifecycle Cost Analysis",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Investment Analysis",
+      "status": "partial",
+      "rgb": [
+        0.784314,
+        0.498039,
+        0.039216
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "ROI Forecasting",
+      "status": "partial",
+      "rgb": [
+        0.784314,
+        0.498039,
+        0.039216
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Profitability Dashboard",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "section",
+      "title": "Sustainability"
+    },
+    {
+      "type": "feature",
+      "text": "Green Building Planner",
+      "status": "partial",
+      "rgb": [
+        0.784314,
+        0.498039,
+        0.039216
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Carbon Emission Calculator",
+      "status": "partial",
+      "rgb": [
+        0.784314,
+        0.498039,
+        0.039216
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Solar Energy Planning",
+      "status": "partial",
+      "rgb": [
+        0.784314,
+        0.498039,
+        0.039216
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Water Conservation Analysis",
+      "status": "partial",
+      "rgb": [
+        0.784314,
+        0.498039,
+        0.039216
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "ESG Reporting",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "section",
+      "title": "Construction Intelligence"
+    },
+    {
+      "type": "feature",
+      "text": "Construction Timeline Optimisation",
+      "status": "partial",
+      "rgb": [
+        0.784314,
+        0.498039,
+        0.039216
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Resource Allocation",
+      "status": "partial",
+      "rgb": [
+        0.784314,
+        0.498039,
+        0.039216
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Labour Optimisation",
+      "status": "partial",
+      "rgb": [
+        0.784314,
+        0.498039,
+        0.039216
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Equipment Scheduling",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Construction Delay Prediction",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Risk Prediction",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "section",
+      "title": "Reports & Decision Support"
+    },
+    {
+      "type": "feature",
+      "text": "AI Report Writer",
+      "status": "partial",
+      "rgb": [
+        0.784314,
+        0.498039,
+        0.039216
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Executive Dashboards",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Interactive Analytics",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Decision Sandbox",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Scenario Simulation",
+      "status": "partial",
+      "rgb": [
+        0.784314,
+        0.498039,
+        0.039216
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Engineering Benchmarking",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    }
+  ],
+  "14": [
+    {
+      "type": "section",
+      "title": "Marketplace & Ecosystem"
+    },
+    {
+      "type": "feature",
+      "text": "Engineering Marketplace",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Plugin Marketplace",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "API Marketplace",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Educational Mode",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Government Approval Assistant",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Tender Document Generator",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    }
+  ],
+  "15": [
+    {
+      "type": "feature",
+      "text": "0 built",
+      "status": "built",
+      "rgb": [
+        0.117647,
+        0.517647,
+        0.286275
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "2 partial",
+      "status": "partial",
+      "rgb": [
+        0.784314,
+        0.498039,
+        0.039216
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "17 planned",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "section",
+      "title": "Autonomous AI Engineering"
+    },
+    {
+      "type": "feature",
+      "text": "Conversational Project Design",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Multi-Agent Engineering Teams",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Autonomous Compliance Checking",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Autonomous BOQ & Costing",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "AI Negotiation with Suppliers",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "section",
+      "title": "Generative Design"
+    },
+    {
+      "type": "feature",
+      "text": "AI-Generated 2D Floor Plans",
+      "status": "partial",
+      "rgb": [
+        0.784314,
+        0.498039,
+        0.039216
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "AI-Generated 3D Building Concepts",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Facade Design Suggestions",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Landscape Design",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Parking Layout Generation",
+      "status": "partial",
+      "rgb": [
+        0.784314,
+        0.498039,
+        0.039216
+      ]
+    },
+    {
+      "type": "section",
+      "title": "Smart City Platform"
+    },
+    {
+      "type": "feature",
+      "text": "City-Scale Planning",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Traffic Simulation",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Utility Network Optimisation",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Urban Digital Twin",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Infrastructure Demand Forecasting",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "section",
+      "title": "XR & Robotics"
+    },
+    {
+      "type": "feature",
+      "text": "AR Site Visualisation",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "VR Project Walkthroughs",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Drone Survey Integration",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    },
+    {
+      "type": "feature",
+      "text": "Robotics-Assisted Construction Planning",
+      "status": "planned",
+      "rgb": [
+        0.603922,
+        0.647059,
+        0.694118
+      ]
+    }
+  ]
+}
