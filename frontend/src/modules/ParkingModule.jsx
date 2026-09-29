@@ -76,6 +76,16 @@ export default function ParkingModule({ project, analysis, update, readOnly, pro
 
                 <div className="px-3 py-2 grid md:grid-cols-2 gap-3">
                   <div>
+                    {t.residential_basement && (
+                      <div className="mb-2 rounded-sm border border-indigo-100 bg-indigo-50 px-2 py-1.5 text-[11px] text-indigo-900"
+                        data-testid={`parking-residential-basement-${t.id}`}>
+                        Project basement allocation: {int(t.residential_basement.car_spaces)} car · {int(t.residential_basement.bike_spaces)} bike
+                        {t.residential_basement.optional_car_pool > 0 &&
+                          ` · ${int(t.residential_basement.optional_car_pool)} optional car spaces for purchase`}
+                        {t.residential_basement.flexible_space_use && " · flexible use; no dedicated bike bays"}
+                        {` · ${num(t.residential_basement.area_sqm, 0)} m² per tower`}
+                      </div>
+                    )}
                     <Table>
                       <TableHeader>
                         <TableRow>

@@ -7,20 +7,20 @@ import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 import { num } from "../lib/format";
+import PlanningModule from "./PlanningModule";
 
 /**
- * Generative Design Studio — facade synthesis, landscape zoning and the parking
- * bay generator, as its own module.
+ * Generative Studio — apartment planning plus facade, landscape and parking tools
+ * under the single Design navigation entry.
  *
- * These three previously sat at the very bottom of Apartment Planning, below the
- * towers, unit mix and floor plate, and were effectively undiscoverable. The
- * section is unchanged in behaviour; it just moved out of PlanningModule.jsx so
- * the same JSX can render both there (kept for continuity) and here.
+ * Apartment planning and these generation tools share one workspace so the
+ * project has a single design entry point. The planning module keeps the saved
+ * tower floor layouts that Reports and the 3D views also use.
  *
- * Nothing here depends on the site layout, so the studio works on any project
- * even before a boundary is drawn.
+ * Facade, landscape and parking generation work before a boundary is drawn.
  */
-export default function GenerativeStudioModule({ project, projectId, readOnly }) {
+export default function GenerativeStudioModule(props) {
+  const { projectId, readOnly } = props;
   const [facades, setFacades] = useState([]);
   const [landscapeOpenSpace, setLandscapeOpenSpace] = useState(3500);
   const [landscapePlan, setLandscapePlan] = useState(null);
@@ -70,9 +70,21 @@ export default function GenerativeStudioModule({ project, projectId, readOnly })
 
   return (
     <div className="space-y-4">
+      <div className="border border-blue-200 bg-blue-50/60 rounded-sm px-4 py-3">
+        <h2 className="text-sm font-semibold text-slate-900">Generative Studio</h2>
+        <p className="text-xs text-slate-600 mt-1">
+          Apartment planning, shared AI floor plans, facade concepts, landscape zoning, and parking layouts in one workspace.
+        </p>
+      </div>
+      <div>
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-600">Apartment planning & AI floor plans</h3>
+        <p className="text-[11px] text-slate-500 mt-1">Configure towers and unit mix, generate layouts, and review the same saved drawing shown in Reports.</p>
+      </div>
+      <PlanningModule {...props} />
+
       <Section
-        title="Generative Design Studio"
-        description="Generative architectural facade synthesis, central park landscape zoning, and automated parking bay layout"
+        title="Facade, landscape & parking generation"
+        description="Create architectural facade options, central park zoning, and automated parking bay layouts"
         testid="generative-design-studio-section"
       >
         {/* 1. FACADES */}

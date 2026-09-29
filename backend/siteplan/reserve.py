@@ -52,11 +52,10 @@ def _area(geom: Optional[BaseGeometry]) -> float:
 # ---------------------------------------------------------------- 1-3. straight network
 def road_network(envelope: BaseGeometry,
                  cfg: SiteLayoutConfig) -> Tuple[Optional[BlockNetwork], List[str]]:
-    """Straight-sided development blocks with a rectangular ring and full-span spines.
+    """Build an orthogonal network for rectangular sites, adaptive roads otherwise.
 
-    Returns (network, warnings). A network of None means no usable rectangle fits inside
-    the envelope at all — the caller falls back to treating the envelope as one
-    undifferentiated packable region rather than inventing circulation for it.
+    Returns (network, warnings). A network of None means roads are disabled or no usable
+    development area remains; the caller falls back to the envelope for packing.
     """
     if not cfg.road.enabled:
         return None, []
@@ -72,10 +71,11 @@ def road_network(envelope: BaseGeometry,
         max_blocks=max(int(cfg.road.max_blocks), 1),
         min_block_area=max(cfg.road.min_block_area, 0.0),
         min_region_area=cfg.min_region_area,
+        quad_segs=cfg.buffer_quad_segs,
     )
     if network is None:
-        return None, ["No straight-sided development block fits inside the buildable "
-                      "envelope, so no circulation was reserved."]
+        return None, ["No usable development area fits inside the buildable envelope, "
+                      "so no circulation was reserved."]
     return network, list(network.warnings)
 
 
@@ -172,6 +172,43 @@ def _boundary_candidates(region: BaseGeometry, step: float, cap: int = 96) -> Li
     return out
 
 
+def _interior_candidates(region: BaseGeometry, step: float, cap: int = 320):
+    """Candidate amenity centres sampled across each usable parcel, centre-first.
+
+    The previous edge-only search made every standalone building compete for a corner
+    position. Sampling the interior lets a clubhouse sit beside the shared green while
+    retaining the road-distance and fragmentation checks in `_place_one`.
+    """
+    out = []
+    spacing = max(float(step), 3.0)
+    angles = []
+    for part in polygons_of(region):
+        axis, _, _ = _principal_axis(part)
+        angles = list(dict.fromkeys((round(axis, 2), round((axis + 90) % 180, 2), 0.0)))
+        minx, miny, maxx, maxy = part.bounds
+        nx = max(1, int(math.ceil((maxx - minx) / spacing)))
+        ny = max(1, int(math.ceil((maxy - miny) / spacing)))
+        stride = max(1, int(math.ceil(math.sqrt(nx * ny / max(cap, 1)))))
+        target = part.centroid if part.contains(part.centroid) else part.representative_point()
+        radius = max(math.hypot(maxx - minx, maxy - miny) / 2.0, 1.0)
+
+        # Always include a point in the actual parcel, even when a narrow parcel's grid
+        # happens to place every sample between cells.
+        centres = [(target.x, target.y)]
+        for row in range(0, ny, stride):
+            cy = miny + min((row + 0.5) * spacing, maxy - miny)
+            for col in range(0, nx, stride):
+                cx = minx + min((col + 0.5) * spacing, maxx - minx)
+                centres.append((cx, cy))
+
+        for cx, cy in centres:
+            if not part.contains(Point(cx, cy)):
+                continue
+            for angle in angles:
+                out.append((cx, cy, angle, target.x, target.y, radius))
+    return out
+
+
 def _rect(cx: float, cy: float, w: float, d: float, angle_deg: float) -> Polygon:
     r = box(-w / 2.0, -d / 2.0, w / 2.0, d / 2.0)
     return translate(rotate(r, angle_deg, origin=(0, 0)), cx, cy)
@@ -179,16 +216,15 @@ def _rect(cx: float, cy: float, w: float, d: float, angle_deg: float) -> Polygon
 
 def _place_one(region: BaseGeometry, roads: BaseGeometry, placed: Sequence[Polygon],
                w: float, d: float, target_sep: float,
-               cfg: SiteLayoutConfig) -> Optional[Polygon]:
+               cfg: SiteLayoutConfig,
+               green: Optional[BaseGeometry] = None) -> Optional[Polygon]:
     """Best position for one w x d block inside `region`.
 
-    Candidates hug the region boundary (which abuts the circulation network) facing
-    inward. Each is scored on three normalised terms — how little it fragments the
-    remaining packable land, how far it stays from already-placed amenities, and how
-    tightly it sits against a road — combined by the weights in AmenityConfig.
+    Interior positions are scored for centrality, road access, low fragmentation,
+    separation from other amenities, and proximity to the shared green.
     """
     step = max(3.0, min(w, d) / 2.0)
-    candidates = _boundary_candidates(region, step)
+    candidates = _interior_candidates(region, step)
     if not candidates:
         return None
 
@@ -199,13 +235,9 @@ def _place_one(region: BaseGeometry, roads: BaseGeometry, placed: Sequence[Polyg
 
     best: Optional[Polygon] = None
     best_score = float("-inf")
-    for px, py, angle in candidates:
-        nx, ny = math.cos(math.radians(angle)), math.sin(math.radians(angle))
+    for cx, cy, angle, target_x, target_y, centrality_radius in candidates:
         for ww, dd in ((w, d), (d, w)):
-            # Push the block in off the boundary by half its depth, and align its width
-            # with the boundary tangent (normal angle - 90 deg).
-            cx, cy = px + nx * (dd / 2.0), py + ny * (dd / 2.0)
-            rect = _rect(cx, cy, ww, dd, angle - 90.0)
+            rect = _rect(cx, cy, ww, dd, angle)
             if not region.contains(rect):
                 continue
 
@@ -223,16 +255,25 @@ def _place_one(region: BaseGeometry, roads: BaseGeometry, placed: Sequence[Polyg
             else:
                 road = 1.0
 
+            centre = rect.centroid
+            centrality = 1.0 - min(math.hypot(centre.x - target_x, centre.y - target_y)
+                                   / centrality_radius, 1.0)
+            green_access = (1.0 - min(rect.distance(green) / sep_scale, 1.0)
+                            if green is not None and not green.is_empty else 0.0)
             score = (a.compactness_weight * compactness
                      + a.spread_weight * spread
-                     + a.road_weight * road)
+                     + a.road_weight * road
+                     + a.centrality_weight * centrality
+                     + a.green_weight * green_access)
             if score > best_score:
                 best_score, best = score, rect
     return best
 
 
 def place_amenities(region: BaseGeometry, roads: BaseGeometry, plot_area: float,
-                    cfg: SiteLayoutConfig) -> Tuple[List[AmenityPlacement], BaseGeometry, List[str]]:
+                    cfg: SiteLayoutConfig,
+                    green: Optional[BaseGeometry] = None
+                    ) -> Tuple[List[AmenityPlacement], BaseGeometry, List[str]]:
     """Place every configured amenity block, largest first. Returns (placed, region, warnings)."""
     warnings: List[str] = []
     if not cfg.amenities.enabled or not cfg.amenities.blocks:
@@ -275,7 +316,7 @@ def place_amenities(region: BaseGeometry, roads: BaseGeometry, plot_area: float,
         if region.is_empty:
             warnings.append(f"No room left for amenity '{block.name}'.")
             continue
-        rect = _place_one(region, roads, footprints, w, d, target_sep, cfg)
+        rect = _place_one(region, roads, footprints, w, d, target_sep, cfg, green)
         if rect is None:
             warnings.append(
                 f"Amenity '{block.name}' ({w:.1f} x {d:.1f} m) does not fit in the "
@@ -474,14 +515,15 @@ def reserve(env: EnvelopeResult, cfg: Optional[SiteLayoutConfig] = None) -> Rese
     roads = unary_union([g for g in (ring, drives) if not g.is_empty]) if (
         not ring.is_empty or not drives.is_empty) else EMPTY
 
-    amenities, residual, w = place_amenities(residual, roads, env.plot.area, cfg)
-    warnings += w
-
+    # Reserve green first so it has an actual site position; amenities can be placed
+    # beside it while retaining centrality and road access.
     green, residual, w = reserve_green(residual, env.plot.area, cfg)
     warnings += w
 
-    # Envelope land no development block could cover is not a leftover to be quietly
-    # ignored — it is where the scheme's landscaping goes, so it joins the green.
+    amenities, residual, w = place_amenities(residual, roads, env.plot.area, cfg, green)
+    warnings += w
+
+    # Offset land is intentionally reserved as landscaped buffer, so it joins the green.
     if not leftover.is_empty:
         green = _clean(unary_union([g for g in (green, leftover) if not g.is_empty]), cfg)
 

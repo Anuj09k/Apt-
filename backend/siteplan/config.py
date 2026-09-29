@@ -126,14 +126,16 @@ class AmenityConfig:
     clearance: float = 3.0           # gap kept between an amenity and anything else
 
     # Placement scoring. Each term is normalised to 0..1 and combined as a weighted sum,
-    # so all three actually influence the choice — a lexicographic ordering on a
-    # continuous first key would make the later terms dead weight.
+    # so every term influences the choice rather than being hidden by a lexicographic key.
     #   compactness — leaves the largest single block of packable land (least fragmenting)
-    #   spread      — keeps amenities apart instead of clustering them in one corner
-    #   road        — sits hard against the circulation network
-    compactness_weight: float = 0.40
-    spread_weight: float = 0.45
-    road_weight: float = 0.15
+    #   spread      — keeps multiple amenities apart
+    #   road        — stays accessible from the circulation network
+    #   centrality  — avoids pinning the clubhouse to a parcel corner
+    compactness_weight: float = 0.28
+    spread_weight: float = 0.18
+    road_weight: float = 0.14
+    centrality_weight: float = 0.28
+    green_weight: float = 0.12
     # Separation at which the spread term is fully satisfied. 0 derives it from the size
     # of the packable region, which is what makes it scale from a plot to a township.
     target_separation: float = 0.0

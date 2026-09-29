@@ -10,8 +10,8 @@ Bump ENGINE_VERSION whenever a change alters the geometry a given input produces
 import hashlib
 from typing import Sequence
 
-# 3 — bar footprints, surface parking bays, community green.
-ENGINE_VERSION = 3
+# 4 — site-aware curved circulation, amenity placement and access links.
+ENGINE_VERSION = 4
 
 
 def polygon_signature(coordinates: Sequence[Sequence[float]]) -> str:

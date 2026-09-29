@@ -5,7 +5,7 @@ import { AlertCircle, ArrowLeft, ArrowRight, Eye, EyeOff, Loader, Lock, Mail } f
 import { AnimatePresence, motion } from "framer-motion";
 import { Brand } from "../components/Brand";
 import { useAuth } from "../context/AuthContext";
-import { apiError } from "../lib/api";
+import { requestErrorMessage } from "../lib/api";
 import { Reveal, RevealItem, Stagger } from "../components/landing/Reveal";
 import {
   AuthGlassStyles,
@@ -76,7 +76,7 @@ export default function Login() {
       toast.success("Signed in");
       navigate("/projects");
     } catch (err) {
-      setError(apiError(err.response?.data?.detail, err.message));
+      setError(requestErrorMessage(err));
     } finally {
       setBusy(false);
     }

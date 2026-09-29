@@ -86,6 +86,10 @@ export default function AutonomousStudioModule({ project, projectId, onRefresh }
         instruction,
         save: true,
       });
+      if (data?.ok === false) {
+        toast.error(data.message || "I couldn't apply that design change.");
+        return;
+      }
       setMutationLog((prev) => [
         { instruction, result: data.mutations_applied, time: new Date().toLocaleTimeString() },
         ...prev,

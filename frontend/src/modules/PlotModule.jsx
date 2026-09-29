@@ -6,15 +6,15 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from ".
 import { Input } from "../components/ui/input";
 import { api, apiError, syncTowersFromLayout } from "../lib/api";
 import { COMPASS, num } from "../lib/format";
-import { polygonSignature } from "../lib/scene";
+import { isLayoutCurrent, polygonSignature } from "../lib/scene";
 import { Plus, Trash2, Sparkles, Zap, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 
-// Distinct styled layers so the park, circulation, amenities and packable land stay
-// visually separable on the map. `envelope` is the land inside the setbacks — shown to
-// the user as the Park, and named that way in 3D too.
+// Distinct styled layers keep the setback envelope, shared green, roads, amenities and
+// building footprints visually separate.
 const LAYER_STYLE = {
-  envelope: { color: "#16A34A", weight: 2, dashArray: "6 4", fillOpacity: 0.06 },
+  envelope: { color: "#475569", weight: 2, dashArray: "6 4", fillOpacity: 0.02 },
+  green: { color: "#16A34A", weight: 1.5, fillColor: "#4ADE80", fillOpacity: 0.5 },
   ring: { color: "#F59E0B", weight: 1, fillColor: "#F59E0B", fillOpacity: 0.45 },
   driveways: { color: "#D97706", weight: 1, fillColor: "#FBBF24", fillOpacity: 0.5 },
   amenity: { color: "#7C3AED", weight: 1, fillColor: "#A78BFA", fillOpacity: 0.65 },
@@ -26,6 +26,8 @@ export default function PlotModule({ project, analysis, update, readOnly, goToMo
   const plot = project.plot || {};
   const coords = plot.coordinates || [];
   const areas = analysis?.areas;
+  const savedLayoutNeedsRefresh = !!project.site_layout
+    && !isLayoutCurrent(project.site_layout, coords);
 
   // Setbacks are owned by Setbacks & Controls and stored on the project. They used to be
   // local state here as well, so a user could set one value there, see a different one
@@ -173,7 +175,10 @@ export default function PlotModule({ project, analysis, update, readOnly, goToMo
   const overlays = [];
   if (layout) {
     overlays.push({ key: "envelope", polygons: layout.envelope.polygons, style: LAYER_STYLE.envelope,
-                    label: `Park · ${num(layout.envelope.area_sqm, 0)} m²` });
+                    label: `Buildable envelope inside setbacks · ${num(layout.envelope.area_sqm, 0)} m²` });
+    if (layout.green?.polygons?.length)
+      overlays.push({ key: "green", polygons: layout.green.polygons, style: LAYER_STYLE.green,
+                      label: `Community green / play area · ${num(layout.green.area_sqm, 0)} m²` });
     if (layout.residual)
       overlays.push({ key: "residual", polygons: layout.residual.polygons, style: LAYER_STYLE.residual,
                       label: `Packable land · ${num(layout.residual.area_sqm, 0)} m²` });
@@ -189,6 +194,11 @@ export default function PlotModule({ project, analysis, update, readOnly, goToMo
     (layout.towers || []).forEach((t, i) =>
       overlays.push({ key: `tower-${i}`, polygons: t.polygons, style: LAYER_STYLE.tower,
                       label: `${t.name} · ${t.floors}F · ${num(t.footprint_sqm, 0)} m² · ${t.units} units` }));
+    if (layout.pedestrian_links?.length)
+      overlays.push({ key: "pedestrian-links", lines: layout.pedestrian_links.map((link) => ({
+        path: link.path,
+        label: `${link.label} · ${num(link.length_m, 1)} m`,
+      })), lineStyle: { color: "#0F766E", weight: 2, dashArray: "5 5", opacity: 0.9 } });
   }
 
   return (
@@ -319,10 +329,19 @@ export default function PlotModule({ project, analysis, update, readOnly, goToMo
           </p>
         )}
 
+        {savedLayoutNeedsRefresh && !layout && (
+          <p className="text-[11px] text-blue-800 bg-blue-50 border border-blue-200 rounded-sm px-2 py-1 mt-3"
+             data-testid="site-layout-refresh-required">
+            The saved layout predates the current site planner. Generate a new layout to apply the updated roads,
+            green space and building access paths.
+          </p>
+        )}
+
         {layout && (
           <>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3">
-              <Metric label="Park area" value={num(layout.envelope.area_sqm, 2)} unit="m²" testid="envelope-area" />
+              <Metric label="Buildable envelope" value={num(layout.envelope.area_sqm, 2)} unit="m²" testid="envelope-area" />
+              <Metric label="Community green" value={num(layout.green?.area_sqm, 2)} unit="m²" testid="green-area" />
               <Metric label="Of plot area" value={num(layout.envelope.pct_of_plot, 1)} unit="%" testid="envelope-pct" />
               <Metric label="Regions" value={layout.envelope.part_count} testid="envelope-parts" />
               <Metric label="Plot area" value={num(layout.plot.area_sqm, 2)} unit="m²" testid="envelope-plot-area" />

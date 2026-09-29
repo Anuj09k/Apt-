@@ -44,9 +44,34 @@ def validate_project(project):
         return value
 
     finite_tree(project, "")
-    for key in ("plot", "config", "parking", "engineering", "utility_config", "rates", "labour_rates", "equipment_rates", "quantity_ratios", "cost_adders", "wastage_pct", "dev_controls"):
+    for key in ("plot", "config", "parking", "residential_policy", "engineering", "utility_config", "rates", "labour_rates", "equipment_rates", "quantity_ratios", "cost_adders", "wastage_pct", "dev_controls"):
         if key in project and not isinstance(project[key], dict):
             error(key, "Must be an object")
+    policy = project.get("residential_policy") or {}
+    if isinstance(policy, dict):
+        tiers = {"1bhk", "2bhk", "3bhk", "4bhk", "5bhk"}
+        cycle = policy.get("unit_type_cycle")
+        if cycle is not None and (not isinstance(cycle, list) or not cycle or any(t not in tiers for t in cycle)):
+            error("residential_policy.unit_type_cycle", "Must contain one or more supported BHK tiers")
+        unit_density = policy.get("units_per_floor") or {}
+        if not isinstance(unit_density, dict):
+            error("residential_policy.units_per_floor", "Must be an object")
+        else:
+            for tier, value in unit_density.items():
+                if tier not in tiers:
+                    error(f"residential_policy.units_per_floor.{tier}", "Unsupported BHK tier")
+                else:
+                    number({tier: value}, tier, "residential_policy.units_per_floor", minimum=1, maximum=1000, integer=True)
+        parking_policy = policy.get("parking_by_type") or {}
+        if not isinstance(parking_policy, dict):
+            error("residential_policy.parking_by_type", "Must be an object")
+        else:
+            for tier, rules in parking_policy.items():
+                if tier not in tiers or not isinstance(rules, dict):
+                    error(f"residential_policy.parking_by_type.{tier}", "Must be a supported BHK parking rule")
+                    continue
+                for key in ("reserved_cars_per_unit", "reserved_bikes_per_unit", "optional_car_spaces_per_unit"):
+                    number(rules, key, f"residential_policy.parking_by_type.{tier}", maximum=100)
     if issues:
         raise ProjectInputError(issues)
     plot = project.get("plot", {})

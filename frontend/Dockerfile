@@ -20,6 +20,18 @@ RUN npm run build
 
 # ---- serve ----------------------------------------------------------------
 FROM nginx:1.27-alpine
+
+# The nginx image expands /etc/nginx/templates/*.template into conf.d on start, using
+# only the variables that exist in the environment. Both of these are therefore runtime
+# settings: pointing the container at a different API needs a redeploy, not a rebuild.
+# PORT is the one Render injects (10000); 80 keeps docker compose working unchanged.
+ENV PORT=80 \
+    API_UPSTREAM=http://backend:8000
+
 COPY --from=build /app/build /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY nginx.conf /etc/nginx/templates/default.conf.template
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD wget -qO- "http://127.0.0.1:${PORT}/" >/dev/null || exit 1
+
 EXPOSE 80

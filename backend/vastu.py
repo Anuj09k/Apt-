@@ -9,7 +9,7 @@ double-loaded corridor they can pull against each other:
   not the room the manual describes. Rooms may not overlap, and floor area that belongs to
   no room is not "spare" — it is unbuilt plan.
 
-  SOFT — the sector anchors (master SW, kitchen SE/NW, pooja NE) and the entrance rotation
+  SOFT — the sector anchors (master SW, kitchen SE, pooja NE) and the entrance rotation
   matrix. These are targeted by construction, but a flat with one facade cannot always
   give every anchor its sector. Where a target cannot be met, this module says so in the
   report rather than relabelling the result compliant.
@@ -26,41 +26,51 @@ of the plan is North and y increases going South.
 import math
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
+from floorplan.design_guide import (
+    BALCONY_RULES,
+    DOOR_STANDARDS_MM,
+    ENTRY_PADA_RULES,
+    audit_room_zones,
+    mandala_zone_of,
+    room_zone_kind,
+)
+
 EPS = 0.03
 
 # Manual §1 — Universal Vastu Anchors. Sector targets, in preference order.
 ANCHOR_SECTORS = {
-    "pooja": ("NE", "E", "N"),
-    "kitchen": ("SE", "NW"),
+    "pooja": ("NE",),
+    "kitchen": ("SE",),
     "master": ("SW",),
 }
 # Sectors a room must never occupy.
 ANCHOR_FORBIDDEN = {
     "pooja": ("S", "SW"),
+    "kitchen": ("NE",),
     "master": ("NE",),
 }
 
 # Manual §1 — Entrance-specific routing. Keyed by the wall the flat is entered from.
 ROTATION_MATRIX = {
-    "S": {"kitchen": "NW", "living": "SE", "note": "South facing — vestibule buffer at the door, living pushed S/SE, kitchen routed NW to clear the entrance."},
-    "N": {"kitchen": "NW", "living": "NE", "note": "North facing — living flows E/NE, kitchen on the NW secondary fire node."},
+    "S": {"kitchen": "SE", "living": "NE", "note": "South facing — vestibule buffer at the door; keep the fixed kitchen wet core in SE."},
+    "N": {"kitchen": "SE", "living": "NE", "note": "North facing — living flows to N/E; keep the fixed kitchen wet core in SE."},
     "E": {"kitchen": "SE", "living": "NE", "note": "East facing — the ideal case: living flows N/NE, kitchen slots straight into SE."},
-    "W": {"kitchen": "SE", "living": "NW", "note": "West facing — living occupies W/NW, kitchen mapped to SE."},
+    "W": {"kitchen": "SE", "living": "N", "note": "West facing — living occupies N/E where possible; kitchen remains in SE."},
 }
 
 # Manual §2 — Configuration & Scaling Protocol. Per BHK: how many bedrooms carry an
 # en-suite, how many common baths, whether the pooja is a room or a niche, and the
 # balconies and service spaces the tier is entitled to.
 SCALING_PROTOCOL = {
-    1: {"beds": 1, "ensuites": 1, "common_baths": 1, "pooja": "niche",
-        "balconies": ["living"], "utility": "compact", "servant": False, "extras": []},
+    1: {"beds": 1, "ensuites": 1, "common_baths": 0, "pooja": "niche",
+        "balconies": ["living"], "utility": "compact", "servant": False, "extras": ["powder_optional"]},
     2: {"beds": 2, "ensuites": 1, "common_baths": 1, "pooja": "room",
         "balconies": ["living"], "utility": "room", "servant": False, "extras": []},
     3: {"beds": 3, "ensuites": 2, "common_baths": 1, "pooja": "room",
         "balconies": ["living", "master"], "utility": "large", "servant": False, "extras": []},
     4: {"beds": 4, "ensuites": 3, "common_baths": 1, "pooja": "room",
         "balconies": ["living", "master", "submaster"], "utility": "large", "servant": True,
-        "extras": ["powder"]},
+        "extras": []},
     5: {"beds": 5, "ensuites": 4, "common_baths": 1, "pooja": "room",
         "balconies": ["living", "master", "submaster"], "utility": "large", "servant": True,
         "extras": ["powder", "lounge", "pantry", "office", "closet"]},
@@ -154,7 +164,7 @@ def split_v_many(rect, weights: Sequence[float]) -> List[dict]:
 
 # ---------------------------------------------------------------- the programme
 def bhk_of(unit_type: str, carpet: float) -> int:
-    t = (unit_type or "").lower()
+    t = (unit_type or "").lower().replace(" ", "")
     for n in (5, 4, 3, 2, 1):
         if f"{n}bhk" in t:
             return n
@@ -269,14 +279,19 @@ def pack_unit(box: dict, unit_type: str, carpet: float, entry_edge: str,
         for i in range(2, beds + 1):
             slots.append((f"bed{i}", 1.0))
         slots.append(("kitchen", 1.5))
+        if beds >= 5:
+            slots.append(("pantry", 0.55))
         if prog["is_penthouse"]:
             slots.append(("office", 0.9))
+            slots.append(("family", 0.9))
         slots.append(("living", 1.6))
     else:
-        # Facade north: SW is the corridor wall and cannot be daylit. The rotation matrix
-        # sends a south-facing flat's kitchen to NW — the west end of the lit band — so the
-        # kitchen takes it and the master sits beside it. The pooja still ends the row east.
+        # Facade north: the corridor occupies the south side, so this one-facade envelope
+        # cannot reach every preferred zone. Place the kitchen near the east end and report
+        # any SE miss rather than treating NW as an alternate kitchen anchor.
         slots.append(("kitchen", 1.5))
+        if beds >= 5:
+            slots.append(("pantry", 0.55))
         slots.append(("master", 1.45))
         for i in range(2, beds + 1):
             slots.append((f"bed{i}", 1.0))
@@ -285,6 +300,7 @@ def pack_unit(box: dict, unit_type: str, carpet: float, entry_edge: str,
         # wall of living to take its door from. The office goes before it, not after.
         if prog["is_penthouse"]:
             slots.append(("office", 0.9))
+            slots.append(("family", 0.9))
         slots.append(("living", 1.6))
         if prog["pooja"] == "room":
             pooja_w = min(max(1.5, work["w"] * 0.1), 2.2)
@@ -346,12 +362,15 @@ def pack_unit(box: dict, unit_type: str, carpet: float, entry_edge: str,
             return far, near
         return split_h(cell, depth)                           # facade is north: take the top
 
-    def fill_column(cell, key, name, rtype, service=None, balcony=None, closet=False, **extra):
+    def fill_column(cell, key, name, rtype, service=None, balcony=None, closet=False,
+                    common_bath=False, **extra):
         """Lay out one column: service + passage stub at the corridor end, the room in the
         middle, its balcony at the facade end. Returns nothing; emits as it goes."""
         body = cell
         if balcony and facade_edge:
-            depth = min(BALCONY_DEPTH, body["h"] * 0.22)
+            target_depth = (1.8 if balcony == "balcony_living" else
+                            1.2 if balcony == "balcony_master" else 1.5)
+            depth = min(target_depth, body["h"] * 0.22)
             bal, body = facade_end(body, depth)
             if bal["w"] >= 1.2:
                 is_terrace = prog["is_penthouse"]
@@ -381,8 +400,9 @@ def pack_unit(box: dict, unit_type: str, carpet: float, entry_edge: str,
                 # bedroom wall. It may share a wall with the passage — walls are not
                 # doors — but it must never be reachable from one, which is the bypass
                 # route the manual calls out.
+                door_route = {"door_from": ["passage"]} if common_bath else {"door_child_of": key}
                 emit(svc_key, svc_name, "bathroom" if "bath" in svc_key else "utility", svc,
-                     has_window=False, door_child_of=key)
+                     has_window=False, **door_route)
                 leftovers.append(stub)
             elif "bath" in svc_key:
                 # Too narrow to hold a usable bath and still leave the room a door onto the
@@ -417,6 +437,10 @@ def pack_unit(box: dict, unit_type: str, carpet: float, entry_edge: str,
                     service=("utility", "Utility / Dry Balcony", 0.28),
                     has_window=True, hob_faces="East", door_from=["living", "passage"])
 
+    if "pantry" in cells:
+        fill_column(cells["pantry"], "pantry", "Pantry / Dry Storage", "pantry",
+                    has_window=False, door_from=["kitchen"])
+
     for i in range(2, beds + 1):
         slot = f"bed{i}"
         if slot not in cells:
@@ -427,6 +451,7 @@ def pack_unit(box: dict, unit_type: str, carpet: float, entry_edge: str,
                     service=(f"{slot}bath",
                              "Sub-master Ensuite" if ensuite else f"Common Bathroom {i - 1}", 0.28),
                     balcony=f"balcony_bed{i}" if (i == 2 and "submaster" in prog["balconies"]) else None,
+                    common_bath=not ensuite,
                     has_window=True, door_from=["passage", "living"])
 
     if "living" in cells:
@@ -437,6 +462,9 @@ def pack_unit(box: dict, unit_type: str, carpet: float, entry_edge: str,
     if "office" in cells:
         fill_column(cells["office"], "office", "Dedicated Home Office", "office",
                     balcony="terrace_office", has_window=True, door_from=["passage", "living"])
+    if "family" in cells:
+        fill_column(cells["family"], "family", "Family Lounge", "family",
+                    has_window=True, door_from=["passage", "living"])
 
     # The pooja takes a whole column, so it runs from the passage to the facade and shares a
     # full wall with the living room beside it — that wall is where its door goes. Nothing is
@@ -472,6 +500,26 @@ def pack_unit(box: dict, unit_type: str, carpet: float, entry_edge: str,
             notes.append("No room on the passage for the " + ", ".join(n for _, n in deferred)
                          + " — the flat is too shallow for its bedroom count.")
 
+    # Carve the 4/5 BHK's service rooms and guest powder room from the entry band. This
+    # keeps them beside the foyer/service access without borrowing bedroom or kitchen area.
+    support_width = (5.5 if prog["servant"] else 0.0) + (1.5 if "powder" in prog["extras"] else 0.0)
+    if support_width and entry_strip["w"] - support_width >= 2.2 and entry_strip["h"] >= 1.5:
+        service_band, entry_strip = split_v(entry_strip, support_width)
+        support_cursor = service_band
+        if prog["servant"]:
+            servant_bath, support_cursor = split_v(support_cursor, 1.3)
+            servant_room, support_cursor = split_v(support_cursor, 4.2)
+            emit("servant", "Servant Room", "servant", servant_room,
+                 has_window=False, service_access=True, entry_edge=entry_edge)
+            emit("servantbath", "Servant Bath", "bathroom", servant_bath,
+                 has_window=False, door_child_of="servant")
+        if "powder" in prog["extras"]:
+            powder, support_cursor = split_v(support_cursor, 1.5)
+            emit("powder", "Guest Powder Room", "bathroom", powder,
+                 has_window=False, door_from=["entrance"])
+    elif support_width:
+        notes.append("Servant/powder service rooms could not fit beside the foyer in this unit envelope.")
+
     emit("foyer", "Entrance / Foyer", "entrance", entry_strip, main_entrance=True)
     emit("passage", "Passage", "passage", passage_strip, door_from=["entrance"])
     for i, rect in enumerate(leftovers, start=2):
@@ -480,10 +528,11 @@ def pack_unit(box: dict, unit_type: str, carpet: float, entry_edge: str,
     # Stamp each anchor with the sector it is ACTUALLY in. The previous generator wrote a
     # fixed "SW (Nairutya)" onto the master whatever it had done with it, which made the
     # label useless: it agreed with the intent, never with the plan.
-    sector_names = {"NE": "NE (Ishanya)", "SE": "SE (Agni)", "SW": "SW (Nairutya)", "NW": "NW (Vayu)"}
+    sector_names = {"NE": "NE (Ishanya)", "SE": "SE (Agni)", "SW": "SW (Nairutya)",
+                    "NW": "NW (Vayu)", "CENTER": "CENTER (Brahmasthan)"}
     for r in rooms:
         if r["type"] in ("pooja", "kitchen") or r["id"].endswith("-mbed"):
-            sec = sector_of(r, box)
+            sec = mandala_zone_of(r, box)
             r["vastu"] = sector_names.get(sec, sec)
 
     return rooms, notes
@@ -531,6 +580,59 @@ def check_unit(rooms: Sequence[dict], box: dict, exterior_edges: Sequence[str],
     for r in rooms:
         by_type.setdefault(r["type"], []).append(r)
 
+    # The guide's NE exclusions and open central Brahmasthan are hard rules. Generation
+    # and post-generation audits share the same 3x3 zone calculation.
+    v.extend(audit_room_zones(rooms, box)["violations"])
+    for kitchen in by_type.get("kitchen", []):
+        if mandala_zone_of(kitchen, box) != "SE":
+            v.append(f"{kitchen['id']}: fixed kitchen wet core must be in SE")
+        if str(kitchen.get("hob_faces") or "").strip().lower() != "east":
+            v.append(f"{kitchen['id']}: cooking hob must face East")
+
+    # Entry location and door construction are checked from the same metadata the AI prompt
+    # and deterministic generator use.
+    entrances = [r for r in rooms if r.get("main_entrance")]
+    if not entrances:
+        v.append("unit has no marked main entrance")
+    for entry in entrances:
+        edge = str(entry.get("entry_edge") or entry_edge or "").upper()
+        pada = entry.get("entry_pada")
+        allowed = ENTRY_PADA_RULES.get(edge, ())
+        if not allowed or pada not in allowed:
+            v.append(f"{entry.get('id', 'main entrance')}: entry Pada {pada} is not allowed on {edge or 'unknown'}")
+
+    for room in rooms:
+        has_door = bool(
+            room.get("main_entrance") or room.get("door_to") or room.get("door_from")
+            or room.get("door_child_of") or room.get("service_access")
+        )
+        if not has_door:
+            continue
+        kind = room_zone_kind(room)
+        if room.get("main_entrance"):
+            standard = DOOR_STANDARDS_MM["main_entrance"]
+            width = room.get("door_width_mm")
+            if width is None or not standard["width_min"] <= float(width) <= standard["width_max"]:
+                v.append(f"{room.get('id', 'main entrance')}: entrance door must be 1050-1200 mm wide")
+            expected_height = standard["height"]
+        else:
+            door_kind = (
+                "bedroom" if kind in ("master", "bedroom") else
+                "kitchen" if kind == "kitchen" else
+                "bathroom" if kind == "bathroom" else "other"
+            )
+            standard = DOOR_STANDARDS_MM[door_kind]
+            if room.get("door_width_mm") != standard["width"]:
+                v.append(f"{room.get('id', 'room')}: {door_kind} door width must be {standard['width']} mm")
+            expected_height = standard["height"]
+        if room.get("door_height_mm") != expected_height:
+            v.append(f"{room.get('id', 'room')}: door height must be {expected_height} mm")
+        hinge = room.get("hinge_offset_mm")
+        if hinge is None or not DOOR_STANDARDS_MM["hinge_offset_min"] <= float(hinge) <= DOOR_STANDARDS_MM["hinge_offset_max"]:
+            v.append(f"{room.get('id', 'room')}: hinge offset must be 100-150 mm")
+        if room.get("door_swing") != DOOR_STANDARDS_MM["swing"]:
+            v.append(f"{room.get('id', 'room')}: door must swing inward clockwise")
+
     for i in range(len(rooms)):
         for j in range(i + 1, len(rooms)):
             if overlaps(rooms[i], rooms[j]):
@@ -545,9 +647,53 @@ def check_unit(rooms: Sequence[dict], box: dict, exterior_edges: Sequence[str],
         anchor = next((r for r in rooms if r["id"] == anchor_id), None)
         if anchor is None or not touches(b, anchor):
             v.append(f"{b['id']}: balcony does not project from the room it belongs to")
+        depth = b.get("balcony_depth_mm")
+        source_kind = room_zone_kind(anchor) if anchor else ""
+        faces_north_east = on_edge(b, box, "N") or on_edge(b, box, "E")
+        if source_kind == "living" and faces_north_east:
+            if depth is None or float(depth) < BALCONY_RULES["living_north_east_depth_min_mm"]:
+                v.append(f"{b['id']}: north/east living balcony must be at least 1800 mm deep")
+            if depth is not None and float(depth) > BALCONY_RULES["living_north_east_depth_max_mm"]:
+                v.append(f"{b['id']}: north/east living balcony must not exceed 2400 mm deep")
+            if b.get("slab_drop_mm") is None or not (
+                BALCONY_RULES["north_east_slab_drop_min_mm"] <= float(b["slab_drop_mm"])
+                <= BALCONY_RULES["north_east_slab_drop_max_mm"]
+            ):
+                v.append(f"{b['id']}: north/east living balcony slab drop must be 12-25 mm")
+        elif source_kind == "master" and depth != BALCONY_RULES["master_depth_mm"]:
+            v.append(f"{b['id']}: master balcony must be 1200 mm deep")
+        elif source_kind == "bedroom" and (depth is None or not (
+            BALCONY_RULES["secondary_depth_min_mm"] <= float(depth)
+            <= BALCONY_RULES["secondary_depth_max_mm"]
+        )):
+            v.append(f"{b['id']}: secondary balcony must be 1200-1500 mm deep")
+        if (on_edge(b, box, "S") or on_edge(b, box, "W")) and b.get("parapet_type") != "1000mm masonry":
+            v.append(f"{b['id']}: south/west balcony needs a 1000 mm masonry parapet")
+
+    living_rooms = by_type.get("living", [])
+    living_room = next((r for r in living_rooms
+                        if "family lounge" not in str(r.get("name", "")).lower()),
+                       living_rooms[0] if living_rooms else None)
+    balcony_sources = {b.get("projects_from") for b in by_type.get("balcony", []) + by_type.get("terrace", [])}
+    if living_room and living_room.get("id") not in balcony_sources:
+        v.append("living room has no attached main balcony")
+    unit_type = str((rooms[0].get("unit_type") if rooms else "") or "")
+    bedrooms = bhk_of(unit_type, area(box))
+    if bedrooms >= 3:
+        master = next((r for r in by_type.get("bedroom", [])
+                       if r["id"].endswith("-mbed") or "master" in str(r.get("name", "")).lower()), None)
+        if master and master.get("id") not in balcony_sources:
+            v.append("3+ BHK master bedroom has no attached balcony")
+    if bedrooms >= 4 and not any(
+        room_zone_kind(by_id) == "bedroom" and by_id.get("id") in balcony_sources
+        for by_id in by_type.get("bedroom", [])
+    ):
+        v.append("4+ BHK has no attached secondary bedroom balcony")
 
     # Pooja: a door off the living room, and never a shared wall with a bathroom.
-    living = next(iter(by_type.get("living", [])), None)
+    living = next((r for r in by_type.get("living", [])
+                   if "family lounge" not in str(r.get("name", "")).lower()),
+                  next(iter(by_type.get("living", [])), None))
     for p in by_type.get("pooja", []):
         if living is None or not touches(p, living):
             v.append(f"{p['id']}: pooja room has no wall on the living room to take its door from")
@@ -606,6 +752,8 @@ def check_unit(rooms: Sequence[dict], box: dict, exterior_edges: Sequence[str],
                      f"shields it from that sightline")
 
     for serv in by_type.get("servant", []):
+        if serv.get("service_access") and on_edge(serv, box, entry_edge):
+            continue
         if not adjacent_of_type(serv, {"utility", "entrance", "passage"}):
             v.append(f"{serv['id']}: servant quarters need their own service access, "
                      f"not a route through the living room")
@@ -615,11 +763,16 @@ def check_unit(rooms: Sequence[dict], box: dict, exterior_edges: Sequence[str],
     for u in by_type.get("utility", []):
         if kitchen is None or not touches(u, kitchen):
             v.append(f"{u['id']}: utility is not snapped to the kitchen")
+        width_mm = u.get("utility_width_mm")
+        if width_mm is None:
+            width_mm = min(float(u.get("w") or 0), float(u.get("h") or 0)) * 1000
+        if not 1200 <= float(width_mm) <= 1500:
+            v.append(f"{u['id']}: kitchen utility width must be 1200-1500 mm")
 
     # Daylight: every habitable room wants a wall on air, directly or through its balcony.
     balconies = by_type.get("balcony", []) + by_type.get("terrace", [])
     for r in rooms:
-        if r["type"] not in ("living", "bedroom", "kitchen", "study", "office"):
+        if r["type"] not in ("living", "family", "bedroom", "kitchen", "study", "office"):
             continue
         if on_any_edge(r, box, exterior_edges) or any(touches(r, b) for b in balconies):
             continue
@@ -637,7 +790,7 @@ def check_unit(rooms: Sequence[dict], box: dict, exterior_edges: Sequence[str],
 
 
 def sector_report(rooms: Sequence[dict], box: dict) -> Dict[str, Any]:
-    """Which anchors landed in their sector, stated as found. Soft targets, not defects."""
+    """Which anchors landed in their 3x3 Mandala zone, stated as found."""
     out = {}
     picks = {
         "pooja": next((r for r in rooms if r["type"] == "pooja"), None),
@@ -649,12 +802,14 @@ def sector_report(rooms: Sequence[dict], box: dict) -> Dict[str, Any]:
             out[key] = {"placed": False, "sector": None, "target": ANCHOR_SECTORS.get(key, ()),
                         "met": None, "detail": "not present in this unit's programme"}
             continue
-        sec = sector_of(room, box)
+        sec = mandala_zone_of(room, box)
+        quadrant = sector_of(room, box)
         targets = ANCHOR_SECTORS.get(key, ())
         forbidden = ANCHOR_FORBIDDEN.get(key, ())
         met = sec in targets
         out[key] = {
-            "placed": True, "sector": sec, "target": targets, "met": met,
+            "placed": True, "sector": sec, "mandala_zone": sec, "quadrant": quadrant,
+            "target": targets, "met": met,
             "forbidden_hit": sec in forbidden,
             "detail": (f"in {sec}, its primary sector" if sec == (targets[0] if targets else None)
                        else f"in {sec}, an accepted secondary sector" if met

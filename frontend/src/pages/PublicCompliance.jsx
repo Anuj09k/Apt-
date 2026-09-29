@@ -5,8 +5,7 @@ import { CheckCircle2, XCircle } from "lucide-react";
 import { BrandMark } from "../components/Brand";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
 import { dt, int, num } from "../lib/format";
-
-const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+import { API_BASE } from "../lib/api";
 
 export default function PublicCompliance() {
   const { token } = useParams();
@@ -15,7 +14,7 @@ export default function PublicCompliance() {
 
   useEffect(() => {
     axios
-      .get(`${API}/public/compliance/${token}`)
+      .get(`${API_BASE}/public/compliance/${token}`)
       .then(({ data }) => setData(data))
       .catch((e) => setError(e.response?.data?.detail || "Unable to load this link"));
   }, [token]);

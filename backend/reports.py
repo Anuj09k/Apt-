@@ -1733,8 +1733,8 @@ def build_pdf(report_type: str, project: dict, a: dict, eng: dict = None) -> byt
                 el += [Paragraph("Vastu Audit — Generative Architecture & Vastu Logic Manual",
                                  ss["Sec"]),
                        Paragraph("Hard rules are geometry that is wrong if broken and are "
-                                 "reported as violations. Soft rules are the sector anchors "
-                                 "(pooja NE, kitchen SE/NW, master SW); a flat with one "
+                                 "reported as violations. The fixed kitchen is checked in SE; "
+                                 "sector targets include pooja NE and master SW. A flat with one "
                                  "facade cannot always give every anchor its sector, so an "
                                  "unmet anchor is stated rather than relabelled compliant.",
                                  ss["Sub"])]

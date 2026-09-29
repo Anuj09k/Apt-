@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Brand } from "../components/Brand";
 import { useAuth } from "../context/AuthContext";
-import { apiError } from "../lib/api";
+import { requestErrorMessage } from "../lib/api";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
@@ -26,7 +26,7 @@ export default function Register() {
       toast.success("Account created");
       navigate("/projects");
     } catch (err) {
-      setError(apiError(err.response?.data?.detail, err.message));
+      setError(requestErrorMessage(err));
     } finally {
       setBusy(false);
     }

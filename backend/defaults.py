@@ -5,13 +5,17 @@ from datetime import datetime, timezone
 import iscodes
 import layout as layoutlib
 from engine import DEFAULT_RATIOS, DEFAULT_RATES, DEFAULT_RULES
+from residential_defaults import (
+    new_residential_policy, parking_summary, summarize_units, tower_index, configure_tower,
+    update_tower_parking,
+)
 
 
 def floor_layout_entry(tower, floor, nonce=0):
-    """Generate + wrap one floor's room layout for storage in tower['floor_layouts'].
-    `validation` maps unit_id -> any schema/adjacency violations left after layout.py's
-    own reject-and-regenerate retries (empty dict = every unit fully validated)."""
-    rooms, validation = layoutlib.generate_floor_layout(tower, floor, nonce)
+    """Generate and wrap one guide-aligned floor layout for tower storage."""
+    # Import lazily to avoid coupling defaults initialization to the architecture engine.
+    import aifloorplan
+    rooms, validation = aifloorplan.generate_architectural_template(tower, floor)
     return {
         "rooms": rooms,
         "validation": validation,
@@ -32,7 +36,7 @@ def default_society_amenities():
     ]
 
 
-def default_tower(name="Tower A"):
+def default_tower(name="Tower A", index=None, policy=None):
     tower = {
         "id": str(uuid.uuid4())[:8],
         "name": name,
@@ -44,16 +48,14 @@ def default_tower(name="Tower A"):
         "corridor_length": 32.0,
         "exits_per_floor": 2,
         "max_travel_distance": 24.0,
-        "units": [
-            {"id": str(uuid.uuid4())[:8], "type": "2bhk", "count": 2, "carpet_area": 78.0, "balcony_area": 8.0},
-            {"id": str(uuid.uuid4())[:8], "type": "3bhk", "count": 2, "carpet_area": 110.0, "balcony_area": 12.0},
-        ],
+        "units": [],
         "staircases": [{"id": str(uuid.uuid4())[:8], "count": 2, "width": 1.5, "type": "dog-legged", "location": "core"}],
         "lifts": [{"id": str(uuid.uuid4())[:8], "count": 2, "capacity": 8, "location": "core"}],
         "common_spaces": [
             {"id": str(uuid.uuid4())[:8], "name": "Entrance Lobby", "type": "lobby", "area": 90.0},
         ],
     }
+    configure_tower(tower, tower_index(name) if index is None else index, policy=policy)
     # Ground-floor layout is generated up front so the plate isn't empty on first load;
     # "rooms" mirrors floor 1 for the engineering calcs (engine.py, engineering.py) and the
     # 3D view (scene.js) that still read a single flat room list per tower.
@@ -67,7 +69,7 @@ def _tower_letter(i):
     return f"Tower {chr(65 + i)}" if i < 26 else f"Tower {i + 1}"
 
 
-def apply_layout_to_tower(tower, engine_tower, name):
+def apply_layout_to_tower(tower, engine_tower, name, policy=None):
     """Stamp one packed block's geometry onto the project tower that represents it.
 
     Only the things the site layout engine decides -- how tall the building is and how big
@@ -84,6 +86,8 @@ def apply_layout_to_tower(tower, engine_tower, name):
     footprint = engine_tower.get("footprint_sqm")
     if footprint:
         tower["footprint_area"] = round(float(footprint), 2)
+    if (tower.get("parking") or {}).get("basement_only"):
+        update_tower_parking(tower, policy)
 
     # Stored plans above the new top floor describe floors that no longer exist. Leaving
     # them behind lets the planner open floor 22 of a 14-storey building.
@@ -94,7 +98,7 @@ def apply_layout_to_tower(tower, engine_tower, name):
     return tower
 
 
-def towers_from_site_layout(existing, engine_towers):
+def towers_from_site_layout(existing, engine_towers, policy=None):
     """Reconcile the project's tower list with what the site layout engine packed.
 
     The engine is the authority on how many buildings the land takes and how many floors
@@ -113,11 +117,11 @@ def towers_from_site_layout(existing, engine_towers):
         if idx is None and i < len(existing) and i not in taken:
             idx = i
         if idx is None:
-            tower = default_tower(name)
+            tower = default_tower(name, index=i, policy=policy)
         else:
             taken.add(idx)
             tower = dict(existing[idx])
-        out.append(apply_layout_to_tower(tower, et, name))
+        out.append(apply_layout_to_tower(tower, et, name, policy))
     return out
 
 
@@ -146,6 +150,19 @@ def default_project(name, client, location, plot_reference, owner_id, latitude=N
         lat, lng = base_lat + jy, base_lng + jx
     _city = iscodes.city_reference(next((c for c in iscodes.CITIES if c.lower() in (location or "").lower()), location))
     d_lat, d_lng = 0.00045, 0.00072  # ~100 m × 160 m box around the location centre
+    residential_policy = new_residential_policy()
+    initial_tower = default_tower(policy=residential_policy)
+    parking = {
+        **parking_summary([initial_tower], basement_levels=2),
+        "ratio_per_unit": 1.0,
+        "visitor_pct": 10.0,
+        "ev_pct": 20.0,
+        "accessible_pct": 2.0,
+        "visitor_provided": 8,
+        "ev_provided": 16,
+        "accessible_provided": 2,
+        "ramp": {"slope_pct": 10.0, "width": 3.6, "turning_radius": 6.0},
+    }
     return {
         "name": name,
         "client": client,
@@ -166,22 +183,11 @@ def default_project(name, client, location, plot_reference, owner_id, latitude=N
             "boundary_points": [],
             "is_placeholder": True,
         },
-        "towers": [default_tower()],
+        "towers": [initial_tower],
+        "residential_policy": residential_policy,
+        "unit_mix": summarize_units([initial_tower]),
         "society_amenities": default_society_amenities(),
-        "parking": {
-            "basement_levels": 2,
-            "basement_area_per_level": 1000.0,
-            "ground_area": 400.0,
-            "ratio_per_unit": 1.5,
-            "area_per_slot": 30.0,
-            "visitor_pct": 10.0,
-            "ev_pct": 20.0,
-            "accessible_pct": 2.0,
-            "visitor_provided": 8,
-            "ev_provided": 16,
-            "accessible_provided": 2,
-            "ramp": {"slope_pct": 10.0, "width": 3.6, "turning_radius": 6.0},
-        },
+        "parking": parking,
         "config": {
             "wall_thickness_factor": 0.10,
             "common_area_loading": 0.25,

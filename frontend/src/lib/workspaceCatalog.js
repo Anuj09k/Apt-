@@ -16,11 +16,10 @@ export const WORKSPACE_CATALOG = [
   ] },
   { id: "design", label: "Design", icon: Building2, modules: [
     { id: "autonomous-studio", name: "Quick Generation", icon: Sparkles, note: "Rapid concept schemes from project constraints.", parameters: [input("Generation brief", "text", "Site and scheme constraints."), estimate("Generated scheme", "concept", "Candidate layout, not an approved construction drawing.") ] },
-    { id: "planning", name: "Apartment Planning", icon: Building2, note: "Unit mix, floor plates and circulation.", parameters: [
-      input("Floor count & floor height", "floors / m", "Tower-level inputs."), input("Unit mix, carpet & balcony area", "units / m²", "Per-unit areas multiplied by units and floors."), input("Corridors, stairs & lifts", "m / count", "Circulation dimensions and vertical cores."), computed("Unit yield & Vastu checks", "count / checks", "Generated layouts and configured rules.") ] },
     { id: "parking", name: "Parking", icon: Car, note: "Demand, capacity and accessible provision.", parameters: [
       input("ECS norm & visitor allocation", "ECS / %", "Authority-specific demand settings."), input("Basement levels & bay area", "levels / m²", "Parking capacity inputs."), input("Ramp slope, width & turning radius", "% / m", "Ramp geometry checks."), computed("Required, provided & EV bays", "bays", "Demand rounded up to whole parking spaces.") ] },
-    { id: "studio", name: "Generative Studio", icon: Shapes, note: "Facade, landscape and parking alternatives.", parameters: [input("Facade & landscape constraints", "settings", "Project-specific generation inputs."), estimate("Design alternatives", "concept", "Parametric options requiring design review.") ] },
+    { id: "studio", name: "Generative Studio", icon: Shapes, note: "Apartment planning, AI floor plans, facade, landscape and parking generation.", parameters: [
+      input("Tower floors, unit mix & circulation", "floors / units / m", "Project tower, apartment and core inputs."), computed("AI floor plans & Vastu checks", "plans / checks", "Saved tower floor layouts shared with Reports."), input("Facade, landscape & parking constraints", "settings", "Project-specific generation inputs."), estimate("Design alternatives", "concept", "Generated options requiring design review.") ] },
     { id: "3d", name: "3D Visualisation", icon: Box, note: "Inspect the spatial arrangement of the scheme.", parameters: [input("Tower position & rotation", "m / °", "Placement within the project site."), computed("Massing & floor stacking", "model", "Visual geometry from current project data.") ] },
   ] },
   { id: "engineering-bim", label: "Engineering & BIM", icon: Ruler, modules: [

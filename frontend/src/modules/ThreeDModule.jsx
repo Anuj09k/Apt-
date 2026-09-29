@@ -202,63 +202,22 @@ const shapeFromPolygon = (rings) => {
   return shape;
 };
 
-/** The Park — the landscaped open space the engine reserved, marked in pink. */
+/** The shared community green / play area reserved by the site planner. */
 const ParkGround = ({ rings }) =>
   (rings || []).map((pts, i) =>
     pts.length < 3 ? null : (
       <group key={`park-${i}`}>
         <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, 0.06, 0]} receiveShadow>
           <shapeGeometry args={[new THREE.Shape(pts.map(([x, z]) => new THREE.Vector2(x, z)))]} />
-          <meshStandardMaterial color="#F4C2C2" roughness={0.85} side={THREE.DoubleSide} />
+          <meshStandardMaterial color="#86EFAC" roughness={0.85} side={THREE.DoubleSide} />
         </mesh>
-        <Line points={[...pts, pts[0]].map(([x, z]) => [x, 0.07, z])} color="#C77B8B" lineWidth={2} />
+        <Line points={[...pts, pts[0]].map(([x, z]) => [x, 0.07, z])} color="#15803D" lineWidth={2} />
       </group>
     )
   );
 
-const getDrivewayCenterline = (pts) => {
-  if (!pts || pts.length < 4) return null;
-  const p0 = pts[0];
-  const p1 = pts[1];
-  const p2 = pts[2];
-  const p3 = pts[3];
-  const d01 = Math.hypot(p1[0] - p0[0], p1[1] - p0[1]);
-  const d12 = Math.hypot(p2[0] - p1[0], p2[1] - p1[1]);
-  if (d12 > d01) {
-    return [
-      [(p0[0] + p1[0]) / 2, 0.17, (p0[1] + p1[1]) / 2],
-      [(p3[0] + p2[0]) / 2, 0.17, (p3[1] + p2[1]) / 2],
-    ];
-  }
-  return [
-    [(p0[0] + p3[0]) / 2, 0.17, (p0[1] + p3[1]) / 2],
-    [(p1[0] + p2[0]) / 2, 0.17, (p1[1] + p2[1]) / 2],
-  ];
-};
-
 /** Asphalt Black Roads with White Dotted/Dashed Centerlines and Concrete Kerbs */
-const AsphaltRoadLayer = ({ rings, y = 0.14 }) => {
-  const centerlines = useMemo(() => {
-    const lines = [];
-    // Centrelines are set out from each polygon's OUTER ring; a hole has no centreline.
-    (rings || []).map((poly) => poly?.[0] || []).forEach((pts) => {
-      if (pts.length === 4 || pts.length === 5) {
-        const cl = getDrivewayCenterline(pts);
-        if (cl) lines.push(cl);
-      } else if (pts.length > 5) {
-        for (let i = 0; i < pts.length - 1; i += 2) {
-          const a = pts[i];
-          const b = pts[(i + 1) % pts.length];
-          lines.push([
-            [a[0], 0.17, a[1]],
-            [b[0], 0.17, b[1]],
-          ]);
-        }
-      }
-    });
-    return lines;
-  }, [rings]);
-
+const AsphaltRoadLayer = ({ rings, centrelines = [], y = 0.14 }) => {
   return (
     <group>
       {/* 1. Deep Asphalt Charcoal Black Surface */}
@@ -280,10 +239,10 @@ const AsphaltRoadLayer = ({ rings, y = 0.14 }) => {
       )}
 
       {/* 3. White Dotted/Dashed Centerline */}
-      {centerlines.map(([p1, p2], i) => (
+      {centrelines.map((points, i) => (
         <Line
           key={`centerline-${i}`}
-          points={[p1, p2]}
+          points={points.map(([x, z]) => [x, y + 0.04, z])}
           color="#FFFFFF"
           lineWidth={2.5}
           dashed
@@ -792,7 +751,7 @@ export default function ThreeDModule({ project, analysis, update, readOnly, proj
 
     const usingEngine = !!(engine && engine.length > 0);
     const towers = usingEngine ? engine : fallback;
-    const site = engineSiteShapes(siteLayout, pts, bounds);
+    const site = engineSiteShapes(siteLayout);
 
     return {
       origin, pts, bounds,
@@ -1131,16 +1090,27 @@ export default function ThreeDModule({ project, analysis, update, readOnly, proj
                 </>
               )}
 
-              {/* Reserved circulation, parking, central park and integrated clubhouse from site engine */}
+              {/* Reserved circulation, parking, community green and clubhouse from the site engine */}
               {scene.site && view !== "floorplan" && layers.site && (
                 <>
-                  {/* The Park, in pink. Everything green underneath it is simply land with
-                      no road and no building on it. */}
+                  {/* Shared community green / play area. */}
                   <ParkGround rings={scene.site.green} />
                   {/* Asphalt black access ring road with white dashed centerlines */}
-                  <AsphaltRoadLayer rings={scene.site.ring} y={0.13} isRing={true} />
+                  <AsphaltRoadLayer rings={scene.site.ring} centrelines={scene.site.ringCentrelines} y={0.13} />
                   {/* Asphalt black internal spine driveways with white dashed centerlines */}
-                  <AsphaltRoadLayer rings={scene.site.driveways} y={0.14} />
+                  <AsphaltRoadLayer rings={scene.site.driveways} centrelines={scene.site.drivewayCentrelines} y={0.14} />
+                  {scene.site.pedestrianLinks.map((link, i) => (
+                    <Line
+                      key={`pedestrian-link-${i}`}
+                      points={link.points.map(([x, z]) => [x, 0.1, z])}
+                      color="#0F766E"
+                      lineWidth={2}
+                      dashed
+                      dashScale={1.2}
+                      dashSize={1.5}
+                      gapSize={1}
+                    />
+                  ))}
                   {/* Surface parking bays — one merged mesh, not one mesh per bay: the
                       engine regularly emits 200+ bays and 200+ draw calls froze the
                       scene on every rebuild. */}
@@ -1285,7 +1255,7 @@ export default function ThreeDModule({ project, analysis, update, readOnly, proj
               </div>
               {scene.site?.parkArea != null && (
                 <div className="flex justify-between" data-testid="three-park-area">
-                  <span>Park</span>
+                  <span>Community green</span>
                   <span className="font-mono">{num(scene.site.parkArea, 0)} m²</span>
                 </div>
               )}

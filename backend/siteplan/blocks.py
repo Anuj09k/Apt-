@@ -1,25 +1,9 @@
-"""Straight-line circulation geometry.
+"""Site-aware road and development geometry.
 
-Roads on a site plan are built, not grown: a contractor sets out a straight centreline and
-kerbs it. The previous reservation derived the access ring from `envelope.buffer(-w)`,
-which traces the plot boundary — so on any plot that is not a rectangle the "road" came
-out curved, kinked, or split into slivers, and the internal spines were clipped polygons
-rather than corridors. Nothing downstream could even name a centreline for it.
-
-This module reserves circulation the way it is actually laid out:
-
-  1. Find the plot's own grid — the principal axis of the buildable envelope — and work in
-     it, so the network is orthogonal to the site rather than to north.
-  2. Inside that frame, take the largest axis-aligned rectangle that fits in the envelope.
-     That rectangle is the development block; every road is a rectangle cut from it, so
-     straightness holds by construction rather than by tolerance.
-  3. The perimeter ring is four straight bands (N/S/E/W) around the block; the internal
-     spines are full-span bands across the core. Each corridor carries its own centreline
-     so the renderer never has to reverse-engineer one from a polygon.
-  4. Land inside the envelope but outside the block is not packable — it is the leftover
-     landscape strip, and it is returned as such so it can be planted rather than built on.
-
-Everything is produced in the rotated frame and rotated back once, at the end.
+Regular rectangular envelopes use efficient orthogonal blocks. Irregular parcels keep
+their full buildable shape: a perimeter road follows the inset boundary and curved
+internal drives connect back into it. Both layouts preserve explicit road footprints and
+centrelines, so the packer and renderers consume the same connected circulation plan.
 """
 import math
 from dataclasses import dataclass, field
@@ -45,8 +29,8 @@ _REFINE_STEPS = 24
 
 @dataclass
 class RoadCorridor:
-    """One straight road. `polygon` is always a rectangle; `centreline` is its axis."""
-    polygon: Polygon
+    """One road footprint and its set-out centreline."""
+    polygon: BaseGeometry
     centreline: LineString
     width_m: float
     kind: str          # "ring" | "spine"
@@ -362,6 +346,140 @@ def _rotate_corridor(c: RoadCorridor, angle: float, origin) -> RoadCorridor:
                         width_m=c.width_m, kind=c.kind, label=c.label)
 
 
+def _line_parts(geom: BaseGeometry) -> List[LineString]:
+    """Return the connected linear pieces of a Shapely line or collection."""
+    if geom is None or geom.is_empty:
+        return []
+    if geom.geom_type == "LineString" or geom.geom_type == "LinearRing":
+        return [LineString(geom.coords)]
+    return [line for part in getattr(geom, "geoms", []) for line in _line_parts(part)]
+
+
+def _curvilinear_network(envelope: BaseGeometry, ring_width: float, ring_offset: float,
+                         driveway_width: float, reach: float, central_min: float,
+                         quad_segs: int, min_region_area: float) -> BlockNetwork:
+    """Reserve roads against an irregular envelope without discarding its side parcels."""
+    warnings: List[str] = []
+    outer = envelope.buffer(-ring_offset, quad_segs=quad_segs) if ring_offset > 0 else envelope
+    if outer.is_empty and ring_offset > 0:
+        warnings.append(f"The {ring_offset:g} m road offset consumes the usable site; "
+                        "the offset was ignored.")
+        outer = envelope
+
+    outer_parts = [p for p in polygons_of(outer) if p.area >= min_region_area]
+    if not outer_parts:
+        return BlockNetwork(warnings=["No usable area remains inside the road offset."])
+
+    core = outer.buffer(-ring_width, quad_segs=quad_segs) if ring_width > 0 else outer
+    if core.is_empty:
+        ring_geom = outer
+        warnings.append(f"The {ring_width:g} m perimeter road uses the full buildable site; "
+                        "no tower area remains inside it.")
+    else:
+        ring_geom = outer.difference(core) if ring_width > 0 else Polygon()
+
+    ring: List[RoadCorridor] = []
+    if not ring_geom.is_empty and ring_width > 0:
+        for i, part in enumerate(outer_parts):
+            inside = part.buffer(-ring_width, quad_segs=quad_segs)
+            band = part.difference(inside) if not inside.is_empty else part
+            mid = part.buffer(-ring_width / 2.0, quad_segs=quad_segs)
+            lines = _line_parts(mid.boundary if not mid.is_empty else part.boundary)
+            for j, line in enumerate(lines):
+                ring.append(RoadCorridor(
+                    polygon=band, centreline=line, width_m=round(ring_width, 3),
+                    kind="ring", label=f"perimeter {i + 1}.{j + 1}"))
+
+    drives: List[RoadCorridor] = []
+    core_parts = [p for p in polygons_of(core) if p.area >= min_region_area]
+    for part_index, part in enumerate(core_parts):
+        angle = principal_angle(part)
+        pivot = part.centroid
+        local = rotate(part, -angle, origin=pivot)
+        minx, miny, maxx, maxy = local.bounds
+        long_span, short_span = maxx - minx, maxy - miny
+        if long_span < short_span:
+            # Degenerate principal-axis estimates can occur on near-round parcels.
+            angle = (angle + 90.0) % 180.0
+            local = rotate(part, -angle, origin=pivot)
+            minx, miny, maxx, maxy = local.bounds
+            long_span, short_span = maxx - minx, maxy - miny
+
+        count = 0
+        if driveway_width > 0 and reach > 0 and short_span > 2.0 * reach:
+            count = min(max(math.ceil(short_span / (2.0 * reach)) - 1, 0), 8)
+        if (driveway_width > 0 and count == 0 and central_min > 0
+                and min(long_span, short_span) >= central_min):
+            count = 1
+        if count <= 0:
+            continue
+
+        used = 0
+        for road_index in range(count):
+            y = miny + short_span * (road_index + 1) / (count + 1)
+            scan = LineString([(minx - 1.0, y), (maxx + 1.0, y)])
+            intersections = _line_parts(local.intersection(scan))
+            if not intersections:
+                continue
+            base = max(intersections, key=lambda segment: segment.length)
+            x0, _, x1, _ = base.bounds
+            if x1 - x0 < max(driveway_width * 2.0, 8.0):
+                continue
+
+            amplitude = min(short_span * 0.10, 18.0)
+            candidates = [amplitude, amplitude * 0.65, amplitude * 0.3, 0.0]
+            accepted = None
+            for bend in candidates:
+                points = []
+                for step in range(33):
+                    t = step / 32.0
+                    x = x0 + (x1 - x0) * t
+                    yy = y + bend * math.sin(2.0 * math.pi * t)
+                    points.append((x, yy))
+                line_local = LineString(points)
+                road_local = line_local.buffer(
+                    driveway_width / 2.0, cap_style="square", join_style="round",
+                    quad_segs=quad_segs)
+                line_world = rotate(line_local, angle, origin=pivot)
+                road_world = rotate(road_local, angle, origin=pivot)
+                if not outer.buffer(1e-6).covers(road_world):
+                    continue
+                if not ring_geom.is_empty and not road_world.intersects(ring_geom.buffer(0.05)):
+                    continue
+                accepted = (line_world, road_world)
+                break
+
+            if accepted is None:
+                continue
+            line_world, road_world = accepted
+            used += 1
+            drives.append(RoadCorridor(
+                polygon=road_world, centreline=line_world,
+                width_m=round(driveway_width, 3), kind="spine",
+                label=f"curved drive {part_index + 1}.{used}"))
+
+        if used < count:
+            warnings.append(f"Only {used} of {count} planned internal drive(s) fit the "
+                            f"irregular parcel's road and setback constraints.")
+        elif used:
+            warnings.append(f"Added {used} curved internal drive(s) connected to the "
+                            "perimeter circulation road.")
+
+    drive_geom = unary_union([c.polygon for c in drives]) if drives else Polygon()
+    core_area = core.difference(drive_geom) if not drive_geom.is_empty else core
+    leftover = envelope.difference(outer) if not envelope.equals(outer) else Polygon()
+    return BlockNetwork(
+        blocks=outer_parts,
+        core=core,
+        residual=core_area,
+        ring=ring,
+        spines=drives,
+        leftover=leftover,
+        angle_deg=round(principal_angle(envelope), 3),
+        warnings=warnings,
+    )
+
+
 # ---------------------------------------------------------------- entry point
 def _serve_block(rect: Polygon, ring_width: float, driveway_width: float,
                  reach: float, central_spine_min_core: float, index: int,
@@ -446,14 +564,28 @@ def build_network(envelope: BaseGeometry, ring_width: float, ring_offset: float,
                   central_spine_min_core: float = 0.0,
                   safety: float = 0.02, max_blocks: int = 3,
                   min_block_area: float = 900.0,
-                  min_region_area: float = 25.0) -> Optional[BlockNetwork]:
-    """Envelope -> development blocks + straight ring and spine corridors.
+                  min_region_area: float = 25.0,
+                  quad_segs: int = 16) -> Optional[BlockNetwork]:
+    """Envelope -> site-adapted blocks and connected road corridors.
 
-    Returns None when no rectangle of any use fits inside the envelope; the caller decides
-    whether that is a warning or an error.
+    Returns None only when the input envelope is empty; the caller decides how to handle
+    a site with no remaining packable area.
     """
     if envelope is None or envelope.is_empty:
         return None
+    parts = polygons_of(envelope)
+    if len(parts) != 1:
+        return _curvilinear_network(envelope, ring_width, ring_offset,
+                                    driveway_width, max_distance_to_road,
+                                    central_spine_min_core, quad_segs,
+                                    min_region_area)
+    mrr = parts[0].minimum_rotated_rectangle
+    rectangularity = parts[0].area / mrr.area if mrr.area > 0 else 0.0
+    if rectangularity < 0.992:
+        return _curvilinear_network(envelope, ring_width, ring_offset,
+                                    driveway_width, max_distance_to_road,
+                                    central_spine_min_core, quad_segs,
+                                    min_region_area)
     pivot = envelope.centroid
 
     # Try a handful of site grids and keep the one that leaves the least land unbuildable.
@@ -520,7 +652,7 @@ def corridors_to_dict(corridors: Sequence[RoadCorridor], frame) -> List[dict]:
     The centreline is the point of this: a renderer that has to infer one from a polygon
     gets it wrong the moment the polygon is not the rectangle it assumed.
     """
-    from .frame import geom_to_latlng   # local import keeps frame.py dependency-free
+    from .frame import geom_to_latlng, geom_to_local   # local import keeps frame.py dependency-free
 
     out = []
     for c in corridors:
@@ -531,8 +663,7 @@ def corridors_to_dict(corridors: Sequence[RoadCorridor], frame) -> List[dict]:
             "width_m": c.width_m,
             "length_m": round(c.centreline.length, 2),
             "polygons": geom_to_latlng(c.polygon, frame),
-            "polygons_local": [[[[round(x, 3), round(y, 3)]
-                                 for x, y in c.polygon.exterior.coords[:-1]]]],
+            "polygons_local": geom_to_local(c.polygon),
             "centreline_local": line_local,
             "centreline": [frame.to_latlng(x, y) for x, y in c.centreline.coords],
         })

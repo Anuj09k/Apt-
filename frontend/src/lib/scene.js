@@ -41,7 +41,7 @@ export const localBounds = (pts) => {
 /** Engine version this build of the frontend understands. Must match backend
  *  siteplan/version.py — a layout stamped with anything else was produced by different
  *  geometry code and is not safe to render against the current boundary. */
-export const ENGINE_VERSION = 3;
+export const ENGINE_VERSION = 4;
 
 /** Digest of a plot ring.
  *
@@ -209,7 +209,7 @@ export const spineTowerLayout = (projectTowers = [], poly = [], bounds = null) =
  *  fallback exists for towers (better than an empty plot while the engine runs), not for
  *  roads that would be drawn where a real road could never be built.
  */
-export const engineSiteShapes = (siteLayout, pts = [], bounds = null) => {
+export const engineSiteShapes = (siteLayout) => {
   const hasRoads =
     siteLayout?.roads?.ring_polygons_local?.length ||
     siteLayout?.roads?.driveway_polygons_local?.length;
@@ -245,22 +245,6 @@ export const engineSiteShapes = (siteLayout, pts = [], bounds = null) => {
       })
       .filter(Boolean);
 
-    const b = bounds || (pts.length >= 3 ? localBounds(pts) : { cx: 0, cz: 0, width: 80, depth: 80 });
-
-    if (!amenities.some((a) => a.key === "clubhouse" || a.key === "mega")) {
-      amenities.push({
-        key: "clubhouse",
-        name: "Integrated Community Clubhouse",
-        height: 10.5,
-        floors: 3,
-        x: b.cx + Math.min(b.width * 0.22, 28),
-        z: b.cz + Math.min(b.depth * 0.15, 18),
-        w: 24,
-        d: 16,
-        rotationY: 0,
-      });
-    }
-
     // No invented oval here: if the engine reserved no landscaped area, drawing a park
     // in the middle of the site would paint green over whatever it actually built.
     const green = toSceneRings(siteLayout?.green?.polygons_local);
@@ -269,6 +253,18 @@ export const engineSiteShapes = (siteLayout, pts = [], bounds = null) => {
       amenities,
       ring: toScenePolys(siteLayout?.roads?.ring_polygons_local),
       driveways: toScenePolys(siteLayout?.roads?.driveway_polygons_local),
+      ringCentrelines: (siteLayout?.roads?.corridors || [])
+        .filter((c) => c.kind === "ring")
+        .map((c) => (c.centreline_local || []).map(([x, y]) => [x, -y])),
+      drivewayCentrelines: (siteLayout?.roads?.corridors || [])
+        .filter((c) => c.kind === "spine")
+        .map((c) => (c.centreline_local || []).map(([x, y]) => [x, -y])),
+      pedestrianLinks: (siteLayout?.pedestrian_links || [])
+        .filter((link) => link.path_local?.length >= 2)
+        .map((link) => ({
+          label: link.label,
+          points: link.path_local.map(([x, y]) => [x, -y]),
+        })),
       bays: toSceneRings(siteLayout?.surface_parking?.polygons_local),
       green,
       // Area of the reserved landscaped space, so the panel names the pink region on

@@ -18,7 +18,6 @@ import { Button } from "../components/ui/button";
 const GisModule = lazy(() => import("../modules/GisModule"));
 const ThreeDModule = lazy(() => import("../modules/ThreeDModule"));
 const EngineeringModule = lazy(() => import("../modules/EngineeringModule"));
-const PlanningModule = lazy(() => import("../modules/PlanningModule"));
 const CalculationsModule = lazy(() => import("../modules/CalculationsModule"));
 const ParkingModule = lazy(() => import("../modules/ParkingModule"));
 const BoqModule = lazy(() => import("../modules/BoqModule"));
@@ -39,7 +38,7 @@ const UrbanSustainabilityModule = lazy(() => import("../modules/UrbanSustainabil
 
 const COMPONENTS = {
   plot: SiteModule, gis: GisModule, township: TownshipModule,
-  "autonomous-studio": AutonomousStudioModule, planning: PlanningModule, parking: ParkingModule,
+  "autonomous-studio": AutonomousStudioModule, parking: ParkingModule,
   studio: GenerativeStudioModule, "3d": ThreeDModule, calculations: CalculationsModule,
   engineering: EngineeringModule, bim: BimModule, "digital-twin": DigitalTwinModule,
   boq: BoqModule, cost: CostModule, procurement: ProcurementMarketModule,
@@ -67,7 +66,7 @@ const GROUP_OF = Object.fromEntries(
 const GROUP_LABEL = Object.fromEntries(GROUPS.map(([g, label]) => [g, label]));
 
 const EDITABLE = [
-  "name", "client", "location", "plot_reference", "status", "plot", "towers", "parking", "config",
+  "name", "client", "location", "plot_reference", "status", "plot", "towers", "parking", "residential_policy", "config",
   "quantity_ratios", "rates", "labour_rates", "equipment_rates", "utility_config", "compliance_rules",
   "engineering", "finance", "solar", "cost_adders", "wastage_pct",
   // The programme config holds the user's per-task edits; without it a reload silently

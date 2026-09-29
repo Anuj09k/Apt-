@@ -1,10 +1,48 @@
 import axios from "axios";
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "http://127.0.0.1:8000";
+const LOCAL_API_BASE = "http://127.0.0.1:8000/api";
+
+function fallbackApiBase() {
+  // Production is served behind the API reverse proxy, so an unset backend URL
+  // must stay same-origin. Local development runs FastAPI on port 8000 by default.
+  return process.env.NODE_ENV === "production" ? "/api" : LOCAL_API_BASE;
+}
+
+function normalizeApiBase(configuredUrl) {
+  const value = typeof configuredUrl === "string" ? configuredUrl.trim() : "";
+  if (!value) return fallbackApiBase();
+
+  // Relative API paths are useful when the frontend and backend share an origin.
+  if (value.startsWith("/")) {
+    const path = value.replace(/\/+$/, "");
+    return /\/api$/i.test(path) ? path : `${path}/api`;
+  }
+
+  // Accept common local settings such as `localhost:8000`, while rejecting
+  // malformed explicit schemes before Axios reaches the browser URL parser.
+  const hasHttpScheme = /^https?:\/\//i.test(value);
+  const looksLikeHostAndPort = /^[\w.-]+:\d+(?:\/|$)/.test(value);
+  const hasOtherScheme = /^[a-z][a-z\d+.-]*:/i.test(value) && !looksLikeHostAndPort;
+  if (hasOtherScheme && !hasHttpScheme) return fallbackApiBase();
+
+  const candidate = hasHttpScheme || hasOtherScheme ? value : `http://${value}`;
+  try {
+    const url = new URL(candidate);
+    if (!["http:", "https:"].includes(url.protocol) || !url.hostname) {
+      return fallbackApiBase();
+    }
+
+    const path = url.pathname.replace(/\/+$/, "");
+    const apiPath = /\/api$/i.test(path) ? path : `${path}/api`;
+    return `${url.origin}${apiPath}`;
+  } catch {
+    return fallbackApiBase();
+  }
+}
 
 // Exported for the streaming chat, which uses fetch rather than axios: EventSource cannot
 // POST, and the conversation has to go up with the request.
-export const API_BASE = `${BACKEND_URL}/api`;
+export const API_BASE = normalizeApiBase(process.env.REACT_APP_BACKEND_URL);
 
 export const api = axios.create({
   baseURL: API_BASE,
@@ -30,6 +68,30 @@ export function apiError(detail, fallback = "Something went wrong. Please try ag
     return detail.map((e) => (e && typeof e.msg === "string" ? e.msg : JSON.stringify(e))).join(" ");
   if (detail && typeof detail.msg === "string") return detail.msg;
   return String(detail);
+}
+
+/** Turn a thrown request error into a sentence the person reading it can act on.
+ *
+ *  Axios reports "Network Error" whenever the browser received no response at all, which
+ *  covers a refused CORS preflight, a wrong API host, and a backend that is still waking
+ *  up. All three look identical to the user and none of them are a wrong password, so say
+ *  which of the two it is rather than passing the library's wording through.
+ */
+export function requestErrorMessage(err, fallback = "Something went wrong. Please try again.") {
+  if (err?.response) {
+    const detail = err.response.data?.detail;
+    if (detail != null) return apiError(detail, fallback);
+    // No detail to quote (an unhandled 500 returns plain text, not our JSON shape), so
+    // quote the status instead of dropping the only clue the user has.
+    return err.response.status
+      ? `The server rejected the request (HTTP ${err.response.status}).`
+      : fallback;
+  }
+  const looksUnreachable =
+    err?.code === "ERR_NETWORK" || err?.code === "ECONNABORTED" || err?.message === "Network Error";
+  if (looksUnreachable)
+    return "Cannot reach the server. It may still be starting up — wait a moment and try again.";
+  return err?.message || fallback;
 }
 
 export async function downloadFile(path, filename) {

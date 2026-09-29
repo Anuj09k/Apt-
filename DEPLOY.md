@@ -97,11 +97,11 @@ Firewall: open 22, 80 and 443, nothing else. Mongo is deliberately not published
 
 ### Route B — a managed platform (no server administration)
 
-Render, Railway and Fly.io all deploy from a Dockerfile and terminate TLS for you. The shape is the same on each:
+Render, Railway and Fly.io all deploy from a Dockerfile and terminate TLS for you. The shape is the same on each — and on Render it is already written down in `render.yaml` at the repo root, with a walk-through in `RENDER_DEPLOY.md`:
 
 1. **Database** — MongoDB Atlas free tier. Create a cluster, add a database user, allow access from anywhere (or the platform's IP range), and copy the connection string into `MONGO_URL`.
-2. **Backend service** — deploy from `backend/Dockerfile`, set every variable from `.env.example`, expose port 8000.
-3. **Frontend service** — deploy from `frontend/Dockerfile`. Because the two services are on different hostnames here, the same-origin trick does not apply: set `REACT_APP_BACKEND_URL` to the backend's public URL as a **build argument**, and set `FRONTEND_URL` on the backend to the frontend's URL so CORS allows it.
+2. **Backend service** — deploy from `backend/Dockerfile` with the build context set to `backend/`. Set every variable from `.env.example`; leave `PORT` alone, the container binds to whatever the host assigns.
+3. **Frontend service** — deploy from `frontend/Dockerfile` with the context set to `frontend/`. It keeps the same-origin trick: nginx forwards `/api/*` to the host in `API_UPSTREAM`, so set that to the backend's public URL (`https://<backend-host>`) and the browser never makes a cross-origin request. Setting `REACT_APP_BACKEND_URL` instead makes the browser call the API directly, which then requires `FRONTEND_URL` on the backend to match the frontend's origin character for character — that mismatch is the usual cause of "Network Error" on the sign-in screen.
 
 Route B costs more per month than Route A and gives you less control, but there is no server to patch.
 

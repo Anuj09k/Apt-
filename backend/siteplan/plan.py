@@ -16,6 +16,56 @@ from .reserve import ReserveResult, reserve
 from .version import ENGINE_VERSION, polygon_signature
 
 
+def _pedestrian_links(res: ReserveResult, towers: Sequence[TowerPlacement], frame) -> List[dict]:
+    """Connect each building and the shared green to the common road network.
+
+    These are at-grade access paths, not links between tower roofs. Candidate paths are
+    sampled around each footprint so the shortest unobstructed connection is selected.
+    """
+    from shapely.geometry import LineString
+    from shapely.ops import nearest_points
+
+    roads = res.roads
+    if roads is None or roads.is_empty:
+        return []
+
+    sources = [(tower.name, tower.polygon) for tower in towers]
+    sources.extend((amenity.name, amenity.polygon) for amenity in res.amenities)
+    if res.green is not None and not res.green.is_empty:
+        sources.append(("Community green", res.green))
+
+    allowed = res.envelope.envelope.buffer(1e-6)
+    links: List[dict] = []
+    for source_index, (label, geom) in enumerate(sources):
+        obstacles = [other for i, (_, other) in enumerate(sources) if i != source_index]
+        best = None
+        for part in polygons_of(geom):
+            boundary = part.exterior
+            length = boundary.length
+            if length <= 0:
+                continue
+            count = max(8, min(48, int(length / 8.0)))
+            for sample in range(count):
+                start = boundary.interpolate(length * sample / count)
+                _, end = nearest_points(start, roads)
+                path = LineString([(start.x, start.y), (end.x, end.y)])
+                if path.length < 0.5 or not allowed.covers(path):
+                    continue
+                if any(path.intersection(obstacle).length > 0.05 for obstacle in obstacles):
+                    continue
+                if best is None or path.length < best.length:
+                    best = path
+
+        if best is not None:
+            links.append({
+                "label": f"{label} pedestrian access",
+                "length_m": round(best.length, 2),
+                "path": [frame.to_latlng(x, y) for x, y in best.coords],
+                "path_local": [[round(x, 3), round(y, 3)] for x, y in best.coords],
+            })
+    return links
+
+
 @dataclass
 class LayoutResult:
     reservation: ReserveResult
@@ -60,6 +110,7 @@ class LayoutResult:
             },
             "method": self.method,
             "refinement": self.refinement,
+            "pedestrian_links": _pedestrian_links(res, self.towers, frame),
             # `ga_report` is the alias the site-layout UI reads for the telemetry banner.
             "ga_report": self.refinement,
             "towers": [
@@ -157,4 +208,3 @@ def plan_site(project: Dict[str, Any],
         return plan(coords, plot.get("road_edges") or [], cfg).to_dict()
     except LayoutError as exc:
         return exc.to_dict()
-

@@ -29,8 +29,7 @@ const REPORT_GROUPS = [
   ], ""],
 
   ["design", "Design", [
-    ["studio", "Generative Studio & Massing", "AI parametric massing, facade synthesis, and daylight envelope optimization"],
-    ["planning", "Apartment Planning & Vaastu", "Unit mix (1BHK/2BHK/3BHK), tower layouts, circulation cores, and Vaastu compliance audit"],
+    ["studio", "Generative Studio & Apartment Planning", "Tower and unit mix, saved AI floor layouts, Vastu checks, facade synthesis, and design alternatives"],
     ["parking", "Parking Layout & Demand", "NBC Part 4 norms, basement ramp geometry, vehicular circulation, and bay demand/supply"],
     ["3d", "3D Visualisation & Spatial Model", "Volumetric tower stacking, structural bay layout, and 3D massing documentation"],
   ], ""],

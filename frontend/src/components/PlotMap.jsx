@@ -29,13 +29,18 @@ const ClickCatcher = ({ active, onAdd }) => {
  * render through the same prop without touching this component again.
  */
 const Overlays = ({ overlays }) =>
-  overlays.flatMap((o) =>
-    (o.polygons || []).map((rings, i) => (
+  overlays.flatMap((o) => [
+    ...(o.polygons || []).map((rings, i) => (
       <Polygon key={`${o.key}-${i}`} positions={rings} pathOptions={o.style}>
         {o.label && <Tooltip sticky>{o.label}</Tooltip>}
       </Polygon>
-    ))
-  );
+    )),
+    ...(o.lines || []).map((line, i) => (
+      <Polyline key={`${o.key}-line-${i}`} positions={line.path} pathOptions={o.lineStyle || o.style}>
+        {line.label && <Tooltip sticky>{line.label}</Tooltip>}
+      </Polyline>
+    )),
+  ]);
 
 export const PlotMap = ({ coordinates = [], roadEdges = [], overlays = [], onChange, readOnly }) => {
   const [drawing, setDrawing] = useState(false);

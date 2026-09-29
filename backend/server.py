@@ -46,6 +46,10 @@ import schedule as schedlib
 import siteplan as siteplanlib
 from defaults import (default_project, default_tower, floor_layout_entry,
                       towers_from_site_layout)
+from residential_defaults import (
+    new_residential_policy, parking_summary, summarize_units, tower_index,
+    update_tower_parking, unit_key,
+)
 import aifloorplan
 import recommend as reclib
 import collaboration as collablib
@@ -394,7 +398,7 @@ async def get_project(project_id: str, user: dict = Depends(get_current_user)):
 @api.put("/projects/{project_id}")
 async def patch_project(project_id: str, body: ProjectPatch, user: dict = Depends(get_current_user)):
     current_project = await load_project(project_id, user, write=True)
-    allowed = {"name", "client", "location", "plot_reference", "status", "plot", "towers", "parking",
+    allowed = {"name", "client", "location", "plot_reference", "status", "plot", "towers", "parking", "residential_policy",
                "config", "quantity_ratios", "rates", "labour_rates", "equipment_rates",
                "utility_config", "compliance_rules", "gis", "engineering", "society_amenities",
                # The programme config carries the user's per-task edits, so it has to be
@@ -414,6 +418,35 @@ async def patch_project(project_id: str, body: ProjectPatch, user: dict = Depend
     if not updates:
         raise HTTPException(status_code=400, detail="No valid fields to update")
     validate_project({**current_project, **updates})
+    if "towers" in updates or "residential_policy" in updates:
+        towers = updates.get("towers", current_project.get("towers") or [])
+        policy = updates.get("residential_policy") or current_project.get("residential_policy")
+        if policy and isinstance(towers, list) and all(isinstance(t, dict) for t in towers):
+            towers = [dict(t) for t in towers]
+            for tower in towers:
+                unit_count = sum(max(0, int(u.get("count") or 0)) for u in (tower.get("units") or []))
+                if unit_count:
+                    tower["units_per_floor"] = unit_count
+                if (tower.get("parking") or {}).get("basement_only"):
+                    update_tower_parking(tower, policy)
+            updates["towers"] = towers
+            has_only_supported_units = all(
+                unit_key(u.get("type"))
+                for tower in towers for u in (tower.get("units") or [])
+            )
+            unit_mix = summarize_units(towers) if has_only_supported_units else []
+            if unit_mix:
+                updates["unit_mix"] = unit_mix
+            if towers and all((t.get("parking") or {}).get("basement_only") for t in towers):
+                prior_parking = dict(updates.get("parking") or current_project.get("parking") or {})
+                derived_parking = parking_summary(towers, prior_parking.get("basement_levels") or 2)
+                if "parking" in updates:
+                    for key in ("tower_allocations", "reserved_car_spaces", "reserved_bike_spaces",
+                                "optional_car_pool_capacity", "slots_required", "slots_provided"):
+                        prior_parking[key] = derived_parking[key]
+                    updates["parking"] = prior_parking
+                else:
+                    updates["parking"] = {**prior_parking, **derived_parking}
     updates["updated_at"] = now_iso()
 
     # Optimistic concurrency.
@@ -651,10 +684,20 @@ async def compare_versions(project_id: str, a: str = "", b: str = "",
 async def add_tower(project_id: str, user: dict = Depends(get_current_user)):
     proj = await load_project(project_id, user, write=True)
     towers = proj.get("towers") or []
-    tower = default_tower(f"Tower {chr(65 + len(towers))}")
+    policy = proj.get("residential_policy") or new_residential_policy()
+    next_index = max((tower_index(t.get("name"), i) for i, t in enumerate(towers)), default=-1) + 1
+    next_name = f"Tower {chr(65 + next_index)}" if next_index < 26 else f"Tower {next_index + 1}"
+    tower = default_tower(next_name, index=next_index, policy=policy)
     towers.append(tower)
+    updates = {"towers": towers, "updated_at": now_iso()}
+    updates["unit_mix"] = summarize_units(towers)
+    if all(t.get("parking") for t in towers):
+        old_parking = dict(proj.get("parking") or {})
+        updates["parking"] = {**old_parking, **parking_summary(towers, old_parking.get("basement_levels") or 2)}
+    if not proj.get("residential_policy"):
+        updates["residential_policy"] = policy
     await db.projects.update_one({"_id": oid(project_id)},
-                                 {"$inc": {"rev": 1}, "$set": {"towers": towers, "updated_at": now_iso()}})
+                                 {"$inc": {"rev": 1}, "$set": updates})
     await log_activity(project_id, user, "tower.added", tower["name"])
     fresh = await db.projects.find_one({"_id": oid(project_id)}, {"rev": 1})
     return {"tower": tower, "towers": towers, "rev": (fresh or {}).get("rev")}
@@ -686,8 +729,14 @@ async def sync_towers_from_layout(project_id: str, body: SyncTowersIn = SyncTowe
                                    "Plot & Setbacks first.")
 
     before = proj.get("towers") or []
-    towers = towers_from_site_layout(before, engine_towers)
+    policy = proj.get("residential_policy") or new_residential_policy()
+    towers = towers_from_site_layout(before, engine_towers, policy)
     updates = {"towers": towers, "updated_at": now_iso()}
+    updates["residential_policy"] = policy
+    updates["unit_mix"] = summarize_units(towers)
+    if all((t.get("parking") or {}).get("basement_only") for t in towers):
+        old_parking = dict(proj.get("parking") or {})
+        updates["parking"] = {**old_parking, **parking_summary(towers, old_parking.get("basement_levels") or 2)}
     if body.site_layout:
         updates["site_layout"] = body.site_layout
     await db.projects.update_one({"_id": oid(project_id)}, {"$inc": {"rev": 1}, "$set": updates})
@@ -2911,11 +2960,15 @@ class OneClickIn(BaseModel):
 async def one_click_generate_route(body: OneClickIn, user: dict = Depends(get_current_user)):
     res = await run_in_threadpool(autoplanning.one_click_generate, body.dict())
     if body.save:
-        doc = default_project(res["name"], user["_id"], client=res.get("client", ""), location=res.get("location", ""))
+        doc = default_project(
+            res["name"], res.get("client", ""), res.get("location", ""), "",
+            str(user["_id"]),
+        )
         doc["plot"] = res["plot"]
         doc["dev_controls"] = res["dev_controls"]
         doc["towers"] = res["towers"]
         doc["unit_mix"] = res["unit_mix"]
+        doc["residential_policy"] = res["residential_policy"]
         doc["parking"] = res["parking"]
         ins = await db.projects.insert_one(doc)
         doc["_id"] = ins.inserted_id
@@ -2935,15 +2988,13 @@ async def conversational_design_route(project_id: str, body: ConversationalIn, u
     res = await run_in_threadpool(autoplanning.conversational_design, proj, body.instruction)
     if body.save and res.get("mutations_applied"):
         up = res["updated_project"]
+        updates = {key: up[key] for key in (
+            "towers", "unit_mix", "parking", "dev_controls", "residential_policy", "achieved_metrics"
+        ) if key in up and up[key] is not None}
+        updates["updated_at"] = now_iso()
         await db.projects.update_one(
             {"_id": oid(project_id)},
-            {"$set": {
-                "towers": up.get("towers"),
-                "unit_mix": up.get("unit_mix"),
-                "parking": up.get("parking"),
-                "dev_controls": up.get("dev_controls"),
-                "updated_at": now_iso()
-            }, "$inc": {"rev": 1}}
+            {"$set": updates, "$inc": {"rev": 1}}
         )
         await log_activity(project_id, user, "project.conversational_mutation", "; ".join(res["mutations_applied"]))
     return res
@@ -3203,7 +3254,10 @@ app.include_router(api)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=list({origin.strip().rstrip("/") for origin in
-                        [os.environ["FRONTEND_URL"], *os.environ.get("CORS_ORIGINS", "").split(",")]
+                        [os.environ.get("FRONTEND_URL") or
+                         os.environ.get("RENDER_EXTERNAL_URL") or
+                         "http://localhost:3000",
+                         *os.environ.get("CORS_ORIGINS", "").split(",")]
                         if origin.strip() and origin.strip() != "*"}),
     allow_credentials=True,
     allow_methods=["*"],
@@ -3211,4 +3265,3 @@ app.add_middleware(
 )
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-

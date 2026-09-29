@@ -11,7 +11,7 @@ from typing import Any, Dict, List, Sequence, Tuple
 
 
 def _programme(unit_type: str) -> int:
-    text = (unit_type or "2bhk").lower()
+    text = (unit_type or "2bhk").lower().replace(" ", "")
     if "penthouse" in text:
         return 5
     for beds in (5, 4, 3, 2, 1):
@@ -93,7 +93,7 @@ def generate_unit(box: Dict[str, float], unit_type: str, carpet: float, entry_ed
         bath_name = "Master Ensuite Bath" if index == 0 else f"Bedroom {index + 1} Ensuite Bath"
         
         has_balcony = index == 0 or (beds >= 3 and index == 1) or beds >= 4
-        balcony_h = min(1.5, north_h * 0.3) if has_balcony else 0.0
+        balcony_h = (1.2 if index == 0 else 1.5) if has_balcony else 0.0
         
         if balcony_h > 0:
             balcony_key = "mbalcony" if index == 0 else f"balcony{index + 1}"

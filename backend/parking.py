@@ -184,7 +184,14 @@ def plan(project: Dict[str, Any], areas: Dict[str, Any]) -> Dict[str, Any]:
     basement_area = float(p.get("basement_area_per_level") or 0)
     ground_area = float(p.get("ground_area") or 0)
 
-    basement_slots = int((basement_levels * basement_area) / area_per_slot)
+    # A custom residential program records two-wheeler bays inside the basement area.
+    # Subtract their floor area before translating the remaining area into car ECS, so a
+    # bike bay cannot also be counted as an extra car space by the site-wide calculation.
+    allocations = p.get("tower_allocations") or []
+    bike_area = float((project.get("residential_policy") or {}).get("bike_space_area_sqm") or (23.0 / 3.0))
+    allocated_bike_area = sum(int(t.get("basement_bike_spaces") or 0) for t in allocations) * bike_area
+    basement_car_area = max(0.0, basement_levels * basement_area - allocated_bike_area)
+    basement_slots = int(basement_car_area / area_per_slot)
     ground_slots = int(ground_area / area_per_slot)
     shared_pool = basement_slots + ground_slots
 
@@ -204,6 +211,13 @@ def plan(project: Dict[str, Any], areas: Dict[str, Any]) -> Dict[str, Any]:
             "own_slots": own,
             "stilt_slots": int(tp.get("stilt_slots") or 0),
             "podium_slots": int(tp.get("podium_slots") or 0),
+            "residential_basement": ({
+                "car_spaces": int(tp.get("basement_car_spaces") or 0),
+                "bike_spaces": int(tp.get("basement_bike_spaces") or 0),
+                "optional_car_pool": int(tp.get("optional_car_pool_capacity") or 0),
+                "flexible_space_use": bool(tp.get("flexible_space_use")),
+                "area_sqm": round(float(tp.get("basement_area_sqm") or 0), 2),
+            } if tp.get("basement_only") else None),
         })
         own_supply.append(own)
         residual.append(max(d["cars_required"] - own, 0))

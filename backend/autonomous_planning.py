@@ -18,6 +18,10 @@ from typing import Any, Dict, List, Optional
 
 from siteplan.frame import LocalFrame
 from siteplan.devcontrols import recommend, setback_minimums
+from residential_defaults import (
+    new_residential_policy, configure_tower, update_tower_parking,
+    parking_summary, summarize_units, tower_index,
+)
 
 
 # --------------------------------------------------------------------------- 1. One-Click Generation
@@ -117,39 +121,22 @@ def one_click_generate(params: Dict[str, Any]) -> Dict[str, Any]:
             "structural_system": "RCC Shear Wall" if floors > 12 else "RCC Frame",
         })
 
-    # Unit mix definition based on tier
-    if tier == "luxury":
-        unit_mix = [
-            {"type": "3BHK Large", "carpet_area_sqm": 140.0, "share_pct": 50.0, "balcony_sqm": 18.0},
-            {"type": "4BHK Premium", "carpet_area_sqm": 210.0, "share_pct": 40.0, "balcony_sqm": 25.0},
-            {"type": "Penthouse", "carpet_area_sqm": 350.0, "share_pct": 10.0, "balcony_sqm": 45.0},
-        ]
-    elif tier == "affordable":
-        unit_mix = [
-            {"type": "1BHK Compact", "carpet_area_sqm": 38.0, "share_pct": 40.0, "balcony_sqm": 4.0},
-            {"type": "2BHK Standard", "carpet_area_sqm": 62.0, "share_pct": 50.0, "balcony_sqm": 6.0},
-            {"type": "3BHK Compact", "carpet_area_sqm": 85.0, "share_pct": 10.0, "balcony_sqm": 8.0},
-        ]
-    else:  # mid
-        unit_mix = [
-            {"type": "2BHK", "carpet_area_sqm": 72.0, "share_pct": 45.0, "balcony_sqm": 8.0},
-            {"type": "2.5BHK", "carpet_area_sqm": 92.0, "share_pct": 25.0, "balcony_sqm": 10.0},
-            {"type": "3BHK", "carpet_area_sqm": 120.0, "share_pct": 30.0, "balcony_sqm": 14.0},
-        ]
+    # Assign each building one tier in the repeating A–E residential program.
+    residential_policy = new_residential_policy()
+    for index, tower in enumerate(towers):
+        configure_tower(tower, index, policy=residential_policy)
+    unit_mix = summarize_units(towers)
 
     # Total units & parking
     units_per_tower = sum(t["units_per_floor"] * t["floors"] for t in towers)
     total_units = units_per_tower
-    parking_slots_required = int(total_units * (1.5 if tier == "luxury" else 1.0 if tier == "mid" else 0.75))
-
     parking = {
-        "slots_required": parking_slots_required,
-        "slots_provided": parking_slots_required + int(parking_slots_required * 0.1),  # 10% visitor buffer
-        "basement_levels": 2 if floors > 12 else 1,
+        **parking_summary(towers, basement_levels=2 if floors > 12 else 1),
         "podium_levels": 1 if tier == "luxury" else 0,
-        "surface_slots": min(50, int(parking_slots_required * 0.15)),
-        "ev_charging_slots": int(parking_slots_required * 0.20),
+        "surface_slots": 0,
+        "ev_charging_slots": 0,
     }
+    parking["ev_charging_slots"] = int(parking["slots_required"] * 0.20)
 
     # Basic estimated cost
     achieved_builtup = sum(t["footprint_sqm"] * t["floors"] for t in towers)
@@ -165,6 +152,7 @@ def one_click_generate(params: Dict[str, Any]) -> Dict[str, Any]:
         "dev_controls": dev_controls,
         "towers": towers,
         "unit_mix": unit_mix,
+        "residential_policy": residential_policy,
         "parking": parking,
         "achieved_metrics": {
             "total_builtup_sqm": round(achieved_builtup, 1),
@@ -190,6 +178,7 @@ def conversational_design(project: Dict[str, Any], instruction: str) -> Dict[str
     Supported mutations:
       - Change floor count: "make tower 1 16 floors", "add 2 floors"
       - Adjust unit mix: "increase 3BHK to 60%", "set 2BHK to 40%"
+      - Assign one unit type per tower: "Tower A consists only of 2BHK units"
       - Modify parking: "add 20 EV slots", "add basement level", "convert surface parking to park"
       - Adjust setbacks: "increase front setback to 12m"
       - Scale footprint: "reduce tower footprint by 10%"
@@ -217,14 +206,29 @@ def conversational_design(project: Dict[str, Any], instruction: str) -> Dict[str
             if match:
                 old_f = t.get("floors", 12)
                 t["floors"] = new_floors
+                if (t.get("parking") or {}).get("basement_only"):
+                    update_tower_parking(t, updated_project.get("residential_policy"))
                 mutations_applied.append(f"Updated {t.get('name', 'Tower')} from {old_f} to {new_floors} floors")
         updated_project["towers"] = towers
-        achieved_builtup = sum(t["footprint_sqm"] * t["floors"] for t in towers)
+        achieved_builtup = sum(
+            float(t.get("footprint_sqm") or t.get("footprint_area") or 0.0) * int(t.get("floors") or 0)
+            for t in towers
+        )
         plot_area = float((updated_project.get("plot") or {}).get("area_sqm") or 10000.0)
         metrics = dict(updated_project.get("achieved_metrics") or {})
         metrics["total_builtup_sqm"] = round(achieved_builtup, 1)
         metrics["achieved_far"] = round(achieved_builtup / max(1.0, plot_area), 2)
+        metrics["total_units"] = sum(
+            sum(int(u.get("count") or 0) for u in (t.get("units") or []))
+            * max(1, int(t.get("floors") or 1)) for t in towers
+        )
         updated_project["achieved_metrics"] = metrics
+        if towers and all((t.get("parking") or {}).get("basement_only") for t in towers):
+            old_parking = dict(updated_project.get("parking") or {})
+            updated_project["parking"] = {
+                **old_parking,
+                **parking_summary(towers, old_parking.get("basement_levels") or 2),
+            }
 
     # 2. Unit mix adjustment
     mix_match = re.search(r"(?:set|increase|change|make)?\s*([1-4]\s*bhk|penthouse)\s*(?:to|by)?\s*(\d+)%", text)
@@ -247,7 +251,271 @@ def conversational_design(project: Dict[str, Any], instruction: str) -> Dict[str
                 u["share_pct"] = round((u.get("share_pct", 0.0) / total_other) * remaining, 1)
         updated_project["unit_mix"] = unit_mix
 
+    # Tower-specific unit assignment. Only activate for instructions that describe a
+    # single/exclusive type per tower; this keeps global share instructions such as
+    # "set Tower A 16 floors and 3BHK share to 60%" from changing a tower's whole mix.
+    assignment_intent = bool(re.search(
+        r"\b(?:each|every|all)\s+towers?\b.{0,100}\b(?:only|single|specific|exclusive|houses?|consists?|comprises?)\b"
+        r"|\b(?:one|single|specific)\s+(?:and\s+only\s+)?unit\s+type\s+per\s+tower\b"
+        r"|\btower\s+[a-z0-9]+\b.{0,80}\b(?:only|entirely|exclusively|dedicated)\b",
+        text,
+    ))
+    tower_marks = list(re.finditer(r"\btower\s+([a-z]|\d+)\b", text))
+    unit_type_re = re.compile(r"\b(?P<kind>[1-5](?:\.5)?\s*bhk|penthouse|studio)\b", re.I)
+    assignments = []
+    if assignment_intent:
+        for mark_index, mark in enumerate(tower_marks):
+            clause_end = tower_marks[mark_index + 1].start() if mark_index + 1 < len(tower_marks) else len(text)
+            clause = text[mark.end():clause_end]
+            type_match = unit_type_re.search(clause)
+            if type_match:
+                assignments.append((mark.group(1), type_match.group("kind")))
+
+    repeating_default_intent = assignment_intent and bool(re.search(
+        r"\b(?:repeating\s+cycle|pattern\s+restarts?|continuing\s+sequentially)\b", text
+    ))
+    if repeating_default_intent:
+        towers = [dict(t) for t in updated_project.get("towers") or []]
+        policy = new_residential_policy()
+        for index, tower in enumerate(towers):
+            configure_tower(tower, tower_index(tower.get("name"), index), policy=policy)
+        if towers:
+            updated_project["towers"] = towers
+            updated_project["residential_policy"] = policy
+            updated_project["unit_mix"] = summarize_units(towers)
+            old_parking = dict(updated_project.get("parking") or {})
+            updated_project["parking"] = {
+                **old_parking,
+                **parking_summary(towers, old_parking.get("basement_levels") or 2),
+            }
+            metrics = dict(updated_project.get("achieved_metrics") or {})
+            metrics["total_units"] = sum(
+                sum(int(u.get("count") or 0) for u in (tower.get("units") or []))
+                * max(1, int(tower.get("floors") or 1)) for tower in towers
+            )
+            updated_project["achieved_metrics"] = metrics
+            mutations_applied.append(
+                f"Applied the repeating 1–5 BHK tower pattern, floor densities and underground parking to {len(towers)} tower(s)"
+            )
+        assignments = []
+
+    if assignments:
+        towers = [dict(t) for t in updated_project.get("towers") or []]
+        resolved = []
+        missing_targets = []
+
+        def find_tower(label: str):
+            wanted = label.lower()
+            for index, tower in enumerate(towers):
+                name = str(tower.get("name") or "").lower()
+                tower_id = str(tower.get("id") or "").lower()
+                if re.search(rf"\btower\s+{re.escape(wanted)}\b", name):
+                    return tower
+                if tower_id in {wanted, f"t{wanted}"}:
+                    return tower
+                if wanted.isalpha() and len(wanted) == 1 and index == ord(wanted) - ord("a"):
+                    return tower
+                if wanted.isdigit() and re.search(rf"\btower\s+{re.escape(wanted)}\b", name):
+                    return tower
+            return None
+
+        def unit_type_key(value: Any) -> str:
+            value = str(value or "").lower()
+            if "penthouse" in value:
+                return "penthouse"
+            if re.search(r"\bstudio\b", value):
+                return "studio"
+            match = re.search(r"([1-5](?:\.5)?)\s*bhk", value)
+            return f"{match.group(1)}bhk" if match else re.sub(r"[^a-z0-9]+", "", value)
+
+        for label, raw_kind in assignments:
+            tower = find_tower(label)
+            if tower is None:
+                missing_targets.append(f"Tower {label.upper()}")
+                continue
+            type_key = unit_type_key(raw_kind)
+            resolved.append((tower, raw_kind, type_key))
+
+        if missing_targets:
+            return {
+                "ok": False,
+                "instruction": instruction,
+                "mutations_applied": [],
+                "message": f"Couldn't find {', '.join(missing_targets)} in this project.",
+            }
+
+        old_mix = updated_project.get("unit_mix") or []
+        policy = updated_project.get("residential_policy") or new_residential_policy()
+        all_tower_units = [u for t in towers for u in (t.get("units") or [])]
+        default_areas = {
+            "studio": (35.0, 3.0), "1bhk": (48.0, 5.0), "2bhk": (72.0, 8.0),
+            "2.5bhk": (92.0, 10.0), "3bhk": (120.0, 14.0), "4bhk": (160.0, 20.0),
+            "5bhk": (210.0, 28.0), "penthouse": (280.0, 36.0),
+        }
+
+        for tower, raw_kind, type_key in resolved:
+            if type_key in policy.get("units_per_floor", {}):
+                configure_tower(
+                    tower,
+                    tower_index(tower.get("name"), towers.index(tower)),
+                    kind=type_key,
+                    policy=policy,
+                )
+                updated_project["residential_policy"] = policy
+                mutations_applied.append(
+                    f"Set {tower.get('name') or 'Tower'} to {type_key.upper()} only "
+                    f"({tower['units_per_floor']} per floor)"
+                )
+                continue
+            current_units = [dict(u) for u in tower.get("units") or []]
+            per_floor_count = sum(max(0, int(float(u.get("count") or 0))) for u in current_units)
+            if per_floor_count <= 0:
+                per_floor_count = max(1, int(tower.get("units_per_floor") or 4))
+
+            source = next((u for u in current_units if unit_type_key(u.get("type")) == type_key), None)
+            if source is None:
+                source = next((u for u in old_mix if unit_type_key(u.get("type")) == type_key), None)
+            if source is None:
+                source = next((u for u in all_tower_units if unit_type_key(u.get("type")) == type_key), None)
+            default_carpet, default_balcony = default_areas.get(type_key, (72.0, 8.0))
+            carpet_area = float(
+                (source or {}).get("carpet_area")
+                or (source or {}).get("carpet_area_sqm")
+                or default_carpet
+            )
+            balcony_area = float(
+                (source or {}).get("balcony_area")
+                or (source or {}).get("balcony_sqm")
+                or default_balcony
+            )
+            display_type = str((source or {}).get("type") or raw_kind.upper().replace(" ", ""))
+            tower_id = re.sub(r"[^a-z0-9]+", "-", str(tower.get("id") or tower.get("name") or "tower").lower()).strip("-")
+            tower["units"] = [{
+                "id": (source or {}).get("id") or f"{tower_id}-{type_key}",
+                "type": display_type,
+                "count": per_floor_count,
+                "carpet_area": carpet_area,
+                "balcony_area": balcony_area,
+            }]
+            tower["units_per_floor"] = per_floor_count
+            mutations_applied.append(
+                f"Set {tower.get('name') or 'Tower ' + tower_id} to {display_type} only ({per_floor_count} per floor)"
+            )
+
+        updated_project["towers"] = towers
+        updated_project["unit_mix"] = summarize_units(towers) or updated_project.get("unit_mix")
+        old_parking = dict(updated_project.get("parking") or {})
+        updated_project["parking"] = {
+            **old_parking,
+            **parking_summary(towers, old_parking.get("basement_levels") or 2),
+        }
+
+        # Keep the project-wide unit mix aligned with the per-tower mixes when every
+        # tower has explicit unit rows. Existing labels and area assumptions are retained.
+        if towers and all(t.get("units") for t in towers):
+            totals: Dict[str, int] = {}
+            templates: Dict[str, Dict[str, Any]] = {}
+            for item in old_mix:
+                templates.setdefault(unit_type_key(item.get("type")), dict(item))
+            for tower in towers:
+                floors = max(1, int(tower.get("floors") or 1))
+                for unit in tower.get("units") or []:
+                    key = unit_type_key(unit.get("type"))
+                    count = max(0, int(float(unit.get("count") or 0))) * floors
+                    if count:
+                        totals[key] = totals.get(key, 0) + count
+                        if key not in templates:
+                            templates[key] = {
+                                "type": unit.get("type"),
+                                "carpet_area_sqm": unit.get("carpet_area"),
+                                "balcony_sqm": unit.get("balcony_area"),
+                            }
+            total_units = sum(totals.values())
+            if total_units:
+                mix = []
+                for key, count in sorted(totals.items()):
+                    item = dict(templates.get(key) or {})
+                    item["type"] = item.get("type") or key.upper()
+                    item["share_pct"] = round(count * 100.0 / total_units, 1)
+                    mix.append(item)
+                if mix:
+                    mix[-1]["share_pct"] = round(100.0 - sum(u["share_pct"] for u in mix[:-1]), 1)
+                updated_project["unit_mix"] = mix
+
     # 3. Parking mutations
+    five_bhk_choice = None
+    four_car_option = re.search(
+        r"\b(?:4|four)\s+cars?\b.{0,30}\b(?:0|zero|no)\s+(?:two[- ]wheelers?|bikes?|scooters?)\b", text
+    )
+    three_car_option = re.search(
+        r"\b(?:3|three)\s+cars?\b.{0,30}\b(?:2|two)\s+(?:two[- ]wheelers?|bikes?|scooters?)\b", text
+    )
+    flexible_four_car_option = bool(
+        re.search(r"\b(?:4|four)\s+cars?\b", text)
+        and re.search(r"\b(?:no|zero|without|don['’]?t\s+make\s+any)\b.{0,35}\b(?:dedicated\s+)?(?:two[- ]wheelers?|bikes?|scooters?)\b", text)
+    )
+    if flexible_four_car_option:
+        four_car_option = four_car_option or re.search(r"\b(?:4|four)\s+cars?\b", text)
+    if four_car_option and not three_car_option:
+        five_bhk_choice = (4, 0, "4 car spaces, no dedicated bike bays; flexible use", True)
+    elif three_car_option and not four_car_option:
+        five_bhk_choice = (3, 2, "3 cars + 2 bikes", False)
+    elif four_car_option and re.search(r"\b(?:choose|select|use|set|default)\b.{0,50}\b4\s+cars?\b", text):
+        five_bhk_choice = (4, 0, "4 cars, no bikes", False)
+    elif three_car_option and re.search(r"\b(?:choose|select|use|set|default)\b.{0,50}\b3\s+cars?\b", text):
+        five_bhk_choice = (3, 2, "3 cars + 2 bikes", False)
+    if five_bhk_choice:
+        policy = dict(updated_project.get("residential_policy") or new_residential_policy())
+        by_type = {k: dict(v) for k, v in (policy.get("parking_by_type") or {}).items()}
+        cars, bikes, label, flexible = five_bhk_choice
+        by_type["5bhk"] = {
+            "reserved_cars_per_unit": cars,
+            "reserved_bikes_per_unit": bikes,
+            "optional_car_spaces_per_unit": 0,
+            "flexible_space_use": flexible,
+        }
+        policy["parking_by_type"] = by_type
+        policy["five_bhk_parking_option"] = label
+        towers = [dict(t) for t in updated_project.get("towers") or []]
+        for index, tower in enumerate(towers):
+            if any(unit_key(u.get("type")) == "5bhk" for u in tower.get("units") or []):
+                configure_tower(tower, tower_index(tower.get("name"), index), kind="5bhk", policy=policy)
+        updated_project["towers"] = towers
+        updated_project["residential_policy"] = policy
+        old_parking = dict(updated_project.get("parking") or {})
+        updated_project["parking"] = {
+            **old_parking,
+            **parking_summary(towers, old_parking.get("basement_levels") or 2),
+        }
+        mutations_applied.append(f"Set 5BHK basement parking to {label}")
+
+    optional_pool_match = re.search(
+        r"\b1\s*bhk\b.{0,60}\b(?:optional|purchase)\b.{0,35}\b(\d+(?:\.\d+)?)\s+(?:car\s+)?spaces?\s+per\s+unit\b",
+        text,
+    )
+    if optional_pool_match:
+        spaces = float(optional_pool_match.group(1))
+        policy = dict(updated_project.get("residential_policy") or new_residential_policy())
+        by_type = {k: dict(v) for k, v in (policy.get("parking_by_type") or {}).items()}
+        one_bhk = dict(by_type.get("1bhk") or {})
+        one_bhk["reserved_cars_per_unit"] = 0
+        one_bhk["reserved_bikes_per_unit"] = 0
+        one_bhk["optional_car_spaces_per_unit"] = spaces
+        by_type["1bhk"] = one_bhk
+        policy["parking_by_type"] = by_type
+        towers = [dict(t) for t in updated_project.get("towers") or []]
+        for index, tower in enumerate(towers):
+            if any(unit_key(u.get("type")) == "1bhk" for u in tower.get("units") or []):
+                configure_tower(tower, tower_index(tower.get("name"), index), kind="1bhk", policy=policy)
+        updated_project["towers"] = towers
+        updated_project["residential_policy"] = policy
+        old_parking = dict(updated_project.get("parking") or {})
+        updated_project["parking"] = {
+            **old_parking,
+            **parking_summary(towers, old_parking.get("basement_levels") or 2),
+        }
+        mutations_applied.append(f"Set the 1BHK optional parking pool to {spaces:g} spaces per apartment")
+
     ev_match = re.search(r"(?:add|set|increase)\s*(\d+)\s*(?:ev|electric)\s*(?:slots?|bays?)", text)
     if ev_match:
         ev_slots = int(ev_match.group(1))
@@ -283,7 +551,15 @@ def conversational_design(project: Dict[str, Any], instruction: str) -> Dict[str
         mutations_applied.append(f"Set {edge} setback to {val}m")
 
     if not mutations_applied:
-        mutations_applied.append(f"Parsed instruction '{instruction}' — no schema matching pattern. Applied general project note.")
+        return {
+            "ok": False,
+            "instruction": instruction,
+            "mutations_applied": [],
+            "message": (
+                "I couldn't match a supported change. Try naming a tower and floor count, "
+                "a BHK share percentage, per-tower unit type, EV slots, basement levels, or a setback."
+            ),
+        }
 
     return {
         "ok": True,

@@ -73,8 +73,8 @@ def _get_rooms_for_tower(tower: Dict[str, Any], floor: Optional[int] = None) -> 
         return direct_rooms, 1
 
     try:
-        import layout as layoutlib
-        rooms, _ = layoutlib.generate_floor_layout(tower, chosen_floor, 0)
+        import aifloorplan
+        rooms, _ = aifloorplan.generate_architectural_template(tower, chosen_floor)
         if rooms:
             return rooms, chosen_floor
     except Exception:
@@ -513,7 +513,7 @@ def render_floorplan_image(
 
         # Doors and door swing arcs
         target_name = r.get("door_to")
-        main_entry = r.get("main_entrance") is True
+        main_entry = r.get("main_entrance") is True or r.get("service_access") is True
         door_edge = None
         if main_entry:
             door_edge = r.get("entry_edge") or "S"
