@@ -36,7 +36,7 @@ def test_revenue_is_the_sum_of_its_unit_types(base):
 
 def test_a_per_type_rate_overrides_the_default(base):
     p, a, r = base
-    hi = F.analyse(p, a, {"sale_rate_per_sqft": 6500, "sale_rate_by_type": {"3bhk": 9000}})
+    hi = F.analyse(p, a, {"sale_rate_per_sqft": 6500, "sale_rate_by_type": {"1bhk": 9000}})
     assert hi["revenue"]["from_sales"] > r["revenue"]["from_sales"]
 
 

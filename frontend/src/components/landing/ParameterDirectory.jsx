@@ -19,7 +19,7 @@ export const ParameterDirectory = () => {
         <div><p className="landing-eyebrow">02 / Inside the workspace</p>
           <h2 className="landing-title">The parameters behind the project.</h2>
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-600">{WORKSPACE_MODULES.length} connected modules. Inputs, calculated values and estimates—clearly distinguished.</p></div>
-        <span className="font-mono text-xs text-slate-500" data-testid="parameter-directory-total">{PARAMETER_COUNT} parameter groups</span>
+        <span className="font-mono text-xs text-slate-500" data-testid="parameter-directory-total">{PARAMETER_COUNT} listed parameters</span>
       </div>
       <div className="mt-8 grid gap-3 sm:grid-cols-[1fr_180px]">
         <div className="relative"><Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
@@ -35,11 +35,11 @@ export const ParameterDirectory = () => {
           className={`rounded-md border px-3 py-2 text-xs font-medium transition-colors ${group === g.id ? "border-blue-600 bg-blue-600 text-white" : "border-slate-200 text-slate-600 hover:border-blue-400 hover:text-blue-700"}`}>{g.label}</button>)}
       </div>
       <div className="my-6 flex flex-wrap items-center justify-between gap-2 border-b pb-4">
-        <p aria-live="polite" className="font-mono text-xs text-slate-500" data-testid="parameter-result-count">{count} parameter groups · {results.length} modules</p>
+        <p aria-live="polite" className="font-mono text-xs text-slate-500" data-testid="parameter-result-count">{count} parameters · {results.length} modules</p>
         {(query || group !== "all" || kind !== "all") && <Button variant="ghost" size="sm" onClick={reset} data-testid="parameter-reset">Reset filters <X size={14} className="ml-2" /></Button>}
       </div>
-      {results.length ? <div className="grid gap-x-12 gap-y-8 md:grid-cols-2 xl:grid-cols-3">
-        {results.map(m => <article key={m.id} className="min-w-0 border-b pb-6" data-testid={`parameter-module-${m.id}`}>
+      {results.length ? <div className="columns-1 gap-x-12 sm:columns-2 xl:columns-3">
+        {results.map(m => <article key={m.id} className="mb-8 inline-block w-full min-w-0 break-inside-avoid border-b pb-6" data-testid={`parameter-module-${m.id}`}>
           <div className="flex items-start gap-3"><m.icon size={19} className="mt-0.5 shrink-0 text-blue-600" /><div><h3 className="text-sm font-semibold text-slate-900">{m.name}</h3><p className="mt-1 text-xs leading-relaxed text-slate-500">{m.note}</p></div></div>
           <ul className="mt-4 space-y-2">{m.parameters.map(p => <li key={p.name}>
             <details className="parameter-detail" data-testid={`parameter-detail-${m.id}-${p.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}>

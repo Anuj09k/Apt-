@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { motion, useMotionValueEvent, useReducedMotion, useScroll, useSpring } from "framer-motion";
+import { motion, useMotionValueEvent, useReducedMotion, useScroll } from "framer-motion";
 import { ArrowRight, ArrowDown, ArrowUpRight, Menu, X, Check, Compass, Ruler, Layers, ShieldCheck, BookOpen, AlertTriangle } from "lucide-react";
 import { Brand } from "../components/Brand";
 import { ScrollScene } from "../components/ScrollScene";
@@ -35,17 +35,15 @@ export default function Landing() {
   const [menu, setMenu] = useState(false);
   const [solid, setSolid] = useState(false);
   const { scrollYProgress, scrollY } = useScroll();
-  const progress = useSpring(scrollYProgress, { stiffness: 180, damping: 32 });
   // The ref must be measured in its owning component, after its DOM has committed.
   const { scrollYProgress: heroProgress } = useScroll({ target: hero, offset: ["start 64px", "end end"] });
-  const sceneProgress = useSpring(heroProgress, { stiffness: 260, damping: 24, mass: 0.25, restDelta: 0.0001 });
   useMotionValueEvent(scrollY, "change", value => setSolid(previous => previous === (value > 20) ? previous : value > 20));
   const href = user ? "/projects" : "/register";
   const cta = user ? "Open workspace" : "Start a project";
 
   return <div className="landing-page" data-testid="landing-page">
     <a href="#workspace" className="landing-skip" data-testid="landing-skip-content">Skip to workspace overview</a>
-    <motion.div aria-hidden="true" className="fixed inset-x-0 top-0 z-50 h-0.5 origin-left bg-blue-600" style={{ scaleX: reduced ? scrollYProgress : progress }} data-testid="landing-scroll-progress" />
+    <motion.div aria-hidden="true" className="fixed inset-x-0 top-0 z-50 h-0.5 origin-left bg-blue-600" style={{ scaleX: scrollYProgress }} data-testid="landing-scroll-progress" />
     <header className={`landing-nav ${solid ? "landing-nav-solid" : ""}`} data-testid="landing-nav">
       <div className="landing-container flex h-16 items-center justify-between gap-3">
         <Link to="/" aria-label="Aptimizer home" data-testid="landing-nav-brand"><Brand testid="landing-nav-brand-lockup" markClass="h-8 w-auto" wordClass="text-lg" /></Link>
@@ -62,7 +60,7 @@ export default function Landing() {
     <main>
       <section ref={hero} className={`landing-hero ${reduced ? "landing-hero-static" : ""}`} data-testid="landing-hero">
         <div className="landing-stage">
-          <ScrollScene progress={sceneProgress} className="landing-scene-media" />
+          <ScrollScene progress={heroProgress} className="landing-scene-media" />
           <div className="landing-hero-heading landing-container">
             <p className="landing-eyebrow">Aptimizer / Built for Indian engineering</p>
             <h1 data-testid="landing-heading">From the first line.<br /><span>To the bigger picture.</span></h1>
@@ -82,7 +80,7 @@ export default function Landing() {
               <ReactiveButton as={Link} to={href} icon={<ArrowRight size={16} />} className="mt-6" data-testid="landing-hero-primary-cta">{cta}</ReactiveButton></Reveal>
           </div>
           <div className="landing-statline" data-testid="landing-metrics">
-            {[[WORKSPACE_MODULES.length, "workspace modules"], [PARAMETER_COUNT, "parameter groups"], [6, "layout stages"], ["INR", "project costing"]].map(([value, label], i) => <div key={label} data-testid={`landing-metric-${i}`}><strong>{value}</strong><span>{label}</span></div>)}
+            {[[WORKSPACE_MODULES.length, "workspace modules"], [PARAMETER_COUNT, "listed parameters"], [6, "layout stages"], ["INR", "project costing"]].map(([value, label], i) => <div key={label} data-testid={`landing-metric-${i}`}><strong>{value}</strong><span>{label}</span></div>)}
           </div>
           <Stagger className="grid gap-7 sm:grid-cols-2 lg:grid-cols-5" step={0.04}>
             {WORKSPACE_CATALOG.map((g, i) => <RevealItem key={g.id} className="min-w-0" data-testid={`landing-workspace-group-${g.id}`}>
@@ -105,9 +103,12 @@ export default function Landing() {
       </section>
 
       <section id="modules" className="landing-section bg-white scroll-mt-16" data-testid="landing-modules">
-        <div className="landing-container grid gap-10 lg:grid-cols-[0.8fr_1.2fr]">
-          <Reveal><p className="landing-eyebrow">04 / Engineering references</p><h2 className="landing-title">A reference behind the check.</h2><p className="mt-4 max-w-sm text-sm leading-relaxed text-slate-600">Supported checks reference Indian standards and local controls. Confirm the applicable edition, amendments and project-specific requirements with your engineer.</p><BookOpen className="mt-8 text-blue-600" size={30} /></Reveal>
-          <div>{CODES.map(([name, code], i) => <div key={name} data-testid={`landing-code-${i}`} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-slate-200 py-3.5"><span className="text-sm text-slate-700">{name}</span><span className="font-mono text-xs text-blue-700">{code}</span></div>)}</div>
+        <div className="landing-container">
+          <div className="flex items-end justify-between gap-8">
+            <Reveal><p className="landing-eyebrow">04 / Engineering references</p><h2 className="landing-title">A reference behind the check.</h2><p className="mt-4 max-w-2xl text-sm leading-relaxed text-slate-600">Supported checks reference Indian standards and local controls. Confirm the applicable edition, amendments and project-specific requirements with your engineer.</p></Reveal>
+            <BookOpen className="mb-1 hidden shrink-0 text-blue-600 sm:block" size={30} />
+          </div>
+          <div className="mt-8 grid gap-x-10 sm:grid-cols-2 lg:grid-cols-3">{CODES.map(([name, code], i) => <div key={name} data-testid={`landing-code-${i}`} className="flex min-w-0 flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-t border-slate-200 py-3.5"><span className="text-sm text-slate-700">{name}</span><span className="font-mono text-xs text-blue-700">{code}</span></div>)}</div>
         </div>
       </section>
 
