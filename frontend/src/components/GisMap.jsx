@@ -51,7 +51,7 @@ export const GisMap = ({ coordinates = [], features = {}, height = 460 }) => {
 
         {LAYERS.map(([key, label, color, fill]) =>
           visible[key]
-            ? (features[key] || []).slice(0, 90).map((f) =>
+            ? (features[key] || []).slice(0, 500).map((f) =>
                 key === "transit" || f.geometry.length === 1 ? (
                   <CircleMarker key={`${key}-${f.id}`} center={f.geometry[0]} radius={5}
                     pathOptions={{ color, fillColor: color, fillOpacity: fill }}>

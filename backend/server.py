@@ -65,13 +65,13 @@ import urban_sustainability as urbansustlib
 from input_validation import ProjectInputError, validate_project
 
 client = AsyncIOMotorClient(
-    os.environ['MONGO_URL'],
+    os.environ.get('MONGO_URL', 'mongodb://localhost:27017'),
     serverSelectionTimeoutMS=5000,
     connectTimeoutMS=5000,
     socketTimeoutMS=10000,
     maxPoolSize=50,
 )
-db = client[os.environ['DB_NAME']]
+db = client[os.environ.get('DB_NAME', 'aptimizer')]
 
 # The interactive docs publish the whole API surface -- every route, every schema, every
 # field name -- to anyone who opens /docs. The endpoints behind them still enforce auth, so
@@ -91,8 +91,9 @@ async def lifespan(app: FastAPI):
         await db.projects.create_index("owner_id")
         await db.shares.create_index([("project_id", 1), ("user_id", 1)])
         await db.activity.create_index("project_id")
-        admin_email = os.environ.get("ADMIN_EMAIL", "admin@aptimizer.com").lower()
-        admin_password = os.environ.get("ADMIN_PASSWORD", "Aptimizer123!")
+        admin_email = os.environ.get("ADMIN_EMAIL", "admin@aptimizer.com").strip().lower()
+        admin_password = os.environ.get("ADMIN_PASSWORD", "Aptimizer@123")
+        await db.login_attempts.delete_many({"identifier": {"$regex": f":{re.escape(admin_email)}$"}})
         existing = await db.users.find_one({"email": admin_email})
         if not existing:
             await db.users.insert_one({
@@ -100,9 +101,13 @@ async def lifespan(app: FastAPI):
                 "password_hash": authlib.hash_password(admin_password), "role": "admin",
                 "org": "Aptimizer", "contact": "", "created_at": now_iso()})
             logger.info("Seeded admin user %s", admin_email)
-        elif not authlib.verify_password(admin_password, existing.get("password_hash", "")):
-            await db.users.update_one({"email": admin_email},
-                                      {"$set": {"password_hash": authlib.hash_password(admin_password)}})
+        elif (not authlib.verify_password(admin_password, existing.get("password_hash", ""))
+              or existing.get("role") != "admin"):
+            await db.users.update_one(
+                {"email": admin_email},
+                {"$set": {"password_hash": authlib.hash_password(admin_password), "role": "admin"}},
+            )
+            logger.info("Updated admin credentials for %s", admin_email)
     except Exception as e:
         logger.warning("Startup index/admin verification encountered issue: %s", e)
     yield
@@ -1613,8 +1618,7 @@ async def ai_chat(project_id: str, body: ChatIn, user: dict = Depends(get_curren
     # point of the intent gate -- "hi" used to run fourteen engineering modules, the
     # programme and eleven optimisers before saying hello.
     if tier == speedlib.NONE:
-        text = (speedlib.CAPABILITY if speedlib.is_capability_question(question)
-                else speedlib.GREETING)
+        text = speedlib.reply_for(question)
         reply = {"role": "assistant", "content": text, "model": "local",
                  "provider": "aptimizer", "at": now_iso(), "tier": tier,
                  "unverified_citations": [], "unconfirmed_clauses": [],
@@ -1728,8 +1732,7 @@ async def ai_chat_stream(project_id: str, body: ChatIn,
     async def events():
         # Chit-chat never reaches a provider, so it streams as a single event.
         if tier == speedlib.NONE:
-            text = (speedlib.CAPABILITY if speedlib.is_capability_question(question)
-                    else speedlib.GREETING)
+            text = speedlib.reply_for(question)
             reply = {"role": "assistant", "content": text, "model": "local",
                      "provider": "aptimizer", "at": now_iso(), "tier": tier,
                      "unverified_citations": [], "unconfirmed_clauses": [],
@@ -2040,24 +2043,23 @@ def _explain_context(figure: str, proj: dict, an: dict) -> dict:
                 "limit": (far_rule or {}).get("threshold")}
     if figure == "ground_coverage":
         gc_rule = next((r for r in an["compliance"]["results"]
-                        if r.get("param") == "ground_coverage"), None)
+                        if r.get("param") in ("ground_coverage_pct", "ground_coverage")), None)
         return {"figure": "Ground coverage", "value": areas["ground_coverage_pct"], "unit": "%",
                 "inputs": {"plot_area_sqm": areas["plot_area_sqm"],
-                           "footprint_sqm": areas.get("footprint_area_sqm")},
+                           "footprint_sqm": areas.get("ground_footprint_sqm")},
                 "formula": "coverage % = tower footprint area / plot area x 100",
                 "code_ref": (gc_rule or {}).get("code"),
                 "limit": (gc_rule or {}).get("threshold")}
     if figure == "total_units":
         tower_rows = []
-        for t in (proj.get("towers") or []):
-            per_floor = sum(int(u.get("count") or 0) for u in (t.get("units") or []))
+        for t in (areas.get("towers") or []):
             tower_rows.append({"name": t.get("name"), "floors": t.get("floors"),
-                               "units_per_floor": per_floor,
-                               "tower_total": per_floor * int(t.get("floors") or 0)})
+                               "units_per_floor": t.get("units_per_floor"),
+                               "tower_total": t.get("total_units")})
         return {"figure": "Total dwelling units", "value": areas["total_units"], "unit": "units",
                 "inputs": {"towers": tower_rows},
-                "formula": "total units = sum over towers of floors x units per floor",
-                "steps": [f"{r['name']}: {r['units_per_floor']} units/floor x {r['floors']} floors = {r['tower_total']}"
+                "formula": "total units = sum over towers of unit counts x occupied storeys",
+                "steps": [f"{r['name']}: {r['units_per_floor']} units/floor ({r['floors']} floors) = {r['tower_total']}"
                           for r in tower_rows] + [f"total = {areas['total_units']}"],
                 "code_ref": None}
     if figure == "parking_required":
@@ -2066,7 +2068,7 @@ def _explain_context(figure: str, proj: dict, an: dict) -> dict:
                            "provided_slots": park["provided_slots"]},
                 "formula": "ECS demand derived from unit count per parking.py demand model",
                 "code_ref": park.get("code_ref") or "NBC Part 3 / local DC rules",
-                "deficit": park.get("deficit_slots")}
+                "deficit": park.get("deficit")}
     if figure == "cost_total":
         return {"figure": "Total estimated cost", "value": cost["total"], "unit": "INR",
                 "inputs": {"builtup_area_sqm": areas["builtup_area_sqm"],
@@ -2077,10 +2079,16 @@ def _explain_context(figure: str, proj: dict, an: dict) -> dict:
     if figure == "seismic_base_shear":
         eng = englib.analyse_engineering(proj, an)
         seis = ((eng.get("modules") or {}).get("seismic") or {})
-        outs = seis.get("outputs") or {}
-        return {"figure": "Seismic base shear", "value": outs.get("base_shear_kn")
-                or outs.get("base_shear"), "unit": "kN",
-                "inputs": outs, "derived": seis.get("derived"),
+        derived = seis.get("derived") or {}
+        raw_outs = seis.get("outputs") or []
+        outs = ({item.get("label", f"item_{idx}"): item.get("value")
+                 for idx, item in enumerate(raw_outs) if isinstance(item, dict)}
+                if isinstance(raw_outs, list) else dict(raw_outs))
+        val = derived.get("vb_kn") if derived.get("vb_kn") is not None else (
+            outs.get("base_shear_kn") or outs.get("base_shear") or outs.get("Design base shear VB")
+        )
+        return {"figure": "Seismic base shear", "value": val, "unit": "kN",
+                "inputs": outs, "derived": derived,
                 "formula": "V = Ah x W  (IS 1893:2016 Cl. 7.6.2)",
                 "code_ref": "IS 1893:2016 Cl. 7.6.2",
                 "recommendation": seis.get("recommendation")}
@@ -2141,7 +2149,8 @@ async def project_finance(project_id: str, body: FinanceIn,
                           user: dict = Depends(get_current_user)):
     """Revenue, profit, return and cash flow for a project the engine can already price."""
     proj = await load_project(project_id, user, write=body.save)
-    result = financelib.analyse(proj, engine.analyse(proj), body.config)
+    merged_cfg = {**(proj.get("finance") or {}), **(body.config or {})}
+    result = financelib.analyse(proj, engine.analyse(proj), merged_cfg)
     if body.save:
         await db.projects.update_one(
             {"_id": oid(project_id)},
@@ -2155,7 +2164,8 @@ async def ai_finance(project_id: str, body: FinanceIn = FinanceIn(),
     """Body is optional: with none, the assumptions last saved on the project are used."""
     proj = await load_project(project_id, user, write=True)
     an = engine.analyse(proj)
-    fin = financelib.analyse(proj, an, body.config or proj.get("finance"))
+    merged_cfg = {**(proj.get("finance") or {}), **(body.config or {})}
+    fin = financelib.analyse(proj, an, merged_cfg)
     context = {
         "project": {"name": proj.get("name"), "location": proj.get("location")},
         "scale": {"builtup_area_sqm": an["areas"]["builtup_area_sqm"],
@@ -2191,7 +2201,8 @@ async def build_schedule(project_id: str, body: ScheduleIn,
                          user: dict = Depends(get_current_user)):
     """Derive the construction programme from the project's own quantities."""
     proj = await load_project(project_id, user)
-    return schedlib.plan_schedule(proj, engine.analyse(proj), body.config, summary=body.summary)
+    merged_cfg = {**(proj.get("schedule") or {}), **(body.config or {})}
+    return schedlib.plan_schedule(proj, engine.analyse(proj), merged_cfg, summary=body.summary)
 
 
 class ScheduleLiveIn(ScheduleIn):
@@ -2201,7 +2212,8 @@ class ScheduleLiveIn(ScheduleIn):
 @api.post("/schedule")
 async def build_schedule_live(body: ScheduleLiveIn, user: dict = Depends(get_current_user)):
     """Stateless variant for live editing before save."""
-    return schedlib.plan_schedule(body.project, engine.analyse(body.project), body.config,
+    merged_cfg = {**((body.project or {}).get("schedule") or {}), **(body.config or {})}
+    return schedlib.plan_schedule(body.project, engine.analyse(body.project), merged_cfg,
                                   summary=body.summary)
 
 
@@ -2600,7 +2612,7 @@ async def get_equipment_plan(project_id: str, user: dict = Depends(get_current_u
     boq = base.get("boq") or {}
     prog = None
     try:
-        prog = schedlib.build_programme(proj, boq)
+        prog = schedlib.plan_schedule(proj, base, proj.get("schedule"), summary=True)
     except Exception:
         pass
     return equipengine.plan_equipment(proj, boq, prog)
@@ -2649,7 +2661,7 @@ async def get_generative_landscape(project_id: str, body: LandscapeIn = Landscap
 async def get_generative_parking(project_id: str, body: ParkingGenIn = ParkingGenIn(), user: dict = Depends(get_current_user)):
     proj = await load_project(project_id, user)
     base = engine.analyse(proj)
-    footprint = body.footprint_sqm or base.get("areas", {}).get("ground_coverage_sqm") or 3500.0
+    footprint = body.footprint_sqm or base.get("areas", {}).get("ground_footprint_sqm") or 3500.0
     return gendesign.generate_parking_layout(footprint, body.layout_type)
 
 
@@ -3254,11 +3266,16 @@ app.include_router(api)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=list({origin.strip().rstrip("/") for origin in
-                        [os.environ.get("FRONTEND_URL") or
-                         os.environ.get("RENDER_EXTERNAL_URL") or
-                         "http://localhost:3000",
+                        ["http://localhost:3000",
+                         "http://127.0.0.1:3000",
+                         os.environ.get("FRONTEND_URL") or "",
+                         os.environ.get("RENDER_EXTERNAL_URL") or "",
                          *os.environ.get("CORS_ORIGINS", "").split(",")]
-                        if origin.strip() and origin.strip() != "*"}),
+                        if origin and origin.strip() and origin.strip() != "*"}),
+    allow_origin_regex=os.environ.get(
+        "CORS_ORIGIN_REGEX",
+        r"https://.*\.preview\.emergentagent\.com|http://(localhost|127\.0\.0\.1)(:\d+)?",
+    ),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

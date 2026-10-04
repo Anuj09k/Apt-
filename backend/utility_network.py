@@ -10,6 +10,7 @@ Computes site-wide external utility engineering networks:
 
 import math
 from typing import Any, Dict, List, Optional
+import engine
 
 
 def plan_utility_network(project: Dict[str, Any], analysis: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
@@ -17,14 +18,18 @@ def plan_utility_network(project: Dict[str, Any], analysis: Optional[Dict[str, A
     plot = project.get("plot") or {}
     towers = project.get("towers") or []
     num_towers = max(len(towers), 1)
+    areas = (analysis or {}).get("areas") or engine.area_metrics(project)
     
     # Extract site and occupancy parameters
-    plot_area_sqm = float(plot.get("area_sqm") or 8000.0)
+    plot_area_sqm = float(areas.get("plot_area_sqm") or plot.get("area_sqm") or 8000.0)
     plot_area_ha = plot_area_sqm / 10000.0
     
     # Persons / Occupancy
-    utilities = (analysis or {}).get("utilities") or {}
-    persons = int(utilities.get("persons") or (sum(int(t.get("units") or 40) for t in towers) * 4.5))
+    utilities = (analysis or {}).get("utilities") or engine.utilities(project, areas)
+    total_units = int(areas.get("total_units") or 0)
+    if total_units <= 0:
+        total_units = sum(int(t.get("units") or 40) if isinstance(t.get("units"), (int, float)) else 40 for t in towers) or 100
+    persons = int(utilities.get("persons") or (total_units * 4.5))
     lpcd = float((project.get("utility_config") or {}).get("lpcd") or 135.0)
     
     # -------------------------------------------------------------------------
@@ -50,11 +55,11 @@ def plan_utility_network(project: Dict[str, Any], analysis: Optional[Dict[str, A
     else:
         sewer_pipe_dia_mm = 250
     
-    # Calculate hydraulic velocity at pipe size
-    r_pipe = (sewer_pipe_dia_mm / 1000.0) / 2.0
-    a_pipe = math.pi * (r_pipe ** 2) * 0.7
-    v_actual = peak_sewage_cum_s / a_pipe if a_pipe > 0 else 0.8
-    v_actual = max(min(v_actual, 2.2), 0.82)
+    # Calculate hydraulic velocity at pipe size via Manning's formula (flowing at 0.7 depth: R ≈ 0.296 * D)
+    d_sewer_m = sewer_pipe_dia_mm / 1000.0
+    r_hyd = 0.2962 * d_sewer_m
+    v_manning = (1.0 / n) * (r_hyd ** (2.0 / 3.0)) * (slope ** 0.5)
+    v_actual = round(v_manning, 2)
     
     # Manholes calculation: 1 manhole every 30m along perimeter (IS 1742 Cl 4.3)
     perimeter_m = float(plot.get("perimeter_m") or (math.sqrt(plot_area_sqm) * 4.0))
@@ -66,10 +71,10 @@ def plan_utility_network(project: Dict[str, Any], analysis: Optional[Dict[str, A
     # -------------------------------------------------------------------------
     # Rational Formula: Q = 10 * C * I * A (L/s)
     # Weighted Runoff Coefficient: Roof (0.90), Paved (0.80), Greens (0.20)
-    ground_cov_pct = float((analysis or {}).get("areas", {}).get("ground_coverage_pct") or 35.0)
+    ground_cov_pct = float(areas.get("ground_coverage_pct") or 35.0)
     c_roof = 0.90 * (ground_cov_pct / 100.0)
     c_paved = 0.80 * 0.35
-    c_green = 0.20 * (1.0 - (ground_cov_pct / 100.0) - 0.35)
+    c_green = 0.20 * max(0.0, 1.0 - (ground_cov_pct / 100.0) - 0.35)
     c_weighted = round(c_roof + c_paved + c_green, 2)
     
     # Design rainfall intensity: 50 mm/hr (typical Indian city 2-year storm)
@@ -103,30 +108,13 @@ def plan_utility_network(project: Dict[str, Any], analysis: Optional[Dict[str, A
     hf_per_100m = (10.67 * (q_cum_s ** 1.852)) / ((130.0 ** 1.852) * (d_m ** 4.87)) * 100.0
     
     # Booster Pump rating (bar / head)
-    max_height_m = max((int(t.get("floors") or 1) for t in towers), default=10) * 3.0
+    max_height_m = max((float(t.get("height") or (int(t.get("floors") or 1) * float(t.get("floor_height") or 3.0))) for t in areas.get("towers") or towers), default=30.0)
     residual_head_req_m = 10.0  # 1.0 kg/cm2
     total_dynamic_head_m = round(max_height_m + (hf_per_100m * (perimeter_m / 100.0)) + residual_head_req_m, 1)
     
     # -------------------------------------------------------------------------
     # 4. ELECTRICAL POWER DISTRIBUTION & SUBSTATION (NBC Part 8)
     # -------------------------------------------------------------------------
-    def _parse_units(val):
-        if isinstance(val, int):
-            return val
-        if isinstance(val, (list, tuple)):
-            s = 0
-            for item in val:
-                if isinstance(item, dict):
-                    s += int(item.get("count") or item.get("units") or 1)
-                elif isinstance(item, (int, float)):
-                    s += int(item)
-            return s or 40
-        try:
-            return int(val)
-        except Exception:
-            return 40
-
-    total_units = sum(_parse_units(t.get("units")) for t in towers) or 100
     connected_load_kw = round((total_units * 4.0) * 1.25, 1)
     # Diversity factor 0.70
     max_demand_kw = round(connected_load_kw * 0.70, 1)

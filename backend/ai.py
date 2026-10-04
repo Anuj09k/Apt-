@@ -20,14 +20,14 @@ import random
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_GEMINI_MODEL = "gemini-3.7-flash"
+DEFAULT_GEMINI_MODEL = "gemini-3.5-flash"
 
 # Google returns 503 UNAVAILABLE ("model is experiencing high demand") for a newly released
 # model far more often than for an established one -- it is a queueing signal, not a fault
 # in the request, and the same prompt usually succeeds seconds later. So a failure is
 # retried with backoff, and only if the model stays unavailable do we step down to an older
 # one. Order matters: the fallbacks are progressively more established, not more capable.
-GEMINI_FALLBACK_MODELS = ["gemini-3.5-flash", "gemini-3.5-flash-lite"]
+GEMINI_FALLBACK_MODELS = ["gemini-3.5-flash-lite", "gemini-flash-lite-latest", "gemini-3.6-flash", "gemini-3.7-flash"]
 
 # xAI speaks the OpenAI wire format, so Grok needs no new dependency -- the `openai`
 # package already pinned in requirements.txt talks to it by pointing base_url at xAI.

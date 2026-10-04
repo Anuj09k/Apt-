@@ -22,7 +22,7 @@ def verify_password(plain: str, hashed: str) -> bool:
 
 
 def _secret() -> str:
-    return os.environ["JWT_SECRET"]
+    return os.environ.get("JWT_SECRET") or "aptimizer-local-dev-jwt-secret-key-2026"
 
 
 def create_access_token(user_id: str, email: str) -> str:
@@ -45,10 +45,12 @@ def create_refresh_token(user_id: str) -> str:
 
 
 def set_auth_cookies(response, access_token: str, refresh_token: str):
-    response.set_cookie("access_token", access_token, httponly=True, secure=True,
-                        samesite="none", max_age=43200, path="/")
-    response.set_cookie("refresh_token", refresh_token, httponly=True, secure=True,
-                        samesite="none", max_age=604800, path="/")
+    is_secure = (os.environ.get("COOKIE_SECURE") or "").strip().lower() in {"1", "true", "yes", "on"} or bool(os.environ.get("RENDER"))
+    samesite = "none" if is_secure else "lax"
+    response.set_cookie("access_token", access_token, httponly=True, secure=is_secure,
+                        samesite=samesite, max_age=43200, path="/")
+    response.set_cookie("refresh_token", refresh_token, httponly=True, secure=is_secure,
+                        samesite=samesite, max_age=604800, path="/")
 
 
 def decode_token(token: str) -> dict:

@@ -1,0 +1,208 @@
+{
+  "Smart Procurement": {
+    "Live Material Prices": [
+      "Real-Time Commodity Ticker",
+      "Feeds live regional wholesale prices for cement, TMT steel, sand, and bricks directly into project cost models."
+    ],
+    "Material Price Forecasting": [
+      "Commodity Inflation Predictor",
+      "Uses predictive market trends to forecast future price swings for steel and cement over the coming 6 to 18 months."
+    ],
+    "Supplier Intelligence": [
+      "Vendor Rating & Directory",
+      "Maintains a performance-rated directory of certified local suppliers, concrete batching plants, and fabricators."
+    ],
+    "Procurement Calendar": [
+      "Material Delivery Timeline",
+      "Synchronizes material purchase order lead times with the on-site construction schedule to prevent worksite stockouts."
+    ],
+    "Inventory Planning": [
+      "Worksite Storage Balancer",
+      "Calculates safe minimum inventory storage levels on site without tying up excess working capital or risking material damage."
+    ]
+  },
+  "Financial Intelligence": {
+    "Cash Flow Planning": [
+      "Developer Liquidity Planner",
+      "Projects monthly cash inflows from apartment customer milestone installments against contractor payment obligations."
+    ],
+    "Lifecycle Cost Analysis": [
+      "Total Cost of Ownership",
+      "Calculates cumulative costs over a 30-year horizon including initial construction, energy utility bills, and maintenance."
+    ],
+    "Investment Analysis": [
+      "Capital Allocation Scorecard",
+      "Evaluates project financial health against key benchmark metrics like hurdle rate, equity multiple, and debt-service coverage."
+    ],
+    "ROI Forecasting": [
+      "Return on Investment Forecaster",
+      "Models projected financial returns across optimistic, moderate, and conservative market sales absorption scenarios."
+    ],
+    "Profitability Dashboard": [
+      "Executive Margin Tracker",
+      "A consolidated executive dashboard displaying gross margin, net developer profit, and cost variance in real time."
+    ]
+  },
+  "Sustainability": {
+    "Green Building Planner": [
+      "Eco-Architecture Guide",
+      "Coordinates passive shading, energy-efficient HVAC, water conservation, and native landscaping to achieve green certifications."
+    ],
+    "Carbon Emission Calculator": [
+      "Greenhouse Gas Footprint Meter",
+      "Calculates total metric tonnes of CO2 emitted during construction (embodied carbon) and annual building occupancy (operational carbon)."
+    ],
+    "Solar Energy Planning": [
+      "Rooftop Clean Energy Strategy",
+      "Sizes rooftop photovoltaic solar arrays to maximize on-site renewable clean electricity generation for common area lighting."
+    ],
+    "Water Conservation Analysis": [
+      "Zero-Liquid Discharge Strategy",
+      "Models water self-sufficiency through dual-plumbing networks, rainwater aquifers, and 100% on-site greywater treatment."
+    ],
+    "ESG Reporting": [
+      "Corporate ESG Disclosure Dossier",
+      "Generates formal Environmental, Social, and Governance (ESG) compliance reports for institutional green financing and investors."
+    ]
+  },
+  "Construction Intelligence": {
+    "Construction Timeline Optimisation": [
+      "Fast-Track Schedule Solver",
+      "Simulates schedule compression techniques (crashing and fast-tracking) to shorten overall construction duration safely."
+    ],
+    "Resource Allocation": [
+      "Worksite Asset Balancer",
+      "Distributes shared site resources (hoists, tower cranes, concrete pumps) across multiple towers to eliminate idle downtime."
+    ],
+    "Labour Optimisation": [
+      "Crew Productivity Multiplier",
+      "Sizes and coordinates trade crews (carpenters, masons, steel fixers) to maintain smooth, continuous workflow without overcrowding."
+    ],
+    "Equipment Scheduling": [
+      "Heavy Machinery Dispatcher",
+      "Creates daily dispatch schedules for concrete transit mixers, piling rigs, and excavators to optimize rental expenses."
+    ],
+    "Construction Delay Prediction": [
+      "Schedule Bottleneck Forecaster",
+      "Identifies high-risk tasks likely to cause delays (weather disruptions, complex transfers) before they impact project delivery."
+    ],
+    "Risk Prediction": [
+      "Proactive Site Hazard Radar",
+      "Evaluates logistical, contractual, subsoil, and regulatory risks to assign mitigation plans before construction begins."
+    ]
+  },
+  "Reports & Decision Support": {
+    "AI Report Writer": [
+      "Automated Technical Scribe",
+      "Generates complete, publication-grade engineering reports, project narratives, and technical specifications automatically."
+    ],
+    "Executive Dashboards": [
+      "C-Suite KPI Dashboard",
+      "Presents key executive metrics (project yield, cost per square foot, statutory compliance, timeline) in clear visual dashboards."
+    ],
+    "Interactive Analytics": [
+      "Deep-Dive Project Analytics",
+      "Enables users to filter, slice, and cross-examine project data across individual towers, cost heads, and floor levels."
+    ],
+    "Decision Sandbox": [
+      "What-If Strategy Simulator",
+      "Allows developers to test hypothetical changes (e.g. 'What if we add 3 floors and upgrade finishes?') without altering the live project."
+    ],
+    "Scenario Simulation": [
+      "Multi-Variable Scenario Engine",
+      "Simulates hundreds of combinations of unit mixes, floor counts, and material grades to identify the optimal commercial solution."
+    ],
+    "Engineering Benchmarking": [
+      "Industry Standard Benchmark",
+      "Compares the project's structural steel consumption, concrete intensity, and cost against regional industry best practices."
+    ]
+  },
+  "Marketplace & Ecosystem": {
+    "Engineering Marketplace": [
+      "Specialist Consultant Exchange",
+      "Connects developers with vetted third-party structural consultants, MEP designers, landscape architects, and peer reviewers."
+    ],
+    "Plugin Marketplace": [
+      "Extensible Tool Directory",
+      "Enables users to install custom software plugins, specialized regional bylaw packages, and third-party calculation modules."
+    ],
+    "API Marketplace": [
+      "Developer Integration Gateway",
+      "Provides secure REST API endpoints allowing external enterprise ERP, BIM, and CRM systems to integrate directly with Aptimizer."
+    ],
+    "Educational Mode": [
+      "Interactive Civil Classroom",
+      "Provides step-by-step explanatory walkthroughs of engineering formulas and architectural principles for students and junior engineers."
+    ],
+    "Government Approval Assistant": [
+      "Municipal Sanction Checklist",
+      "Prepares and organizes all required drawings, compliance certificates, and documents for municipal building sanction submission."
+    ],
+    "Tender Document Generator": [
+      "Contractor Bidding Package",
+      "Assembles comprehensive contractor tender packages complete with technical specifications, BOQs, and general conditions of contract."
+    ]
+  },
+  "Autonomous AI Engineering": {
+    "Conversational Project Design": [
+      "Chat-to-Blueprint Architect",
+      "Allows users to describe building requirements in everyday natural language and instantly see complete parametric models generated."
+    ],
+    "Multi-Agent Engineering Teams": [
+      "Virtual Engineering Bureau",
+      "Coordinates specialized autonomous AI agents (Planner, Civil, Structural, QS, Cost) collaborating together to refine the project."
+    ],
+    "Autonomous Compliance Checking": [
+      "Self-Auditing Building Inspector",
+      "Continuously monitors every design adjustment in real time, automatically correcting any rule breaches without human intervention."
+    ],
+    "Autonomous BOQ & Costing": [
+      "Self-Updating Cost Engine",
+      "Instantly recomputes material takeoffs, labor budgets, and procurement schedules the second any wall or slab is modified."
+    ]
+  },
+  "Generative Design": {
+    "AI-Generated 2D Floor Plans": [
+      "Automated Floor Plan Creator",
+      "Uses generative neural algorithms to generate dozens of functional, livable, and fully compliant apartment floor plan schemes."
+    ],
+    "AI-Generated 3D Building Concepts": [
+      "Concept Massing Generator",
+      "Creates striking 3D architectural massing concepts, stepped terraces, and landmark skyline profiles tailored to the site."
+    ],
+    "Facade Design Suggestions": [
+      "Exterior Elevation Stylist",
+      "Generates beautiful, climate-responsive exterior facade concepts with passive shading fins, glass louvers, and balconies."
+    ],
+    "Landscape Design": [
+      "Generative Park & Garden Planner",
+      "Designs lush community garden layouts, jogging tracks, water features, and outdoor gathering plazas optimized for foot traffic."
+    ],
+    "Parking Layout Generation": [
+      "Automated Bay Packing Engine",
+      "Algorithmically packs the maximum number of parking bays and driveways into irregular basements and podium floor plates."
+    ]
+  },
+  "Smart City Platform": {
+    "City-Scale Planning": [
+      "Metropolitan Masterplanner",
+      "Scales planning algorithms up to masterplan entire neighborhoods, development corridors, and smart satellite townships."
+    ],
+    "Traffic Simulation": [
+      "Urban Traffic Flow Simulator",
+      "Simulates vehicle and pedestrian traffic congestion at project entry gates, arterial junctions, and public transit nodes."
+    ],
+    "Utility Network Optimisation": [
+      "District Utility Grid Sizer",
+      "Optimizes city-scale regional water supply mains, high-voltage electrical grids, and district cooling distribution networks."
+    ],
+    "Urban Digital Twin": [
+      "Living City 3D Replica",
+      "Maintains a high-fidelity 3D digital model of the surrounding urban district to monitor environmental impact and growth over time."
+    ],
+    "Infrastructure Demand Forecasting": [
+      "Civic Resource Predictor",
+      "Projects 20-year municipal demand for drinking water, power capacity, waste management, and school seats across the district."
+    ]
+  }
+}

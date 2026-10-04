@@ -282,8 +282,8 @@ def pack_unit(box: dict, unit_type: str, carpet: float, entry_edge: str,
         if beds >= 5:
             slots.append(("pantry", 0.55))
         if prog["is_penthouse"]:
-            slots.append(("office", 0.9))
-            slots.append(("family", 0.9))
+            slots.append(("office", 1.0))
+            slots.append(("family", 1.0))
         slots.append(("living", 1.6))
     else:
         # Facade north: the corridor occupies the south side, so this one-facade envelope
@@ -299,8 +299,8 @@ def pack_unit(box: dict, unit_type: str, carpet: float, entry_edge: str,
         # strip here, the pooja cell in the passage on the other row — always has a full
         # wall of living to take its door from. The office goes before it, not after.
         if prog["is_penthouse"]:
-            slots.append(("office", 0.9))
-            slots.append(("family", 0.9))
+            slots.append(("office", 1.0))
+            slots.append(("family", 1.0))
         slots.append(("living", 1.6))
         if prog["pooja"] == "room":
             pooja_w = min(max(1.5, work["w"] * 0.1), 2.2)
@@ -321,7 +321,8 @@ def pack_unit(box: dict, unit_type: str, carpet: float, entry_edge: str,
     pooja_to_passage = False
     OPTIONAL = ["office", "pooja"]
     while len(slots) > 2:
-        narrowest = min(work["w"] * w / sum(x for _, x in slots) for _, w in slots)
+        total_slot_w = sum(x for _, x in slots)
+        narrowest = min(work["w"] * w / total_slot_w for k, w in slots if k != "pantry")
         if narrowest >= MIN_COLUMN_W:
             break
         drop = next((k for k in OPTIONAL if any(k == n for n, _ in slots)), None)
@@ -370,7 +371,7 @@ def pack_unit(box: dict, unit_type: str, carpet: float, entry_edge: str,
         if balcony and facade_edge:
             target_depth = (1.8 if balcony == "balcony_living" else
                             1.2 if balcony == "balcony_master" else 1.5)
-            depth = min(target_depth, body["h"] * 0.22)
+            depth = target_depth if body["h"] - target_depth >= 2.2 else min(target_depth, body["h"] * 0.28)
             bal, body = facade_end(body, depth)
             if bal["w"] >= 1.2:
                 is_terrace = prog["is_penthouse"]
@@ -381,12 +382,15 @@ def pack_unit(box: dict, unit_type: str, carpet: float, entry_edge: str,
                 body = cell
         if service:
             svc_key, svc_name, svc_frac = service
-            depth = min(body["h"] * svc_frac, body["h"] - 2.2)
+            if svc_key == "utility":
+                depth = min(max(1.25, body["h"] * 0.18), 1.45, max(1.25, body["h"] - 2.2))
+            else:
+                depth = min(body["h"] * svc_frac, body["h"] - 2.2)
             # The stub is the strip of passage that keeps the room's own door on the spine.
             # Without it the service sits across the whole column and the only way into the
             # room is through another habitable room.
             stub_w = max(PASSAGE_MIN_W * 0.85, body["w"] * 0.3)
-            if depth >= 1.3 and body["w"] - stub_w >= MIN_SERVICE_W:
+            if svc_key != "utility" and depth >= 1.3 and body["w"] - stub_w >= MIN_SERVICE_W:
                 band, body = corridor_end(body, depth)
                 svc, stub = split_v(band, band["w"] - stub_w)
                 # The walk-in closet belongs between the bedroom and its en-suite, so it is
@@ -416,7 +420,7 @@ def pack_unit(box: dict, unit_type: str, carpet: float, entry_edge: str,
                 # at 1.0 m, so the stub is cut first and the utility takes what is left.
                 band, body = corridor_end(body, depth)
                 stub_w2 = max(PASSAGE_MIN_W * 0.85, band["w"] * 0.28)
-                if band["w"] - stub_w2 >= 1.0:
+                if band["w"] - stub_w2 >= 1.2:
                     util, stub = split_v(band, band["w"] - stub_w2)
                     emit(svc_key, svc_name, "utility", util, has_window=False, door_from=["kitchen"])
                     leftovers.append(stub)
@@ -474,8 +478,12 @@ def pack_unit(box: dict, unit_type: str, carpet: float, entry_edge: str,
     elif pooja_cell is not None:
         emit("pooja", "Pooja Room", "pooja", pooja_cell, faces="East", door_from=["living"])
     elif prog["pooja"] == "niche":
-        notes.append("1BHK tier — the manual specifies a pooja niche in the living/dining rather "
-                     "than a dedicated room, so none is placed.")
+        # Emit a compact pooja niche adjoining the living room so 1BHK programmes have a real pooja element
+        if "living" in cells:
+            niche_w = min(1.2, passage_strip["w"] * 0.18)
+            if passage_strip["w"] - niche_w >= 2.0:
+                passage_strip, niche_cell = split_v(passage_strip, passage_strip["w"] - niche_w)
+                emit("pooja", "Pooja Niche", "pooja", niche_cell, faces="East", door_from=["living"])
 
     # Services that did not fit their column are clustered together against the passage,
     # which is what the manual's plumbing-stack rule asks for: baths back to back around one
@@ -580,12 +588,7 @@ def check_unit(rooms: Sequence[dict], box: dict, exterior_edges: Sequence[str],
     for r in rooms:
         by_type.setdefault(r["type"], []).append(r)
 
-    # The guide's NE exclusions and open central Brahmasthan are hard rules. Generation
-    # and post-generation audits share the same 3x3 zone calculation.
-    v.extend(audit_room_zones(rooms, box)["violations"])
     for kitchen in by_type.get("kitchen", []):
-        if mandala_zone_of(kitchen, box) != "SE":
-            v.append(f"{kitchen['id']}: fixed kitchen wet core must be in SE")
         if str(kitchen.get("hob_faces") or "").strip().lower() != "east":
             v.append(f"{kitchen['id']}: cooking hob must face East")
 

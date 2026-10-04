@@ -835,7 +835,8 @@ def build_activities(project: Dict[str, Any], analysis: Dict[str, Any],
     r_tile = _rate_of(analysis, "tiles")[0]
     r_paint = _rate_of(analysis, "paint")[0]
 
-    wage = {t[0]: float((project.get("labour_rates") or {}).get(t[0]) or t[4])
+    from calculation_basis import configured
+    wage = {t[0]: float(configured(project.get("labour_rates") or {}, t[0], t[4]))
             for t in __import__("engine").LABOUR_TRADES}
 
     acts: List[Activity] = []
@@ -1346,25 +1347,27 @@ def solve_for_target(project: Dict[str, Any], analysis: Dict[str, Any], cfg: Sch
                          "structural change that shortens the floor cycle."),
             }
 
-        # Smallest uniform multiplier that lands on or before the target.
-        lo, hi = 1.0, ceiling
-        while hi - lo > MULT_STEP:
-            mid = (lo + hi) / 2
-            if finish_with({t: mid for t in trades}) - timedelta(days=1) <= target:
-                hi = mid
-            else:
-                lo = mid
+        # A uniform staff-up is feasible but wasteful: it raises every crew on the site,
+        # including trades whose work has float and never drives the completion date.
+        # Instead, measure each trade on its own at the labour ceiling, then add the most
+        # effective of them only until the target is met. A trade that cannot move the
+        # date on its own is never staffed up.
+        alone: List[Tuple[date, str]] = []
+        if ceiling > 1.0:
+            for t in trades:
+                alone.append((finish_with({t: ceiling}) - timedelta(days=1), t))
+            alone.sort()
 
-        # Uniform is feasible but wasteful: it staffs up trades that were never on the
-        # driving path, and overstaffs the ones that are. Give each trade back as many
-        # people as the date can spare -- first all of them, then, where that breaks the
-        # date, as many as a short bisection allows. Every step is checked against the
-        # target, so the plan that comes out still lands on time.
-        mults = {t: hi for t in trades}
-        for t in trades:
-            if finish_with(dict(mults, **{t: 1.0})) - timedelta(days=1) <= target:
-                mults[t] = 1.0          # this trade never drove the date
-                continue
+        mults: Dict[str, float] = {}
+        for _, t in alone:
+            mults[t] = ceiling
+            if finish_with(mults) - timedelta(days=1) <= target:
+                break
+
+        # Give back what the date can spare. With every other trade held where it is,
+        # bisect each raised trade down to the smallest multiplier that still lands on
+        # target -- a trade that can go all the way back to its entered crew is dropped.
+        for t in sorted(mults):
             lo_t, hi_t = 1.0, mults[t]
             for _ in range(3):
                 mid = (lo_t + hi_t) / 2
@@ -1373,7 +1376,7 @@ def solve_for_target(project: Dict[str, Any], analysis: Dict[str, Any], cfg: Sch
                 else:
                     lo_t = mid
             mults[t] = hi_t
-        mults = {t: m for t, m in mults.items() if m > 1.0}
+        mults = {t: m for t, m in mults.items() if m > 1.0 + 1e-6}
 
         achieved = finish_with(mults) - timedelta(days=1)
         added = {t: {"from": base_crews.get(t, 0), "to": cfg.seen_crews.get(t, 0),

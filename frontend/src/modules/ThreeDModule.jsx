@@ -361,14 +361,163 @@ const AmenityMesh = ({ block }) => {
   );
 };
 
+const createBuildingGeometry = (shapeType = "curved", w = 24, h = 42, d = 16) => {
+  const hw = w / 2;
+  const hd = d / 2;
+
+  if (shapeType === "cylindrical") {
+    const shape = new THREE.Shape();
+    shape.absellipse(0, 0, hw, hd, 0, Math.PI * 2, false, 0);
+    const geom = new THREE.ExtrudeGeometry(shape, { depth: h, bevelEnabled: false, curveSegments: 36 });
+    geom.rotateX(-Math.PI / 2);
+    return geom;
+  }
+
+  if (shapeType === "chamfered") {
+    const c = Math.min(w, d) * 0.2;
+    const shape = new THREE.Shape();
+    shape.moveTo(-hw + c, -hd);
+    shape.lineTo(hw - c, -hd);
+    shape.lineTo(hw, -hd + c);
+    shape.lineTo(hw, hd - c);
+    shape.lineTo(hw - c, hd);
+    shape.lineTo(-hw + c, hd);
+    shape.lineTo(-hw, hd - c);
+    shape.lineTo(-hw, -hd + c);
+    shape.closePath();
+    const geom = new THREE.ExtrudeGeometry(shape, { depth: h, bevelEnabled: false });
+    geom.rotateX(-Math.PI / 2);
+    return geom;
+  }
+
+  if (shapeType === "stepped") {
+    const h1 = h * 0.45;
+    const h2 = h * 0.32;
+    const h3 = Math.max(h - h1 - h2, 1);
+    const g1 = new THREE.BoxGeometry(w, h1, d);
+    g1.translate(0, h1 / 2, 0);
+    const g2 = new THREE.BoxGeometry(w * 0.84, h2, d * 0.84);
+    g2.translate(0, h1 + h2 / 2, 0);
+    const g3 = new THREE.BoxGeometry(w * 0.68, h3, d * 0.68);
+    g3.translate(0, h1 + h2 + h3 / 2, 0);
+    try {
+      const merged = mergeGeometries([g1, g2, g3], false);
+      g1.dispose(); g2.dispose(); g3.dispose();
+      if (merged) return merged;
+    } catch {}
+    const fallback = new THREE.BoxGeometry(w, h, d);
+    fallback.translate(0, h / 2, 0);
+    return fallback;
+  }
+
+  if (shapeType === "rectangular") {
+    const geom = new THREE.BoxGeometry(w, h, d);
+    geom.translate(0, h / 2, 0);
+    return geom;
+  }
+
+  // Default: "curved" (streamline rounded corners)
+  const radius = Math.min(w, d) * 0.22;
+  const shape = new THREE.Shape();
+  shape.moveTo(-hw + radius, -hd);
+  shape.lineTo(hw - radius, -hd);
+  shape.quadraticCurveTo(hw, -hd, hw, -hd + radius);
+  shape.lineTo(hw, hd - radius);
+  shape.quadraticCurveTo(hw, hd, hw - radius, hd);
+  shape.lineTo(-hw + radius, hd);
+  shape.quadraticCurveTo(-hw, hd, -hw, hd - radius);
+  shape.lineTo(-hw, -hd + radius);
+  shape.quadraticCurveTo(-hw, -hd, -hw + radius, -hd);
+  const geom = new THREE.ExtrudeGeometry(shape, { depth: h, bevelEnabled: false, curveSegments: 24 });
+  geom.rotateX(-Math.PI / 2);
+  return geom;
+};
+
+const PenthouseCrown = ({ tower, visibleFloors }) => {
+  const topY = visibleFloors * tower.floorHeight;
+  const count = Number(tower.penthouses) || 0;
+  if (count <= 0) return null;
+
+  return (
+    <group position={[0, topY, 0]}>
+      {/* 1. Teak wood rooftop sky terrace deck */}
+      <mesh position={[0, 0.1, 0]} receiveShadow>
+        <boxGeometry args={[tower.w * 0.9, 0.2, tower.d * 0.9]} />
+        <meshStandardMaterial color="#B45309" roughness={0.7} metalness={0.1} />
+      </mesh>
+
+      {/* 2. Glass balustrade around terrace perimeter */}
+      <mesh position={[0, 0.7, 0]}>
+        <boxGeometry args={[tower.w * 0.91, 1.1, tower.d * 0.91]} />
+        <meshStandardMaterial color="#BAE6FD" transparent opacity={0.35} roughness={0.1} />
+      </mesh>
+
+      {/* 3. Luxury 5BHK Sky Villa Glass Pavilions */}
+      {count === 1 ? (
+        <group position={[0, 1.8, 0]}>
+          <mesh castShadow>
+            <boxGeometry args={[tower.w * 0.74, 3.2, tower.d * 0.74]} />
+            <meshStandardMaterial color="#93C5FD" transparent opacity={0.82} roughness={0.2} metalness={0.4} />
+          </mesh>
+          <mesh position={[0, 0, 0]}>
+            <boxGeometry args={[tower.w * 0.55, 2.8, tower.d * 0.55]} />
+            <meshStandardMaterial color="#FEF08A" transparent opacity={0.55} />
+          </mesh>
+          <mesh position={[0, 1.75, 0]}>
+            <boxGeometry args={[tower.w * 0.82, 0.15, tower.d * 0.82]} />
+            <meshStandardMaterial color="#1E293B" roughness={0.4} metalness={0.6} />
+          </mesh>
+        </group>
+      ) : (
+        <group>
+          {[-1, 1].map((dir, idx) => (
+            <group key={idx} position={[dir * (tower.w * 0.22), 1.8, 0]}>
+              <mesh castShadow>
+                <boxGeometry args={[tower.w * 0.38, 3.2, tower.d * 0.72]} />
+                <meshStandardMaterial color="#93C5FD" transparent opacity={0.82} roughness={0.2} metalness={0.4} />
+              </mesh>
+              <mesh position={[0, 0, 0]}>
+                <boxGeometry args={[tower.w * 0.28, 2.8, tower.d * 0.55]} />
+                <meshStandardMaterial color="#FEF08A" transparent opacity={0.55} />
+              </mesh>
+              <mesh position={[0, 1.75, 0]}>
+                <boxGeometry args={[tower.w * 0.44, 0.15, tower.d * 0.8]} />
+                <meshStandardMaterial color="#1E293B" roughness={0.4} metalness={0.6} />
+              </mesh>
+            </group>
+          ))}
+          <mesh position={[0, 0.15, 0]}>
+            <boxGeometry args={[tower.w * 0.12, 0.25, tower.d * 0.7]} />
+            <meshStandardMaterial color="#4ADE80" roughness={0.9} />
+          </mesh>
+        </group>
+      )}
+
+      {/* Floating Crown Badge */}
+      <Html position={[0, 4.4, 0]} center distanceFactor={140} occlude zIndexRange={[25, 0]}>
+        <div className="text-[9px] font-mono font-semibold px-1.5 py-0.5 rounded-sm border bg-amber-50/95 border-amber-400 text-amber-900 shadow-xs whitespace-nowrap">
+          👑 {count}x 5BHK Sky Villa
+        </div>
+      </Html>
+    </group>
+  );
+};
+
 const TowerMesh = ({ tower, metrics, detailed, sectionFloor, selected, dimmed, violations, onSelect, layers, showLabel = true }) => {
   const slabRef = useRef();
   const visibleFloors = sectionFloor ? Math.min(sectionFloor, tower.floors) : tower.floors;
+  const totalH = visibleFloors * tower.floorHeight;
+
   const unitColor = useMemo(() => {
     const dominant = (tower.units || []).reduce((a, b) => (Number(b.count) > Number(a?.count || 0) ? b : a), null);
     return UNIT_COLORS[dominant?.type] || "#2563EB";
   }, [tower.units]);
   const color = violations.length ? "#DC2626" : selected ? "#1D4ED8" : unitColor;
+
+  const buildingGeom = useMemo(
+    () => createBuildingGeometry(tower.shape || "curved", tower.w, totalH, tower.d),
+    [tower.shape, tower.w, totalH, tower.d]
+  );
 
   useEffect(() => {
     if (!detailed || !slabRef.current) return;
@@ -407,10 +556,14 @@ const TowerMesh = ({ tower, metrics, detailed, sectionFloor, selected, dimmed, v
           <meshStandardMaterial color="#FFFFFF" transparent opacity={dimmed ? 0.25 : 0.95} roughness={0.6} />
         </instancedMesh>
       ) : (
-        <mesh position={[0, (visibleFloors * tower.floorHeight) / 2, 0]} castShadow>
-          <boxGeometry args={[tower.w, visibleFloors * tower.floorHeight, tower.d]} />
-          <meshStandardMaterial color={color} transparent opacity={dimmed ? 0.2 : 0.92} roughness={0.6} />
+        <mesh geometry={buildingGeom} position={[0, 0, 0]} castShadow>
+          <meshStandardMaterial color={color} transparent opacity={dimmed ? 0.2 : 0.92} roughness={0.55} />
         </mesh>
+      )}
+
+      {/* 5BHK Penthouse Crown (min 0, max 2 at top of building) */}
+      {Number(tower.penthouses) > 0 && (!sectionFloor || sectionFloor >= tower.floors) && (
+        <PenthouseCrown tower={tower} visibleFloors={visibleFloors} />
       )}
 
       {layers.balconies &&
@@ -447,7 +600,7 @@ const TowerMesh = ({ tower, metrics, detailed, sectionFloor, selected, dimmed, v
             }`}
             data-testid={`tower-label-${tower.id}`}
           >
-            {tower.name} · {tower.floors}F{violations.length ? ` · ${violations.length} fail` : ""}
+            {tower.name} · {tower.floors}F{tower.shape && tower.shape !== "curved" ? ` · ${tower.shape}` : ""}{Number(tower.penthouses) > 0 ? ` · 👑 ${tower.penthouses}x 5BHK` : ""}{violations.length ? ` · ${violations.length} fail` : ""}
           </div>
         </Html>
       )}
@@ -1193,6 +1346,10 @@ export default function ThreeDModule({ project, analysis, update, readOnly, proj
                 <div className="font-semibold">{scene.towers[selected.index]?.name}</div>
                 {[
                   ["Floors", tm.floors],
+                  ["Architectural Form", (scene.towers[selected.index]?.shape || "curved").toUpperCase()],
+                  ...(Number(scene.towers[selected.index]?.penthouses) > 0
+                    ? [["Penthouse Crown", `👑 ${scene.towers[selected.index].penthouses}x 5BHK Sky Villa`]]
+                    : []),
                   ["Height", `${num(tm.height_m, 1)} m`],
                   ["Units", tm.total_units],
                   ["Carpet", `${num(tm.carpet_sqm, 0)} m²`],

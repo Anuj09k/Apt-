@@ -117,16 +117,21 @@ def m1_structural_loads(project, base, e, city):
     wall_uw = C.UNIT_WEIGHTS.get(e["wall_material"], C.UNIT_WEIGHTS["brick_masonry"])
     wall_h = max(float(b["floor_height"]) - t, 2.4)
     wall_udl = wall_uw * (float(e["wall_thickness_mm"]) / 1000.0) * wall_h
-    wall_load = round(wall_udl * 0.35, 2)  # 0.35 m of wall per m² of floor plate (typical residential)
-    dead = round(slab + finishes + wall_load, 2)
+    wall_load_raw = wall_udl * 0.35  # 0.35 m of wall per m² of floor plate (typical residential)
+    wall_load = round(wall_load_raw, 2)
+    dead_raw = slab + finishes + wall_load_raw
+    dead = round(dead_raw, 2)
     live = C.LIVE_LOADS["residential_room"]
     roof_live = C.LIVE_LOADS["roof_accessible"]
-    service = round(dead + live, 2)
-    factored = round(1.5 * dead + 1.5 * live, 2)
+    service_raw = dead_raw + live
+    service = round(service_raw, 2)
+    factored_raw = 1.5 * service_raw
+    factored = round(factored_raw, 2)
 
     trib = float(e["grid_bay_x_m"]) * float(e["grid_bay_y_m"])
     floors = max(int(b["floors"]), 1)
-    column_load = round(factored * trib * floors, 1)
+    column_load_raw = factored_raw * trib * floors
+    column_load = round(column_load_raw, 1)
 
     # Grades come from the project, not a fixed M25/Fe415 — picking M40 in the mix design
     # module used to leave the column sized as if it were still M25.
@@ -137,7 +142,7 @@ def m1_structural_loads(project, base, e, city):
     # Sizing lives in `takeoff` and is imported rather than repeated here: the quantity
     # take-off has to size the very same column, and two copies of a formula is how this
     # codebase previously ended up with two different answers for one project.
-    req_area = takeofflib.column_required_area(column_load, fck, fy, float(e["column_steel_pct"]))
+    req_area = takeofflib.column_required_area(column_load_raw, fck, fy, float(e["column_steel_pct"]))
     col_b, col_d = takeofflib.column_section(req_area)
 
     # IS 456 Cl. 25.1.2 — Cl. 39.3 (the axial capacity expression used above) is only
@@ -147,8 +152,9 @@ def m1_structural_loads(project, base, e, city):
     floor_ht = float(b.get("floor_height") or 3.0)
     unsupported = float(e.get("unsupported_length_m") or 0.0) or max(floor_ht - 0.6, 2.0)
     least_dim = min(col_b, col_d)
-    slenderness = round(unsupported * 1000.0 / least_dim, 2)
-    is_short = slenderness < 12.0
+    slenderness_raw = unsupported * 1000.0 / least_dim
+    slenderness = round(slenderness_raw, 2)
+    is_short = slenderness_raw < 12.0
     e_min = max(unsupported * 1000.0 / 500.0 + col_d / 30.0, 20.0)
     ecc_ok = e_min <= 0.05 * col_d
 
@@ -161,8 +167,10 @@ def m1_structural_loads(project, base, e, city):
     k1 = float(e.get("wind_k1") or 1.0)
     k3 = float(e.get("wind_k3") or 1.0)
     vz = vb * k1 * k2 * k3
-    pz = round(0.6 * vz ** 2 / 1000.0, 3)  # kN/m²
-    pd = round(pz * C.WIND_KD * C.WIND_KA * C.WIND_KC, 3)
+    pz_raw = 0.6 * vz ** 2 / 1000.0  # kN/m²
+    pd_raw = pz_raw * C.WIND_KD * C.WIND_KA * C.WIND_KC
+    pz = round(pz_raw, 3)
+    pd = round(pd_raw, 3)
 
     # IS 875-3 Cl. 7.4: F = Cf x Ae x pd. Cf was previously omitted, which is the same as
     # taking it as 1.0 and under-states the lateral force by 20-40%.
@@ -173,7 +181,7 @@ def m1_structural_loads(project, base, e, city):
     h_over_b = (height_m / face_width) if face_width else 1.0
     cf = C.wind_force_coefficient(a_over_b, h_over_b)
     area_eff = face_width * height_m
-    wind_force = round(cf * area_eff * pd, 1)
+    wind_force = round(cf * area_eff * pd_raw, 1)
 
     bay = max(float(e.get("grid_bay_x_m") or 6.0), float(e.get("grid_bay_y_m") or 6.0))
     if floors > 12 or height_m > 40:
@@ -203,6 +211,7 @@ def m1_structural_loads(project, base, e, city):
                                  "the lateral force for anything beyond feasibility.",
                          "clause": C.clause("wind_force")})
 
+    norm_support = str(e.get("beam_support") or "simply supported").replace("_", " ").strip().lower()
     return {
         "id": "loads", "title": "Structural Load Estimator", "codes": ["IS 875 Parts 1–3", "IS 456:2000"],
         "missing": missing, "warnings": warnings,
@@ -223,7 +232,7 @@ def m1_structural_loads(project, base, e, city):
                 f"unsupported length {unsupported:.2f} m ÷ {int(min(col_b, col_d))} mm"),
             out("Minimum eccentricity e_min", round(e_min, 1), "mm", "column_ecc",
                 f"limit for Cl. 39.3 to apply is 0.05D = {round(0.05 * col_d, 1)} mm"),
-            out("Preliminary beam size", f"{int(beam_w)} × {int(beam_d)}", "mm", "beam_depth", f"L/{12 if e['beam_support'] == 'simply supported' else 15} for {span} m span"),
+            out("Preliminary beam size", f"{int(beam_w)} × {int(beam_d)}", "mm", "beam_depth", f"L/{12 if norm_support == 'simply supported' else 15} for {span} m span"),
             out("Basic wind speed Vb", vb, "m/s", "wind_speed", f"{city['city']} ({city['source']} data)"),
             out("Terrain / height factor k2", k2, "", "wind_k2", f"at {b['height_m']} m height"),
             out("Design wind pressure pz", pz, "kN/m²", "wind_pressure"),
@@ -238,9 +247,10 @@ def m1_structural_loads(project, base, e, city):
         ],
         "recommendation": {"label": "Suggested structural system", "value": system,
                            "clause": C.clause("flat_slab")},
-        "per_tower": [_tower_loads(t, e, city, factored, trib, dead, live, pd) for t in b["towers"]],
-        "derived": {"dead": dead, "live": live, "factored": factored, "column_load": column_load,
-                    "tributary": trib, "service": service, "pd": pd},
+        "per_tower": [_tower_loads(t, e, city, factored_raw, trib, dead_raw, live, pd_raw) for t in b["towers"]],
+        "derived": {"dead": dead, "dead_raw": dead_raw, "live": live, "factored": factored, "factored_raw": factored_raw,
+                    "column_load": column_load, "column_load_raw": column_load_raw,
+                    "tributary": trib, "service": service, "service_raw": service_raw, "pd": pd, "pd_raw": pd_raw},
     }
 
 
@@ -250,23 +260,27 @@ def _column_size(load_kn, fck=25.0, fy=415.0, steel_pct=1.0):
     return f"{int(cb)} × {int(cd)}"
 
 
-def _tower_loads(t, e, city, factored, trib, dead, live, pd):
+def _tower_loads(t, e, city, factored_raw, trib, dead, live, pd):
     """Per-tower load / column / wind figures (module 1 outputs are the governing tower)."""
     floors = max(int(t["floors"]), 1)
-    col = round(factored * trib * floors, 1)
+    col_raw = factored_raw * trib * floors
+    col = round(col_raw, 1)
+    k1 = float(e.get("wind_k1") or 1.0)
     k2 = next((v for h, v in C.WIND_K2 if t["height_m"] <= h), C.WIND_K2[-1][1])
-    pd_t = round(0.6 * (city["wind_speed"] * k2) ** 2 / 1000.0 * C.WIND_KD * C.WIND_KA * C.WIND_KC, 3)
+    k3 = float(e.get("wind_k3") or 1.0)
+    pd_t_raw = 0.6 * (city["wind_speed"] * k1 * k2 * k3) ** 2 / 1000.0 * C.WIND_KD * C.WIND_KA * C.WIND_KC
+    pd_t = round(pd_t_raw, 3)
     face = math.sqrt(max(t["footprint_sqm"], 1)) if t["footprint_sqm"] else 0
     cf_t = C.wind_force_coefficient(1.0, (t["height_m"] / face) if face else 1.0)
     return {
         "id": t["id"], "name": t["name"], "floors": floors, "height_m": t["height_m"],
         "footprint_sqm": t["footprint_sqm"], "builtup_sqm": t["builtup_sqm"],
         "column_load_kn": col,
-        "column_size_mm": _column_size(col, float(e["concrete_grade"]), float(e["steel_grade"]),
+        "column_size_mm": _column_size(col_raw, float(e["concrete_grade"]), float(e["steel_grade"]),
                                        float(e["column_steel_pct"])),
         "k2": k2, "design_pressure_kn_sqm": pd_t,
         "cf": cf_t,
-        "wind_force_kn": round(cf_t * face * t["height_m"] * pd_t, 1),
+        "wind_force_kn": round(cf_t * face * t["height_m"] * pd_t_raw, 1),
     }
 
 
@@ -291,13 +305,18 @@ def m2_seismic(project, base, e, city, loads):
             return 2.5 if T < 0.55 else min(1.36 / T, 2.5) if T <= 4 else 0.34
         return 2.5 if T < 0.67 else min(1.67 / T, 2.5) if T <= 4 else 0.42
 
-    sa = round(sa_g(ta, soil_type), 3)
+    sa_raw = sa_g(ta_raw, soil_type)
+    sa = round(sa_raw, 3)
     r = C.RESPONSE_R.get(e["structural_system"], 5.0)
     imp = C.IMPORTANCE_I.get(e["importance"], 1.0)
-    ah = round(z * imp * sa / (2 * r), 5)
-    seismic_load = loads["derived"]["dead"] + 0.25 * loads["derived"]["live"]
-    w = round(seismic_load * b["builtup"], 1)
-    v = round(ah * w, 1)
+    ah_raw = z * imp * sa_raw / (2 * r)
+    ah = round(ah_raw, 5)
+    dead_for_seismic = loads["derived"].get("dead_raw", loads["derived"]["dead"])
+    seismic_load = dead_for_seismic + 0.25 * loads["derived"]["live"]
+    w_raw = seismic_load * b["builtup"]
+    v_raw = ah_raw * w_raw
+    w = round(w_raw, 1)
+    v = round(v_raw, 1)
 
     warnings = []
     if zone in ("IV", "V") and h > 15:
@@ -340,25 +359,30 @@ def m2_seismic(project, base, e, city, loads):
             out("Design horizontal coefficient Ah", ah, "", "base_shear", "Z·I·(Sa/g) ÷ 2R"),
             out("Seismic weight W", w, "kN", "seismic_weight", "DL + 25% LL over built-up area"),
             out("Design base shear VB", v, "kN", "base_shear"),
-            out("Base shear as % of W", round(ah * 100, 2), "%", "base_shear"),
+            out("Base shear as % of W", round(ah_raw * 100, 2), "%", "base_shear"),
         ],
         "recommendation": {"label": "Recommended lateral system", "value": system, "clause": C.clause("seismic_R")},
         "per_tower": [_tower_seismic(t, z, soil_type, r, imp, sa_g, loads, frame_type)
                       for t in b["towers"]],
-        "derived": {"base_shear": v, "ah": ah, "seismic_weight": w},
+        "derived": {"base_shear": v, "vb_kn": v, "ah": ah, "seismic_weight": w},
     }
 
 
 def _tower_seismic(t, z, soil_type, r, imp, sa_g, loads, frame_type="brick_infill"):
     h = max(t["height_m"], 3.0)
     base_dim = math.sqrt(max(t["footprint_sqm"], 1.0)) if t["footprint_sqm"] else 0.0
-    ta = round(C.seismic_period(h, base_dim, frame_type)[0], 3)
-    sa = round(sa_g(ta, soil_type), 3)
-    ah = round(z * imp * sa / (2 * r), 5)
-    w = round((loads["derived"]["dead"] + 0.25 * loads["derived"]["live"]) * t["builtup_sqm"], 1)
+    ta_raw = C.seismic_period(h, base_dim, frame_type)[0]
+    ta = round(ta_raw, 3)
+    sa_raw = sa_g(ta_raw, soil_type)
+    sa = round(sa_raw, 3)
+    ah_raw = z * imp * sa_raw / (2 * r)
+    ah = round(ah_raw, 5)
+    dead_for_seismic = loads["derived"].get("dead_raw", loads["derived"]["dead"])
+    w_raw = (dead_for_seismic + 0.25 * loads["derived"]["live"]) * t["builtup_sqm"]
+    w = round(w_raw, 1)
     return {"id": t["id"], "name": t["name"], "floors": t["floors"], "height_m": t["height_m"],
             "period_s": ta, "sa_g": sa, "ah": ah, "seismic_weight_kn": w,
-            "base_shear_kn": round(ah * w, 1), "base_shear_pct_w": round(ah * 100, 2)}
+            "base_shear_kn": round(ah_raw * w_raw, 1), "base_shear_pct_w": round(ah_raw * 100, 2)}
 
 
 # ================================================================ 3. foundation
@@ -368,13 +392,15 @@ def m3_foundation(project, base, e, loads):
     sbc = soil["sbc"]
     phi = math.radians(soil["phi"])
     gamma = soil["gamma"]
-    q = min(sbc, loads["derived"]["column_load"] / max(float(e["grid_bay_x_m"]) * float(e["grid_bay_y_m"]), 1) * 4)
+    col_load_raw = loads["derived"].get("column_load_raw", loads["derived"]["column_load"])
+    q = min(sbc, col_load_raw / max(float(e["grid_bay_x_m"]) * float(e["grid_bay_y_m"]), 1) * 4)
     df = (q / gamma) * ((1 - math.sin(phi)) / (1 + math.sin(phi))) ** 2
     df = round(max(df, 0.5), 2)
 
-    service_load = loads["derived"]["column_load"] / 1.5
-    req_area = round(service_load / sbc, 2)
-    footing_side = round(math.sqrt(req_area) + 0.05, 2) if req_area > 0 else 0
+    service_load_raw = col_load_raw / 1.5
+    req_area_raw = service_load_raw / sbc if sbc else 0.0
+    req_area = round(req_area_raw, 2)
+    footing_side = round(math.sqrt(req_area_raw) + 0.05, 2) if req_area_raw > 0 else 0
     floors = int(b["floors"] or 0)
     poor = e["soil_type"] in ("soft clay",)
 
@@ -390,20 +416,22 @@ def m3_foundation(project, base, e, loads):
     # Bearing pressure must be measured against the footing actually provided, not the
     # exact required area — service_load / (service_load / sbc) is identically the SBC, so
     # the old output could never differ from it and the "vs SBC" comparison said nothing.
-    provided_area = round(footing_side ** 2, 2) if footing_side else 0.0
-    applied = round(service_load / provided_area, 1) if provided_area else 0
-    utilisation = round(applied / sbc * 100, 1) if sbc else 0
+    provided_area_raw = footing_side ** 2 if footing_side else 0.0
+    provided_area = round(provided_area_raw, 2)
+    applied_raw = service_load_raw / provided_area_raw if provided_area_raw else 0.0
+    applied = round(applied_raw, 1)
+    utilisation = round(applied_raw / sbc * 100, 1) if sbc else 0
     trib = float(e["grid_bay_x_m"]) * float(e["grid_bay_y_m"])
     warnings = []
-    if req_area > 0.35 * trib:
+    if req_area_raw > 0.35 * trib:
         warnings.append({"severity": "critical",
                          "text": f"Required footing area {req_area} m² exceeds 35% of the {trib} m² column grid — "
-                                 f"SBC of {sbc} kN/m² is insufficient for the {round(service_load)} kN service load. "
+                                 f"SBC of {sbc} kN/m² is insufficient for the {round(service_load_raw)} kN service load. "
                                  "Switch to a raft or piles, or improve the ground.",
                          "clause": C.clause("sbc")})
-    elif req_area > 0.2 * trib:
+    elif req_area_raw > 0.2 * trib:
         warnings.append({"severity": "warning",
-                         "text": f"Footings occupy {round(req_area / trib * 100)}% of the grid area — combined footings "
+                         "text": f"Footings occupy {round(req_area_raw / trib * 100)}% of the grid area — combined footings "
                                  "or a raft may be more economical.", "clause": C.clause("found_type")})
     if poor and floors > 4:
         warnings.append({"severity": "critical", "text": "Soft clay with more than 4 floors — deep foundations required, "
@@ -420,7 +448,7 @@ def m3_foundation(project, base, e, loads):
             out("Safe bearing capacity (SBC)", sbc, "kN/m²", "sbc"),
             out("Angle of internal friction φ", soil["phi"], "°", "sbc"),
             out("Minimum foundation depth Df", df, "m", "rankine", "Rankine: (q/γ)·((1−sinφ)/(1+sinφ))²"),
-            out("Column service load", round(service_load, 1), "kN", "found_type"),
+            out("Column service load", round(service_load_raw, 1), "kN", "found_type"),
             out("Required footing area", req_area, "m²", "found_type"),
             out("Isolated footing size", f"{footing_side} × {footing_side}", "m", "found_type"),
             out("Provided footing area", provided_area, "m²", "found_type", "size rounded up from the required area"),
@@ -450,7 +478,9 @@ def m4_mix_design(project, base, e):
     fine = mix["fine_kg"]
     ratio_fine = round(fine / cement, 2)
     ratio_coarse = round(coarse / cement, 2)
-    volume = float(e["concrete_volume_cum"]) or base["quantities"]["items"][0]["quantity"]
+    concrete_item = next((it for it in base["quantities"]["items"] if it["key"] == "concrete"), None)
+    default_vol = float(concrete_item["quantity"]) if concrete_item else 0.0
+    volume = float(e["concrete_volume_cum"]) or default_vol
 
     boq = [
         {"material": "Cement", "per_cum": cement, "unit": "kg", "total": round(cement * volume, 1),
@@ -572,23 +602,27 @@ def m6_storm_rwh(project, base, e, city):
     intensity = float(e["rain_intensity_override"]) or city["rain_intensity_mm_hr"]
     c_roof = C.RUNOFF_C["rcc_roof"]
     c_site = C.RUNOFF_C.get(e["site_area_type"], 0.6)
-    weighted = round((roof * c_roof + max(plot - roof, 0) * c_site) / plot, 3) if plot else c_roof
+    weighted_raw = (roof * c_roof + max(plot - roof, 0) * c_site) / plot if plot else c_roof
+    weighted = round(weighted_raw, 3)
     area_ha = plot / 10000.0
-    q = round(weighted * intensity * area_ha / 360.0, 4)  # m³/s
+    q_raw = weighted_raw * intensity * area_ha / 360.0  # m³/s
+    q = round(q_raw, 4)
 
     n, s = C.MANNING_N, C.DRAIN_SLOPE
-    d = ((q * n * 4 ** (5 / 3)) / (math.pi * math.sqrt(s))) ** (3 / 8) if q > 0 else 0
+    d = ((q_raw * n * 4 ** (5 / 3)) / (math.pi * math.sqrt(s))) ** (3 / 8) if q_raw > 0 else 0
     dia_mm = max(math.ceil(d * 1000 / 50) * 50, 150)
     a_full = math.pi * (dia_mm / 1000.0) ** 2 / 4
-    velocity = round(q / a_full, 2) if a_full else 0
+    velocity_raw = q_raw / a_full if a_full else 0.0
+    velocity = round(velocity_raw, 2)
 
     annual = round(roof * (city["annual_rainfall_mm"] / 1000.0) * c_roof * 1000, 0)  # litres/yr
-    pit_vol = round(roof * (intensity / 1000.0), 2)  # 1 hour of peak rainfall, m³
-    pit_side = round(math.sqrt(pit_vol / 2.0), 2) if pit_vol else 0
+    pit_vol_raw = roof * (intensity / 1000.0)  # 1 hour of peak rainfall, m³
+    pit_vol = round(pit_vol_raw, 2)
+    pit_side = round(math.sqrt(pit_vol_raw / 2.0), 2) if pit_vol_raw else 0
     mandatory = plot > C.RWH_MANDATORY_PLOT_SQM
 
     checks = [
-        check("Self-cleansing velocity 0.6–3.0 m/s", 0.6 <= velocity <= 3.0, f"{velocity} m/s", "0.6–3.0 m/s", "storm_pipe"),
+        check("Self-cleansing velocity 0.6–3.0 m/s", 0.6 <= velocity_raw <= 3.0, f"{velocity} m/s", "0.6–3.0 m/s", "storm_pipe"),
         # The check is "is RWH provided", not "is it mandatory" — scoring a compliant
         # small plot as a red failure because the rule does not bite is backwards.
         check("Rainwater harvesting provided",
@@ -791,7 +825,8 @@ def m8_fire(project, base, e):
             "extinguishers": ext_per_floor,
             "refuge_required": is_refuge,
             "pressurisation": need_press,
-            "status": "pass" if (travel <= F["max_travel_m"] and travel > 0 and ext_per_floor >= 1
+            "status": "pass" if (travel <= F["max_travel_m"] and travel > 0
+                                 and int(e["extinguishers_per_floor"]) >= ext_per_floor and ext_per_floor >= 1
                                  and (not is_refuge or int(e["refuge_floors_provided"]) >= len(refuge_floors))) else "fail",
         })
 
@@ -820,10 +855,11 @@ def m9_accessibility(project, base, e):
     corridor_mm = (tallest["corridor_width"] * 1000) if tallest else 0
     car = e["lift_car_mm"]
     slope = float(e["pedestrian_ramp_slope"])
-    max_slope = round(C.ACCESS["ramp_slope"] * 100, 2)
+    max_slope_raw = C.ACCESS["ramp_slope"] * 100.0
+    max_slope = round(max_slope_raw, 2)
 
     checks = [
-        check("Ramp slope ≤ 1:12 (8.33%)", slope <= max_slope, f"{slope}%", f"≤ {max_slope}%", "acc_ramp"),
+        check("Ramp slope ≤ 1:12 (8.33%)", slope <= max_slope_raw + 1e-9, f"{slope}%", f"≤ {max_slope}%", "acc_ramp"),
         check("Clear door width ≥ 900 mm", float(e["door_width_mm"]) >= C.ACCESS["door_width_mm"],
               f"{e['door_width_mm']} mm", "≥ 900 mm", "acc_door"),
         check("Corridor width ≥ 1200 mm", corridor_mm >= C.ACCESS["corridor_min_mm"], f"{round(corridor_mm)} mm",
@@ -859,7 +895,7 @@ def m9_accessibility(project, base, e):
 def m11_green(project, base, e, water, storm):
     selected = dict(e.get("green_checklist") or {})
     auto = {}
-    if storm["derived"]["mandatory"] and storm["derived"]["rwh_annual_l"] > 0:
+    if bool(e.get("rwh_provided", True)) and storm["derived"]["rwh_annual_l"] > 0:
         auto["water_rwh"] = True
     if water["derived"]["stp_kld"] > 0:
         auto["water_stp"] = True
@@ -1018,16 +1054,18 @@ def m13_carbon(project, base, e, mix):
             "quantity": it["quantity"], "unit": it["unit"],
             "factor": coeff["factor"], "factor_unit": f'kgCO2e/{coeff["unit"]}',
             "basis": coeff["note"], "source": it.get("source", "ratio"),
+            "kg_raw": kg,
             "tco2e": round(kg / 1000.0, 2),
         })
-    rows.sort(key=lambda r: r["tco2e"], reverse=True)
+    rows.sort(key=lambda r: r["kg_raw"], reverse=True)
     for r in rows:
-        r["share_pct"] = round(r["tco2e"] * 1000 / total_kg * 100, 1) if total_kg else 0.0
+        r["share_pct"] = round(r["kg_raw"] / total_kg * 100, 1) if total_kg else 0.0
 
-    per_sqm = round(total_kg / area, 1) if area else 0.0
+    per_sqm_raw = total_kg / area if area else 0.0
+    per_sqm = round(per_sqm_raw, 1)
     band = "low"
     for threshold, name in C.CARBON_BENCHMARKS:
-        if per_sqm >= threshold:
+        if per_sqm_raw >= threshold:
             band = name
     priced = {r["key"] for r in rows}
     unpriced = [it["label"] for it in items if it["key"] not in priced]
@@ -1036,7 +1074,7 @@ def m13_carbon(project, base, e, mix):
     # mix design module already knows which cement this project specified.
     cement_row = next((r for r in rows if r["key"] == "cement"), None)
     cement_share = cement_row["share_pct"] if cement_row else 0.0
-    blended_saving_t = round((cement_row["tco2e"] * 0.30), 1) if cement_row else 0.0
+    blended_saving_t = round((cement_row["kg_raw"] / 1000.0 * 0.30), 1) if cement_row else 0.0
     trees_equiv = int(total_kg / C.TREE_SEQUESTRATION_KG_YR) if total_kg else 0
 
     warnings = []
@@ -1100,23 +1138,24 @@ def m14_trees(project, base, e, carbon):
     if not have_layout:
         green_sqm = open_sqm * 0.55
         road_sqm = open_sqm * 0.25
+    buffer_sqm = max(open_sqm - green_sqm - road_sqm, 0.0)
 
     zones = [
-        {"zone": "Landscape and lawns", "area_sqm": round(green_sqm, 1), "kind": "open",
+        {"zone": "Landscape and lawns", "area_sqm": round(green_sqm, 1), "area_sqm_raw": green_sqm, "kind": "open",
          "note": "large-canopy shade trees, spaced to close at maturity"},
-        {"zone": "Road and driveway verges", "area_sqm": round(road_sqm, 1), "kind": "avenue",
+        {"zone": "Road and driveway verges", "area_sqm": round(road_sqm, 1), "area_sqm_raw": road_sqm, "kind": "avenue",
          "note": "avenue planting at {} m centres, compact-rooted species only".format(
              norms["avenue_spacing_m"])},
         {"zone": "Boundary and setback strip",
-         "area_sqm": round(max(open_sqm - green_sqm - road_sqm, 0), 1), "kind": "buffer",
+         "area_sqm": round(buffer_sqm, 1), "area_sqm_raw": buffer_sqm, "kind": "buffer",
          "note": "narrow-crown screening against neighbours and noise"},
     ]
 
-    allocatable = sum(z["area_sqm"] for z in zones) or 1.0
+    allocatable = math.fsum(z["area_sqm_raw"] for z in zones) or 1.0
     plan = []
     canopy_sqm = 0.0
     for z in zones:
-        count = int(round(required * (z["area_sqm"] / allocatable)))
+        count = int(round(required * (z["area_sqm_raw"] / allocatable)))
         picks = ([s for s in C.TREE_SPECIES if s["zone"] == z["kind"]]
                  or [s for s in C.TREE_SPECIES if s["zone"] == "open"])
         per = [count // len(picks)] * len(picks)

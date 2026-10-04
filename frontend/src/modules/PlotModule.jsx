@@ -7,7 +7,7 @@ import { Input } from "../components/ui/input";
 import { api, apiError, syncTowersFromLayout } from "../lib/api";
 import { COMPASS, num } from "../lib/format";
 import { isLayoutCurrent, polygonSignature } from "../lib/scene";
-import { Plus, Trash2, Sparkles, Zap, CheckCircle2 } from "lucide-react";
+import { Plus, Trash2, Sparkles, Zap, CheckCircle2, Building2 } from "lucide-react";
 import { toast } from "sonner";
 
 // Distinct styled layers keep the setback envelope, shared green, roads, amenities and
@@ -188,7 +188,10 @@ export default function PlotModule({ project, analysis, update, readOnly, goToMo
       overlays.push({ key: "drive", polygons: layout.roads.driveway_polygons, style: LAYER_STYLE.driveways,
                       label: `Internal driveway · ${layout.roads.driveway_width_m} m wide` });
     }
-    (layout.amenities || []).forEach((a) =>
+    const activeAmenities = (Array.isArray(project.society_amenities) && project.society_amenities.length === 0)
+      ? []
+      : (layout.amenities || []);
+    activeAmenities.forEach((a) =>
       overlays.push({ key: `amenity-${a.key}`, polygons: a.polygons, style: LAYER_STYLE.amenity,
                       label: `${a.name} · ${num(a.area_sqm, 0)} m² · ${a.floors} floor(s), ${a.height_m} m` }));
     (layout.towers || []).forEach((t, i) =>
@@ -373,6 +376,44 @@ export default function PlotModule({ project, analysis, update, readOnly, goToMo
                 <p className="text-[11px] text-slate-500 mt-2">
                   Saved to the project — the 3D model now renders these towers instead of the bounding-box fallback.
                 </p>
+
+                {/* Direct access to Unit Mix & Society Amenities (Clubhouse, Pool, Gym) especially crucial for single-tower plots */}
+                <div className="mt-3 p-3.5 bg-blue-50/70 border border-blue-200 rounded-sm space-y-2.5" data-testid="layout-amenities-unit-mix-card">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Building2 className="h-4 w-4 text-blue-700" />
+                      <span className="text-xs font-semibold text-blue-950">
+                        {layout.layout_metrics?.tower_count === 1 ? "Single Tower Configuration · Unit Mix & Society Amenities" : "Tower Configurations, Unit Mix & Society Amenities"}
+                      </span>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-7 text-xs bg-white text-blue-700 border-blue-300 hover:bg-blue-50"
+                      onClick={() => goToModule?.("planning")}
+                      data-testid="goto-planning-from-layout-button"
+                    >
+                      Configure Towers &amp; Amenities →
+                    </Button>
+                  </div>
+                  <p className="text-[11px] text-slate-600 leading-relaxed">
+                    {layout.layout_metrics?.tower_count === 1
+                      ? "When a single tower is placed, society amenities (Clubhouse, Gym, Swimming Pool, Deck) and unit mix (Studio to 5BHK Penthouses) are integrated into the tower programme and podium. You can configure and edit all of them directly."
+                      : "Edit unit mixes, floor plans, 5BHK penthouses, architectural shape (curved/cylindrical/stepped), and shared society amenities."}
+                  </p>
+                  <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-blue-100">
+                    <span className="text-[11px] text-slate-500 font-medium">Configured Society Amenities:</span>
+                    {(project.society_amenities || []).length > 0 ? (
+                      (project.society_amenities || []).map((am) => (
+                        <span key={am.id || am.name} className="inline-flex items-center text-[11px] font-mono bg-white border border-blue-200 text-blue-800 px-2 py-0.5 rounded-sm">
+                          {am.name} ({am.area} m²)
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-[11px] text-amber-700 font-mono">None yet — click Configure to add clubhouse, gym, pool</span>
+                    )}
+                  </div>
+                </div>
               </>
             )}
 
@@ -429,7 +470,7 @@ export default function PlotModule({ project, analysis, update, readOnly, goToMo
               </p>
             ))}
 
-            {!!(layout.amenities || []).length && (
+            {!!(layout.amenities || []).length ? (
               <Table className="mt-3">
                 <TableHeader>
                   <TableRow>
@@ -452,7 +493,14 @@ export default function PlotModule({ project, analysis, update, readOnly, goToMo
                   ))}
                 </TableBody>
               </Table>
-            )}
+            ) : layout.layout_metrics?.tower_count === 1 ? (
+              <div className="mt-2.5 px-3 py-2 bg-slate-50 border border-slate-200 rounded-sm text-xs text-slate-600 flex items-center justify-between">
+                <span>Integrated Tower Amenities active (Clubhouse, Gym, Pool allocated in podium / common floors).</span>
+                <button type="button" onClick={() => goToModule?.("planning")} className="text-blue-700 hover:underline font-medium text-[11px]">
+                  Edit amenities &amp; unit mix →
+                </button>
+              </div>
+            ) : null}
 
             <Table className="mt-3">
               <TableHeader>

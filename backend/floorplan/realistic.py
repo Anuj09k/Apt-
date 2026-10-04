@@ -59,11 +59,18 @@ def generate_unit(box: Dict[str, float], unit_type: str, carpet: float, entry_ed
         return [], ["Envelope is too constrained for the realistic unit planner; use a wider/deeper unit envelope."]
 
     north_h = min(3.4, plan_h * 0.30)
-    hall_h = max(0.9, min(1.05, plan_h * 0.10))
-    entry_h = min(2.15, plan_h * 0.23)
-    middle_h = plan_h - north_h - hall_h - entry_h
-    if middle_h < 3.0:
-        return [], ["Envelope leaves less than 2.45 m for a living room after required circulation."]
+    hall_h = round(max(0.95, min(1.30, plan_h * 0.08)), 2)
+    entry_h = round(max(1.85, min(2.60, plan_h * 0.14)), 2)
+    usable_depth = round(plan_h - hall_h - entry_h, 2)
+    if usable_depth < 4.0:
+        return [], ["Envelope leaves insufficient depth after required circulation."]
+
+    # Allocate depth proportionally between private bedrooms and public/social living zone
+    if usable_depth >= 11.0:
+        north_h = round(min(7.2, max(5.0, usable_depth * 0.42)), 2)
+    else:
+        north_h = round(max(2.85, min(5.0, usable_depth * 0.50)), 2)
+    middle_h = round(usable_depth - north_h, 2)
 
     rooms: List[Dict[str, Any]] = []
 
@@ -80,31 +87,38 @@ def generate_unit(box: Dict[str, float], unit_type: str, carpet: float, entry_ed
         rooms.append(room)
         return room
 
-    # Private suites sit on the quiet facade.  Every programme receives exactly one
-    # attached bathroom for each bedroom: no generic common bath is silently reused.
-    suite_w = plan_w / beds
+    # Private bedroom suites along quiet facade (y = 0 to north_h)
+    balcony_h = (
+        1.6 if north_h >= 5.5
+        else (1.3 if north_h >= 4.2
+              else (0.9 if (beds >= 2 and north_h >= 3.4) else 0.0))
+    )
+    bed_h = round(north_h - balcony_h, 2)
+    suite_w = round(plan_w / beds, 2)
+
     for index in range(beds):
         key = "mbed" if index == 0 else f"bed{index + 1}"
         bath_key = "mbath" if index == 0 else f"bath{index + 1}"
-        bath_w = min(max(1.45, suite_w * 0.30), suite_w * 0.42)
-        bed_w = suite_w - bath_w
-        x = index * suite_w
+        bath_w = round(min(max(1.5, suite_w * 0.28), 2.8), 2)
+        bed_w = round(suite_w - bath_w, 2)
+        x = round(index * suite_w, 2)
         bed_name = "Master Bedroom" if index == 0 else f"Bedroom {index + 1}"
         bath_name = "Master Ensuite Bath" if index == 0 else f"Bedroom {index + 1} Ensuite Bath"
-        
-        has_balcony = index == 0 or (beds >= 3 and index == 1) or beds >= 4
-        balcony_h = (1.2 if index == 0 else 1.5) if has_balcony else 0.0
-        
-        if balcony_h > 0:
+
+        if balcony_h > 0 and (index == 0 or beds >= 3 or (beds == 2 and index == 1)):
             balcony_key = "mbalcony" if index == 0 else f"balcony{index + 1}"
             balcony_name = "Wrap-around Terrace" if beds >= 5 else f"{bed_name} Balcony"
             balcony_type = "terrace" if beds >= 5 else "balcony"
             emit(balcony_key, balcony_name, balcony_type, _rect(x, 0, bed_w, balcony_h),
                  has_window=True, projects_from=f"{uid}-{key}")
-        
-        emit(key, bed_name, "bedroom", _rect(x, balcony_h, bed_w, north_h - balcony_h),
-             has_window=True, door_to="passage",
-             **({"headboard": "South or West wall"} if index == 0 else {}))
+            emit(key, bed_name, "bedroom", _rect(x, balcony_h, bed_w, bed_h),
+                 has_window=True, door_to="passage",
+                 **({"headboard": "South or West wall"} if index == 0 else {}))
+        else:
+            emit(key, bed_name, "bedroom", _rect(x, 0, bed_w, north_h),
+                 has_window=True, door_to="passage",
+                 **({"headboard": "South or West wall"} if index == 0 else {}))
+
         emit(bath_key, bath_name, "bathroom", _rect(x + bed_w, 0, bath_w, north_h),
              has_window=False, door_to=key, door_child_of=key)
 
@@ -112,93 +126,113 @@ def generate_unit(box: Dict[str, float], unit_type: str, carpet: float, entry_ed
     emit("passage", "Private Passage", "passage", _rect(0, hall_y, plan_w, hall_h),
          door_to="living")
 
-    middle_y = hall_y + hall_h
-    social_h = min(3.2, middle_h)
-    social_y = middle_y + middle_h - social_h
-    kitchen_w = min(3.0, max(2.45, plan_w * 0.16))
-    non_kitchen_w = plan_w - kitchen_w
-    living_w = min(5.2, max(3.6, non_kitchen_w * 0.48))
-    dining_w = min(3.2, max(2.4, non_kitchen_w * 0.28)) if beds >= 2 else 0.0
-    flexible_w = non_kitchen_w - living_w - dining_w
-    emit("living", "Living", "living", _rect(0, social_y, living_w, social_h),
+    middle_y = round(hall_y + hall_h, 2)
+
+    # Social and Living Zone:
+    # If middle_h is deep (>= 5.5m in large/luxury homes), divide into Upper Social (Family Lounge / Office)
+    # and Lower Social (Living / Dining / Kitchen) so no single room becomes excessively oversized.
+    if middle_h >= 5.5:
+        upper_h = round(middle_h * 0.44, 2)
+        social_h = round(middle_h - upper_h, 2)
+
+        # Upper tier: Family Lounge + Home Office / Study
+        family_w = round(min(max(4.5, plan_w * 0.52), 12.0), 2)
+        office_w = round(plan_w - family_w, 2)
+        emit("family", "Family Lounge", "living", _rect(0, middle_y, family_w, upper_h),
+             has_window=True, door_to="passage")
+        emit("office", "Dedicated Home Office", "office", _rect(family_w, middle_y, office_w, upper_h),
+             has_window=True, door_to="family")
+
+        social_y = round(middle_y + upper_h, 2)
+    else:
+        social_h = middle_h
+        social_y = middle_y
+
+    kitchen_w = round(max(2.6, min(5.5, plan_w * 0.22)), 2)
+    non_kitchen_w = round(plan_w - kitchen_w, 2)
+    if beds >= 2:
+        living_w = round(min(max(3.8, non_kitchen_w * 0.52), 9.0), 2)
+        dining_w = round(min(max(2.5, non_kitchen_w * 0.32), 6.0), 2)
+        flexible_w = round(non_kitchen_w - living_w - dining_w, 2)
+    else:
+        living_w = non_kitchen_w
+        dining_w = 0.0
+        flexible_w = 0.0
+
+    emit("living", "Living Room", "living", _rect(0, social_y, living_w, social_h),
          has_window=True, door_to="foyer")
-    if dining_w:
-        emit("dining", "Dining Area", "dining", _rect(living_w, social_y, dining_w, social_h), has_window=True)
-    if flexible_w > 0.3:
+
+    if dining_w > 0:
+        emit("dining", "Dining Area", "dining", _rect(living_w, social_y, dining_w, social_h),
+             has_window=True, door_to="living")
+
+    if flexible_w > 0.5 and middle_h < 5.5:
         extra_name = "Family Lounge" if beds >= 4 else "Family / Living Nook"
-        extra_type = "family"
-        emit("family", extra_name, extra_type, _rect(living_w + dining_w, social_y, flexible_w, social_h),
+        emit("family", extra_name, "family", _rect(living_w + dining_w, social_y, flexible_w, social_h),
              has_window=True, door_to="dining" if dining_w else "living")
-    emit("kitchen", "Kitchen", "kitchen", _rect(non_kitchen_w, social_y, kitchen_w, social_h),
+    elif flexible_w > 0.5:
+        # Extra pantry / breakfast space beside dining in large units
+        emit("pantry", "Pantry & Breakfast Nook", "kitchen",
+             _rect(living_w + dining_w, social_y, flexible_w, social_h),
+             has_window=True, door_to="kitchen")
+
+    emit("kitchen", "Kitchen", "kitchen", _rect(plan_w - kitchen_w, social_y, kitchen_w, social_h),
          has_window=True, door_to="dining" if dining_w else "living", hob_faces="East")
 
-    # Larger homes receive a second social/work zone, rather than an inflated kitchen or
-    # dining room.  This band also makes their circulation visibly distinct from 1-3BHK.
-    if social_y > middle_y:
-        upper_h = social_y - middle_y
-        if beds >= 5:
-            office_w = min(3.5, plan_w * 0.22)
-            emit("office", "Home Office", "office", _rect(0, middle_y, office_w, upper_h), has_window=True)
-            emit("family_upper", "Family Lounge", "living", _rect(office_w, middle_y, plan_w - office_w, upper_h), has_window=True)
-        elif beds == 4:
-            emit("family_upper", "Family Lounge", "living", _rect(0, middle_y, plan_w, upper_h), has_window=True)
-        else:
-            emit("upper_passage", "Gallery Passage", "passage", _rect(0, middle_y, plan_w, upper_h), door_to="passage")
+    entry_y = round(middle_y + middle_h, 2)
+    foyer_w = round(min(3.8, max(2.4, living_w * 0.42)), 2)
+    foyer_x = round(max(0.0, (living_w - foyer_w) / 2.0), 2)
+    left_w = foyer_x
+    right_x = round(foyer_x + foyer_w, 2)
+    right_w = round(plan_w - right_x, 2)
 
-    entry_y = middle_y + middle_h
-    foyer_w = min(2.6, max(2.2, plan_w * 0.22))
-    foyer_x = round(max(0, min(living_w - foyer_w, (living_w - foyer_w) / 2)), 2)
-    # The foyer is the only room with an external main door.  The adjacent circulation
-    # areas are internal access only and carry no external openings.
-    left_w, right_x = foyer_x, foyer_x + foyer_w
-    # This compact service strip keeps the plumbing core beside the kitchen/bathrooms
-    # without turning it into a second way into the apartment.
-    if beds >= 2 and left_w >= 2.45:
+    # Left service strip (Shaft + Pooja + Entry Passage)
+    if left_w >= 2.45:
         shaft_w = 0.85
-        pooja_w = min(1.75, left_w - shaft_w)
-        # Shift pooja to the other side to favor NE sector (West in canonical layout since x increases to East but we rotate)
-        if left_w - pooja_w - shaft_w > 0:
+        pooja_w = round(min(2.2, max(1.5, (left_w - shaft_w) * 0.6)), 2)
+        emit("shaft", "MEP Duct Shaft", "shaft", _rect(0, entry_y, shaft_w, entry_h),
+             has_window=False)
+        emit("pooja", "Pooja Room", "pooja", _rect(shaft_w, entry_y, pooja_w, entry_h),
+             door_to="living", faces="East")
+        rem_left = round(left_w - shaft_w - pooja_w, 2)
+        if rem_left > 0.4:
             emit("entrypassage_w", "Entry Passage", "passage",
-                 _rect(0, entry_y, left_w - pooja_w - shaft_w, entry_h), door_to="foyer")
-            emit("pooja", "Pooja Room", "pooja", _rect(left_w - pooja_w - shaft_w, entry_y, pooja_w, entry_h),
-                 door_to="living", faces="East")
-            emit("shaft", "MEP Duct Shaft", "shaft", _rect(left_w - shaft_w, entry_y, shaft_w, entry_h),
-                 has_window=False)
-        else:
-            emit("pooja", "Pooja Room", "pooja", _rect(0, entry_y, pooja_w, entry_h),
-                 door_to="living", faces="East")
-            emit("shaft", "MEP Duct Shaft", "shaft", _rect(pooja_w, entry_y, shaft_w, entry_h),
-                 has_window=False)
+                 _rect(shaft_w + pooja_w, entry_y, rem_left, entry_h), door_to="foyer")
     elif left_w > 0:
-        shaft_w = min(0.85, left_w)
-        pooja_w = min(1.0, left_w - shaft_w) if left_w - shaft_w > 0 else 0
-        if left_w - shaft_w - pooja_w > 0:
-            emit("entrypassage_w", "Entry Passage", "passage", _rect(0, entry_y, left_w - shaft_w - pooja_w, entry_h), door_to="foyer")
-            if pooja_w > 0:
-                emit("pooja", "Pooja Room", "pooja", _rect(left_w - pooja_w - shaft_w, entry_y, pooja_w, entry_h),
-                     door_to="living", faces="East")
-            emit("shaft", "MEP Duct Shaft", "shaft", _rect(left_w - shaft_w, entry_y, shaft_w, entry_h),
-                 has_window=False)
-        else:
-            if pooja_w > 0:
-                emit("pooja", "Pooja Room", "pooja", _rect(0, entry_y, pooja_w, entry_h),
-                     door_to="living", faces="East")
-            emit("shaft", "MEP Duct Shaft", "shaft", _rect(pooja_w, entry_y, shaft_w, entry_h),
-                 has_window=False)
+        shaft_w = round(min(0.85, left_w), 2)
+        pooja_w = round(left_w - shaft_w, 2)
+        emit("shaft", "MEP Duct Shaft", "shaft", _rect(0, entry_y, shaft_w, entry_h),
+             has_window=False)
+        if pooja_w > 0.4:
+            emit("pooja", "Pooja Room", "pooja", _rect(shaft_w, entry_y, pooja_w, entry_h),
+                 door_to="living", faces="East")
+
+    # Central Entrance Foyer
     emit("foyer", "Entrance Foyer", "entrance", _rect(foyer_x, entry_y, foyer_w, entry_h),
          door_to="living", main_entrance=True, entry_edge=entry_edge)
-    if plan_w - right_x > 0:
-        emit("entrypassage_e", "Entry Passage", "passage", _rect(right_x, entry_y, plan_w - right_x, entry_h), door_to="foyer")
 
-    # Utility is adjacent to the kitchen and does not gain an external/main door.
-    utility_w = min(kitchen_w, plan_w - right_x)
-    utility = next((r for r in rooms if r["id"].endswith("-entrypassage_e")), None)
-    if utility is not None:
-        utility.update({"id": f"{uid}-utility", "name": "Utility / Wash Area", "type": "utility",
-                        "door_to": "kitchen", "has_window": False})
+    # Right service strip: Utility (directly under Kitchen) + optional Powder Room / Gallery
+    if right_w > 0:
+        util_w = round(min(kitchen_w, max(2.4, min(4.0, right_w * 0.45))), 2)
+        util_x = round(plan_w - util_w, 2)
+        emit("utility", "Utility / Wash Area", "utility", _rect(util_x, entry_y, util_w, entry_h),
+             door_to="kitchen", has_window=False)
+        rem_right = round(util_x - right_x, 2)
+        if rem_right >= 2.0:
+            powder_w = round(min(2.2, max(1.5, rem_right * 0.5)), 2)
+            emit("powder", "Guest Powder Room", "bathroom", _rect(right_x, entry_y, powder_w, entry_h),
+                 door_to="foyer", has_window=False)
+            if rem_right - powder_w > 0.4:
+                emit("entrypassage_e", "Entry Gallery", "passage",
+                     _rect(right_x + powder_w, entry_y, round(rem_right - powder_w, 2), entry_h),
+                     door_to="foyer")
+        elif rem_right > 0.4:
+            emit("entrypassage_e", "Entry Gallery", "passage",
+                 _rect(right_x, entry_y, rem_right, entry_h), door_to="foyer")
 
     return rooms, [
         "One main entrance is placed on the unit entry wall.",
         "Arrival sequence is main entrance -> foyer -> living and dining.",
         "Bedroom and bathroom doors are served by the private passage; they do not open into the living room.",
+        "Living and social areas are balanced with realistic human-scale dimensions and functional zones.",
     ]

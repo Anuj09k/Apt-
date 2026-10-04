@@ -33,11 +33,12 @@ const BimModule = lazy(() => import("../modules/BimModule"));
 const AutonomousStudioModule = lazy(() => import("../modules/AutonomousStudioModule"));
 const TownshipModule = lazy(() => import("../modules/TownshipModule"));
 const DigitalTwinModule = lazy(() => import("../modules/DigitalTwinModule"));
+const PlanningModule = lazy(() => import("../modules/PlanningModule"));
 const ProcurementMarketModule = lazy(() => import("../modules/ProcurementMarketModule"));
 const UrbanSustainabilityModule = lazy(() => import("../modules/UrbanSustainabilityModule"));
 
 const COMPONENTS = {
-  plot: SiteModule, gis: GisModule, township: TownshipModule,
+  plot: SiteModule, planning: PlanningModule, gis: GisModule, township: TownshipModule,
   "autonomous-studio": AutonomousStudioModule, parking: ParkingModule,
   studio: GenerativeStudioModule, "3d": ThreeDModule, calculations: CalculationsModule,
   engineering: EngineeringModule, bim: BimModule, "digital-twin": DigitalTwinModule,

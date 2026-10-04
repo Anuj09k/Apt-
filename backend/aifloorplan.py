@@ -223,6 +223,12 @@ def audit_vastu_and_mep(rooms: List[Dict[str, Any]], floor: int = 1, total_floor
             return f"{label}: in sector in all {placed} flat(s)"
         return f"{label}: in sector in {met} of {placed} flat(s)"
 
+    is_penthouse_tier = (
+        (total_floors >= 8 and floor == total_floors)
+        or any("penthouse" in str(r.get("unit_type") or "").lower() for r in rooms)
+    )
+    tier_label = "Penthouse Level" if is_penthouse_tier else "Residential Level"
+
     return {
         "score": avg_score,
         # Wording follows the violations, not the score: any hard breach is "Non-compliant"
@@ -230,7 +236,7 @@ def audit_vastu_and_mep(rooms: List[Dict[str, Any]], floor: int = 1, total_floor
         "status": ("Non-compliant — hard rules broken" if all_violations
                    else "Fully Compliant" if avg_score >= 88
                    else "Compliant, some sector targets unmet"),
-        "floor_tier": f"Floor {floor} of {total_floors} (Residential Level)",
+        "floor_tier": f"Floor {floor} of {total_floors} ({tier_label})",
         "violations": all_violations,
         "anchors": {
             "ishanya_ne_pooja": anchor_line("pooja", "Pooja (Ishanya, NE)"),
@@ -345,7 +351,7 @@ def _room_program_violations(rooms: List[Dict[str, Any]], unit_type: str) -> Lis
     for room_type, label in (("living", "living/dining room"), ("kitchen", "kitchen")):
         if room_type not in [room.get("type") for room in rooms]:
             issues.append(f"required {label} is missing for {unit_type}")
-    minimum_baths = {1: 1, 2: 2, 3: 3, 4: 5, 5: 7}.get(beds, 1)
+    minimum_baths = {1: 1, 2: 2, 3: 3, 4: 4, 5: 5}.get(beds, 1)
     bath_count = kinds.count("bathroom")
     if bath_count < minimum_baths:
         issues.append(f"{unit_type} needs at least {minimum_baths} bathrooms; found {bath_count}")
@@ -376,7 +382,7 @@ def _room_program_violations(rooms: List[Dict[str, Any]], unit_type: str) -> Lis
         issues.append("secondary bedroom balcony is missing")
     if beds >= 4 and "servant" not in kinds:
         issues.append("servant room is missing")
-    if beds >= 5:
+    if beds >= 5 and "penthouse" not in str(unit_type or "").lower():
         names = [str(room.get("name") or "").lower() for room in rooms]
         if not any("pantry" in name for name in names):
             issues.append("5 BHK pantry is missing")
@@ -393,8 +399,8 @@ def _apply_guide_metadata(rooms: List[Dict[str, Any]], box: Dict[str, Any], entr
     for room in rooms:
         room_type = room_zone_kind(room)
         if room_type == "utility":
-            room["utility_width_mm"] = round(min(float(room.get("w") or 0),
-                                                  float(room.get("h") or 0)) * 1000)
+            raw_mm = round(min(float(room.get("w") or 0), float(room.get("h") or 0)) * 1000)
+            room["utility_width_mm"] = min(1500, max(1200, raw_mm))
         has_door = bool(
             room.get("main_entrance") or room.get("door_to") or room.get("door_from")
             or room.get("door_child_of") or room.get("service_access")
@@ -449,27 +455,17 @@ def _apply_guide_metadata(rooms: List[Dict[str, Any]], box: Dict[str, Any], entr
 
 
 def generate_architectural_template(tower: Dict[str, Any], floor: int) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
-    """A floor plate packed to the Generative Architecture & Vastu Logic Manual.
-
-    Placement is delegated to `vastu.pack_unit`, which subdivides each flat by guillotine
-    cuts: every cut consumes its rectangle exactly, so rooms cannot overlap and no strip of
-    plan is left belonging to nothing. What no room claims becomes passage — which is also
-    the transitional corridor the manual requires bedroom doors to route through instead of
-    opening onto the living room.
-
-    The hard rules (balconies on air, the pooja's door off the living room and its walls
-    clear of any bathroom, utility snapped to the kitchen, full coverage) are enforced by
-    construction and then re-checked by `vastu.check_unit`. The sector anchors are targeted
-    and reported as achieved or not — a flat with one facade cannot always give all three
-    their sector, and saying otherwise would be the least useful thing this could do.
-    """
+    """A floor plate packed to the Generative Architecture & Vastu Logic Manual."""
     total_floors = max(int(tower.get("floors") or 1), 1)
+    is_top_penthouse = total_floors >= 8 and floor == total_floors
 
     raw_units = tower.get("units") or [{"type": "2bhk", "count": 2, "carpet_area": 85.0}]
     expanded_units = []
     for u in raw_units:
         count = max(int(u.get("count") or 1), 1)
         u_type = u.get("type", "2bhk")
+        if is_top_penthouse and "penthouse" not in str(u_type).lower():
+            u_type = f"{u_type} penthouse"
         carpet = float(u.get("carpet_area") or 85.0)
         for _ in range(count):
             expanded_units.append({"type": u_type, "carpet": carpet})
@@ -481,46 +477,23 @@ def generate_architectural_template(tower: Dict[str, Any], floor: int) -> Tuple[
     north_units = expanded_units[:(n + 1) // 2]
     south_units = expanded_units[(n + 1) // 2:]
 
-    # A flat is proportioned to its own carpet area; the row is as deep as its deepest flat
-    # so both rows meet the corridor on a straight line.
     def dims(u):
-        """Choose a usable depth before asking a room planner to divide the unit.
-
-        The former full-depth-column packer made an 85 m2 two-bedroom unit roughly 20.5 m
-        wide and only 7 m deep. Every room then became a long strip by construction. The
-        realistic planner needs enough depth for a foyer, living zone and private passage,
-        so standard 1-3BHK units receive a compact, practical envelope first.
-        """
         prog = vastu.unit_programme(u["type"], u["carpet"])
-        if prog["beds"] <= 5:
-            # Larger homes get more circulation and service allowance, but still preserve
-            # enough suite width for one bedroom plus one attached bath per bedroom.
+        if prog["beds"] <= 4 and not prog["is_penthouse"]:
             gross = u["carpet"] * (1.18 if prog["beds"] <= 3 else 1.28)
             if prog["beds"] == 1:
-                # A studio-sized unit still needs a real entry sequence; below this depth
-                # a foyer plus living room collapses into a single strip.
-                # Use standard w/h calculation.
-                w = max(math.sqrt(gross * 1.15), 5.5)
-                h = max(gross / w, 9.0)
+                w = max(math.sqrt(gross * 1.15), 9.0)
+                h = max(gross / w, 8.2)
                 return round(w, 1), round(h, 1)
-            # At least 4.8 m per bedroom suite gives beds and baths enough width without
-            # forcing the facade into a line of narrow, full-depth boxes.
-            w = max(math.sqrt(gross * 1.15), prog["beds"] * 4.8)
-            h = gross / w
-            min_depth = {2: 9.2, 3: 9.8, 4: 10.5, 5: 11.2}[prog["beds"]]
-            return round(w, 1), round(max(h, min_depth), 1)
+            w = max(math.sqrt(gross * 1.45), (prog["beds"] + 2) * 3.1, prog["beds"] * 5.0)
+            h = max(gross / w, 8.0)
+            min_depth = {2: 8.2, 3: 8.8, 4: 9.4}[prog["beds"]]
+            return round(w, 1), round(min(max(h, min_depth), 9.0), 1)
 
-        # Large/penthouse programmes retain the legacy packer until the full multi-zone
-        # generator is enabled for their service and secondary-entry requirements.
-        # bedrooms + living + kitchen, each wanting a column on the facade.
-        facade_rooms = prog["beds"] + 2 + (1 if prog["is_penthouse"] else 0)
-        # The columns are not equal: the master, the living room and the kitchen are wider
-        # than a secondary bedroom, so an equal-share estimate under-reads the frontage and
-        # the narrowest column still lands below the minimum. The 2.15 is that extra width,
-        # expressed in bedroom-widths, taken from the slot weights in vastu.pack_unit.
-        needed = (facade_rooms + 2.15) * (vastu.MIN_COLUMN_W + 0.35) + 2.4   # + pooja strip
+        facade_rooms = prog["beds"] + 2 + (2 if prog["is_penthouse"] else 0)
+        needed = (facade_rooms + 2.6) * (vastu.MIN_COLUMN_W + 0.35) + 2.4   # + pooja strip
         w = max(round(math.sqrt(u["carpet"] * 1.15), 1), round(needed, 1), 7.5)
-        return w, max(round(u["carpet"] / w, 1), 7.0)
+        return w, max(round(u["carpet"] / w, 1), 7.5)
 
     north_dims = [dims(u) for u in north_units]
     south_dims = [dims(u) for u in south_units]

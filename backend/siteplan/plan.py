@@ -203,6 +203,28 @@ def plan_site(project: Dict[str, Any],
     plot = project.get("plot") or {}
     raw_coords = plot.get("coordinates") or []
     coords = [[c["lat"], c["lng"]] if isinstance(c, dict) and "lat" in c else c for c in raw_coords]
+
+    overrides = dict(overrides or {})
+    if "amenities" not in overrides:
+        society_amenities = project.get("society_amenities")
+        if society_amenities is not None:
+            if len(society_amenities) == 0:
+                overrides["amenities"] = {"enabled": False, "blocks": []}
+            else:
+                blocks = []
+                for idx, am in enumerate(society_amenities):
+                    key = f"amenity_{idx}"
+                    name = am.get("name") or f"Amenity {idx+1}"
+                    area = float(am.get("area") or 200.0)
+                    blocks.append({
+                        "key": key,
+                        "name": name,
+                        "area_sqm": area,
+                        "height_m": 4.5,
+                        "floors": 1,
+                    })
+                overrides["amenities"] = {"enabled": True, "blocks": blocks}
+
     cfg = SiteLayoutConfig.from_dict(overrides)
     try:
         return plan(coords, plot.get("road_edges") or [], cfg).to_dict()

@@ -13,15 +13,28 @@ Provides:
 
 from typing import Dict, Any, List, Optional
 import math
+import engine
+import iscodes
+
+
+def _project_metrics(project: Dict[str, Any]):
+    areas = engine.area_metrics(project)
+    plot = project.get("plot") or {}
+    eng = project.get("engineering") or {}
+    plot_area = float(areas.get("plot_area_sqm") or plot.get("area_sqm") or 10000.0)
+    builtup = float(areas.get("total_builtup_sqm") or 0.0)
+    if builtup <= 0:
+        towers = project.get("towers") or []
+        builtup = sum(float(t.get("footprint_area") or t.get("footprint_sqm") or 600.0) * int(t.get("floors") or 1) for t in towers) or 10000.0
+    city = str(project.get("location") or eng.get("city") or eng.get("state") or "Delhi-NCR")
+    return areas, plot_area, builtup, city
 
 
 # --------------------------------------------------------------------------- 1. Urban Growth & Land Value Predictions
 
 def predict_urban_growth_and_value(project: Dict[str, Any]) -> Dict[str, Any]:
     """Projects 5-year land value appreciation, transit connectivity impact, and urban density."""
-    plot = project.get("plot") or {}
-    plot_area = float(plot.get("area_sqm") or 10000.0)
-    city = project.get("location") or "Delhi-NCR"
+    _, plot_area, _, city = _project_metrics(project)
 
     # Base land rate estimation
     base_rate_sqm = 85000.0 if "mumbai" in city.lower() else 65000.0 if "delhi" in city.lower() or "bengaluru" in city.lower() else 45000.0
@@ -59,33 +72,42 @@ def predict_urban_growth_and_value(project: Dict[str, Any]) -> Dict[str, Any]:
 
 def analyze_climate_and_disasters(project: Dict[str, Any]) -> Dict[str, Any]:
     """Performs multi-hazard risk assessment and microclimate analysis."""
-    city = project.get("location") or "Delhi-NCR"
+    _, _, _, city = _project_metrics(project)
+    eng = project.get("engineering") or {}
+    city_ref = iscodes.city_reference(eng.get("city") or city, eng.get("state") or "")
+    zone_key = str(eng.get("seismic_zone") or (city_ref or {}).get("zone") or "IV")
+    z_val = iscodes.ZONE_FACTOR.get(zone_key, 0.24)
+    zone_labels = {"II": "Low", "III": "Moderate", "IV": "Severe", "V": "Very Severe"}
+    z_label = zone_labels.get(zone_key, "Severe")
+    vb = float(eng.get("wind_speed_ms") or (city_ref or {}).get("vb") or 47.0)
+    rain_mm_hr = float(eng.get("rain_intensity_mm_hr") or (city_ref or {}).get("rain") or 65.0)
+    climate_zone = str(eng.get("climate_zone") or (city_ref or {}).get("climate") or "Composite")
 
     hazards = [
         {
             "hazard_type": "Seismic Hazard",
-            "zone": "Zone IV (Severe Seismic Intensity)",
-            "peak_ground_acceleration_pga": "0.24g",
-            "risk_level": "MODERATE-HIGH",
+            "zone": f"Zone {zone_key} ({z_label} Seismic Intensity)",
+            "peak_ground_acceleration_pga": f"{z_val}g",
+            "risk_level": "MODERATE-HIGH" if zone_key in ("IV", "V") else "MODERATE",
             "structural_mitigation": "Dual lateral system with RCC shear walls designed for ductile response (R=5.0 per IS 1893:2016).",
         },
         {
             "hazard_type": "Urban Flooding & Inundation",
             "zone": "Low-Lying Micro-Basin",
-            "peak_rainfall_intensity": "65 mm/hr (50-year storm event)",
-            "risk_level": "MODERATE",
+            "peak_rainfall_intensity": f"{rain_mm_hr:g} mm/hr (50-year storm event)",
+            "risk_level": "HIGH" if rain_mm_hr >= 80 else "MODERATE",
             "structural_mitigation": "Plinth level elevated +1.2m above road crown; storm retention sump with dual submersible pumps (120 HP).",
         },
         {
             "hazard_type": "Wind & Cyclone Hazard",
-            "zone": "Basic Wind Speed Vb = 47 m/s",
-            "design_wind_pressure": "1.85 kN/m² at top storey",
-            "risk_level": "LOW-MODERATE",
+            "zone": f"Basic Wind Speed Vb = {vb:g} m/s",
+            "design_wind_pressure": f"{round(0.6 * (vb ** 2) / 1000.0, 2)} kN/m² basic velocity pressure",
+            "risk_level": "HIGH" if vb >= 50 else "LOW-MODERATE",
             "structural_mitigation": "Aerodynamic rounded corners on tower facades reduce vortex shedding and cross-wind sway.",
         },
         {
             "hazard_type": "Extreme Heat & Drought",
-            "zone": "Composite / Semi-Arid",
+            "zone": climate_zone,
             "peak_summer_temp": "45.5 °C",
             "risk_level": "HIGH",
             "structural_mitigation": "SRI > 78 high-albedo roof coating and vertical vegetation screens reduce surface heat gain.",
@@ -110,7 +132,8 @@ def analyze_climate_and_disasters(project: Dict[str, Any]) -> Dict[str, Any]:
 def analyze_noise_and_pollution(project: Dict[str, Any]) -> Dict[str, Any]:
     """Models acoustic attenuation and particulate matter dispersion from adjacent roads."""
     plot = project.get("plot") or {}
-    road_width = float(plot.get("road_width_m") or 18.0)
+    eng = project.get("engineering") or {}
+    road_width = float(plot.get("road_width_m") or eng.get("road_width") or 18.0)
 
     # Road traffic noise: ~75 dB(A) at curb
     curb_noise_dba = 76.0
@@ -148,8 +171,7 @@ def analyze_noise_and_pollution(project: Dict[str, Any]) -> Dict[str, Any]:
 
 def calculate_green_building_scorecard(project: Dict[str, Any], standard: str = "IGBC") -> Dict[str, Any]:
     """Calculates green building certification credits and targeted award tier."""
-    towers = project.get("towers") or []
-    builtup = sum(float(t.get("footprint_sqm") or 600.0) * int(t.get("floors") or 1) for t in towers) or 10000.0
+    _, _, builtup, _ = _project_metrics(project)
 
     categories = [
         {"category": "Sustainable Architecture & Site Design", "max_points": 10, "awarded_points": 8, "highlights": "Preserved topsoil, low-impact development, SRI > 78 roof"},
@@ -181,8 +203,7 @@ def calculate_green_building_scorecard(project: Dict[str, Any], standard: str = 
 
 def generate_esg_report(project: Dict[str, Any]) -> Dict[str, Any]:
     """Generates an Environmental, Social, and Governance compliance report with carbon metrics."""
-    towers = project.get("towers") or []
-    builtup = sum(float(t.get("footprint_sqm") or 600.0) * int(t.get("floors") or 1) for t in towers) or 10000.0
+    _, _, builtup, _ = _project_metrics(project)
 
     # Carbon accounting
     concrete_vol = builtup * 0.38
@@ -222,8 +243,7 @@ def generate_esg_report(project: Dict[str, Any]) -> Dict[str, Any]:
 
 def calculate_lifecycle_cost(project: Dict[str, Any], years: int = 30) -> Dict[str, Any]:
     """Evaluates 30-year lifecycle expenditure (Capex, Opex, periodic rehabilitation, salvage)."""
-    towers = project.get("towers") or []
-    builtup = sum(float(t.get("footprint_sqm") or 600.0) * int(t.get("floors") or 1) for t in towers) or 10000.0
+    _, _, builtup, _ = _project_metrics(project)
 
     initial_capex = builtup * 48000.0
     annual_opex = builtup * 650.0  # energy, water, security, maintenance ₹650/m²/yr
@@ -263,11 +283,7 @@ def calculate_lifecycle_cost(project: Dict[str, Any], years: int = 30) -> Dict[s
 
 def get_executive_dashboard_kpis(project: Dict[str, Any]) -> Dict[str, Any]:
     """Synthesizes high-level portfolio metrics for C-suite executives and investors."""
-    towers = project.get("towers") or []
-    floors = max((int(t.get("floors") or 1) for t in towers), default=12)
-    plot = project.get("plot") or {}
-    plot_area = float(plot.get("area_sqm") or 10000.0)
-    builtup = sum(float(t.get("footprint_sqm") or 600.0) * int(t.get("floors") or 1) for t in towers) or 10000.0
+    _, plot_area, builtup, _ = _project_metrics(project)
 
     capex = builtup * 48000.0
     rev = builtup * 0.78 * 82000.0  # 78% carpet area @ ₹82,000/m² sale price

@@ -7,7 +7,7 @@ import layout as layoutlib
 from engine import DEFAULT_RATIOS, DEFAULT_RATES, DEFAULT_RULES
 from residential_defaults import (
     new_residential_policy, parking_summary, summarize_units, tower_index, configure_tower,
-    update_tower_parking,
+    update_tower_parking, default_programme,
 )
 
 
@@ -36,7 +36,13 @@ def default_society_amenities():
     ]
 
 
-def default_tower(name="Tower A", index=None, policy=None):
+def default_tower(name="Tower A", index=None, policy=None, programme=None):
+    """One tower with a generated ground-floor plate.
+
+    `programme`, when given, is the tower's per-floor unit programme. `default_project`
+    passes the mixed programme so the project's first tower carries the whole mix on its own
+    plate; towers created for extra site-layout blocks keep the one-type-per-tower A-E cycle.
+    """
     tower = {
         "id": str(uuid.uuid4())[:8],
         "name": name,
@@ -55,7 +61,10 @@ def default_tower(name="Tower A", index=None, policy=None):
             {"id": str(uuid.uuid4())[:8], "name": "Entrance Lobby", "type": "lobby", "area": 90.0},
         ],
     }
-    configure_tower(tower, tower_index(name) if index is None else index, policy=policy)
+    if programme:
+        configure_tower(tower, 0, policy=policy, programme=programme)
+    else:
+        configure_tower(tower, tower_index(name) if index is None else index, policy=policy)
     # Ground-floor layout is generated up front so the plate isn't empty on first load;
     # "rooms" mirrors floor 1 for the engineering calcs (engine.py, engineering.py) and the
     # 3D view (scene.js) that still read a single flat room list per tower.
@@ -151,7 +160,8 @@ def default_project(name, client, location, plot_reference, owner_id, latitude=N
     _city = iscodes.city_reference(next((c for c in iscodes.CITIES if c.lower() in (location or "").lower()), location))
     d_lat, d_lng = 0.00045, 0.00072  # ~100 m × 160 m box around the location centre
     residential_policy = new_residential_policy()
-    initial_tower = default_tower(policy=residential_policy)
+    initial_tower = default_tower(policy=residential_policy,
+                                  programme=default_programme())
     parking = {
         **parking_summary([initial_tower], basement_levels=2),
         "ratio_per_unit": 1.0,

@@ -11,6 +11,20 @@ from __future__ import annotations
 
 import math
 from typing import Any, Dict, List, Optional
+import engine
+
+
+def _site_summary(project: Dict[str, Any], default_plot_sqm: float = 10000.0, default_units: int = 200):
+    areas = engine.area_metrics(project)
+    plot = project.get("plot") or {}
+    eng = project.get("engineering") or {}
+    plot_area_sqm = float(areas.get("plot_area_sqm") or plot.get("area_sqm") or default_plot_sqm)
+    unit_count = int(areas.get("total_units") or 0)
+    if unit_count <= 0:
+        towers = project.get("towers") or []
+        unit_count = sum(int(t.get("floors") or 1) * int(t.get("units_per_floor") or 4) for t in towers) or default_units
+    road_width_m = float(plot.get("road_width_m") or eng.get("road_width") or 18.0)
+    return areas, plot_area_sqm, unit_count, road_width_m
 
 
 # --------------------------------------------------------------------------- 1. City-Scale Planning
@@ -18,8 +32,7 @@ from typing import Any, Dict, List, Optional
 def city_scale_plan(project: Dict[str, Any], params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     """Macro-level urban zoning analysis, density distribution, and master plan alignment."""
     params = params or {}
-    plot = project.get("plot") or {}
-    plot_area_sqm = float(plot.get("area_sqm") or 25000.0)
+    _, plot_area_sqm, unit_count, _ = _site_summary(project, default_plot_sqm=25000.0, default_units=192)
     city_tier = params.get("city_tier") or "Tier-1 Metro"
     master_plan_zone = params.get("master_plan_zone") or "R-2 (Medium-to-High Density Residential)"
 
@@ -39,7 +52,7 @@ def city_scale_plan(project: Dict[str, Any], params: Optional[Dict[str, Any]] = 
         "land_use_distribution": land_use,
         "density_guidelines": {
             "permissible_density_units_per_hectare": 250,
-            "proposed_density_units_per_hectare": round((len(project.get("towers") or []) * 48) / (plot_area_sqm / 10000.0), 1),
+            "proposed_density_units_per_hectare": round(unit_count / max(0.01, plot_area_sqm / 10000.0), 1),
             "compliance_status": "Within Master Plan Threshold",
         },
         "urban_fabric_metrics": {
@@ -55,10 +68,7 @@ def city_scale_plan(project: Dict[str, Any], params: Optional[Dict[str, Any]] = 
 def simulate_traffic(project: Dict[str, Any], params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     """Simulates trip generation, road Level of Service (LOS), and emergency vehicle turning radii."""
     params = params or {}
-    towers = project.get("towers") or []
-    unit_count = sum(int(t.get("floors") or 1) * int(t.get("units_per_floor") or 4) for t in towers) or 240
-    plot = project.get("plot") or {}
-    road_width_m = float(plot.get("road_width_m") or 18.0)
+    _, _, unit_count, road_width_m = _site_summary(project, default_plot_sqm=10000.0, default_units=240)
 
     # ITE / IRC Trip Generation Rates for Residential Apartments:
     # ~0.55 trips per dwelling unit in peak AM hour, ~0.65 in peak PM hour
@@ -121,10 +131,8 @@ def simulate_traffic(project: Dict[str, Any], params: Optional[Dict[str, Any]] =
 
 def optimize_utility_network(project: Dict[str, Any]) -> Dict[str, Any]:
     """Optimizes stormwater drainage, looped water supply, gravity sewerage, and electrical grid."""
-    plot = project.get("plot") or {}
-    plot_area_sqm = float(plot.get("area_sqm") or 10000.0)
+    _, plot_area_sqm, unit_count, _ = _site_summary(project, default_plot_sqm=10000.0, default_units=200)
     towers = project.get("towers") or []
-    unit_count = sum(int(t.get("floors") or 1) * int(t.get("units_per_floor") or 4) for t in towers) or 200
 
     # 1. Stormwater drainage (Rational formula Q = C * I * A / 360)
     # C = 0.75 (weighted runoff coeff), I = 50 mm/hr (10-yr storm intensity)
@@ -189,8 +197,7 @@ def optimize_utility_network(project: Dict[str, Any]) -> Dict[str, Any]:
 
 def urban_digital_twin(project: Dict[str, Any]) -> Dict[str, Any]:
     """Calculates 3D spatial twin context, sun-path microclimate, and Urban Heat Island (UHI) index."""
-    plot = project.get("plot") or {}
-    plot_area_sqm = float(plot.get("area_sqm") or 10000.0)
+    _, plot_area_sqm, _, _ = _site_summary(project, default_plot_sqm=10000.0, default_units=200)
     towers = project.get("towers") or []
 
     # Urban Heat Island (UHI) mitigation score based on albedo and vegetation
@@ -223,8 +230,7 @@ def urban_digital_twin(project: Dict[str, Any]) -> Dict[str, Any]:
 
 def forecast_infrastructure_demand(project: Dict[str, Any]) -> Dict[str, Any]:
     """Generates multi-year civic infrastructure demand forecasts."""
-    towers = project.get("towers") or []
-    unit_count = sum(int(t.get("floors") or 1) * int(t.get("units_per_floor") or 4) for t in towers) or 200
+    _, _, unit_count, _ = _site_summary(project, default_plot_sqm=10000.0, default_units=200)
     population = unit_count * 5
 
     years = [2026, 2028, 2030, 2035, 2040]

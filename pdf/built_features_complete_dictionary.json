@@ -1,0 +1,2786 @@
+[
+  {
+    "category": "User & Project Management",
+    "page": "4",
+    "features": [
+      {
+        "name": "User Registration & Login",
+        "status": "built",
+        "memory_anchor": "Digital Front Door",
+        "human_meaning": "Lets authorized architects, engineers, and clients sign up and securely log in with encrypted passwords and protected sessions."
+      },
+      {
+        "name": "Role-Based Access Control",
+        "status": "built",
+        "memory_anchor": "Permission Badges",
+        "human_meaning": "Controls who can view, edit, approve, or admin a project, ensuring team members only access what they are cleared for."
+      },
+      {
+        "name": "User Profiles",
+        "status": "built",
+        "memory_anchor": "Digital Business Card",
+        "human_meaning": "Stores personal credentials, company affiliations, license numbers, and interface preferences for seamless teamwork."
+      },
+      {
+        "name": "Project Creation",
+        "status": "built",
+        "memory_anchor": "Blank Blueprint",
+        "human_meaning": "Initializes a new real estate project workspace with site location, client objectives, and regional municipal rules."
+      },
+      {
+        "name": "Project Dashboard",
+        "status": "built",
+        "memory_anchor": "Mission Control Desk",
+        "human_meaning": "A high-level bird's-eye overview displaying key metrics, live tower counts, FSI consumption, and overall project health."
+      },
+      {
+        "name": "Project Versioning",
+        "status": "built",
+        "memory_anchor": "Blueprint Time Machine",
+        "human_meaning": "Automatically saves timestamped milestone snapshots so you can revisit, restore, or fork any earlier design iteration."
+      },
+      {
+        "name": "Version Comparison",
+        "status": "built",
+        "memory_anchor": "Spot-the-Difference",
+        "human_meaning": "Compares two design revisions side by side to reveal exactly what changed in carpet area, construction cost, or compliance."
+      },
+      {
+        "name": "Project Sharing",
+        "status": "built",
+        "memory_anchor": "Shareable Worksite Link",
+        "human_meaning": "Enables instant collaboration with external consultants, investors, or authorities via secure read-only or editing links."
+      },
+      {
+        "name": "Project Activity History",
+        "status": "built",
+        "memory_anchor": "Black-Box Audit Trail",
+        "human_meaning": "Logs every single modification, calculation, and export with who performed it and when for absolute accountability."
+      },
+      {
+        "name": "Public Compliance Link",
+        "status": "built",
+        "memory_anchor": "Municipal Inspector Pass",
+        "human_meaning": "Generates a tamper-proof, read-only web portal for sanctioning authorities and RERA inspectors to verify code compliance."
+      },
+      {
+        "name": "Admin Console",
+        "status": "built",
+        "memory_anchor": "Superuser Cockpit",
+        "human_meaning": "Gives organization administrators master control over user seats, team permissions, license tiers, and API usage."
+      },
+      {
+        "name": "Autosave & Recompute",
+        "status": "built",
+        "memory_anchor": "Live Safety Net",
+        "human_meaning": "Silently saves every parameter change in real time and automatically recalculates all civil engineering formulas instantly."
+      }
+    ]
+  },
+  {
+    "category": "Plot Management",
+    "page": "4",
+    "features": [
+      {
+        "name": "Manual Plot Entry",
+        "status": "built",
+        "memory_anchor": "Custom Plot Sketchpad",
+        "human_meaning": "Allows users to type in exact boundary lengths, corner coordinates, and bearings directly from land deed survey records."
+      },
+      {
+        "name": "Polygon Plot Creation",
+        "status": "built",
+        "memory_anchor": "Point-and-Click Land Boundary",
+        "human_meaning": "Draws any irregular multi-sided parcel of land by clicking coordinate pins on an interactive canvas."
+      },
+      {
+        "name": "Plot Dimensions",
+        "status": "built",
+        "memory_anchor": "Digital Tape Measure",
+        "human_meaning": "Computes and displays the exact linear distance and bearing for every perimeter boundary segment."
+      },
+      {
+        "name": "Plot Orientation",
+        "status": "built",
+        "memory_anchor": "True-North Compass",
+        "human_meaning": "Rotates the site relative to true North to guide solar exposure, microclimate wind direction, and Vastu alignment."
+      },
+      {
+        "name": "Plot Boundary Editing",
+        "status": "built",
+        "memory_anchor": "Rubber-Band Resizer",
+        "human_meaning": "Lets you drag, insert, or delete boundary corner nodes dynamically as updated land survey measurements arrive."
+      },
+      {
+        "name": "Plot Area Calculation",
+        "status": "built",
+        "memory_anchor": "Instant Land Surveyor",
+        "human_meaning": "Accurately computes the total parcel footprint in square meters, square feet, acres, and hectares."
+      },
+      {
+        "name": "Road Access Definition",
+        "status": "built",
+        "memory_anchor": "Main Gate Gateway",
+        "human_meaning": "Identifies which plot boundaries face public roadways and records entry points for vehicular traffic and emergency services."
+      },
+      {
+        "name": "Road-Edge Classification",
+        "status": "built",
+        "memory_anchor": "Street Hierarchy Tagger",
+        "human_meaning": "Classifies adjoining roads by width and traffic tier (arterial, collector, internal lane) to dictate statutory building setbacks."
+      },
+      {
+        "name": "Coordinate (Lat/Lng) Entry",
+        "status": "built",
+        "memory_anchor": "GPS Satellite Anchor",
+        "human_meaning": "Pins the site's exact real-world geographic coordinates onto Earth for GIS mapping, elevation analysis, and local climate data."
+      },
+      {
+        "name": "Polygon Repair & Validation",
+        "status": "built",
+        "memory_anchor": "Self-Healing Boundary",
+        "human_meaning": "Detects self-intersecting lines, duplicate vertices, or gaps in parcel drawings and automatically fixes them into valid geometry."
+      }
+    ]
+  },
+  {
+    "category": "Apartment Planning",
+    "page": "4",
+    "features": [
+      {
+        "name": "Apartment Type Selection",
+        "status": "built",
+        "memory_anchor": "Apartment Menu",
+        "human_meaning": "Lets you pick standard unit layouts from 1BHK, 2BHK, 3BHK, 4BHK flats, duplexes, and luxury penthouses."
+      },
+      {
+        "name": "Tower Planning",
+        "status": "built",
+        "memory_anchor": "Skyscraper Block Builder",
+        "human_meaning": "Configures structural tower heights, core layouts, floor plates, and positions them strategically across the plot."
+      },
+      {
+        "name": "Floor Planning",
+        "status": "built",
+        "memory_anchor": "Storey Stacker",
+        "human_meaning": "Organizes vertical floor configurations, distinguishing typical living floors from podiums, amenities, and refuge decks."
+      },
+      {
+        "name": "Room Planning",
+        "status": "built",
+        "memory_anchor": "Living Space Sizer",
+        "human_meaning": "Sizes and arranges individual living rooms, bedrooms, kitchens, and bathrooms to meet functional ergonomics."
+      },
+      {
+        "name": "Corridor Planning",
+        "status": "built",
+        "memory_anchor": "Hallway Highway",
+        "human_meaning": "Designs central circulation passages to ensure effortless resident travel and fire-code emergency exit clearance."
+      },
+      {
+        "name": "Staircase Planning",
+        "status": "built",
+        "memory_anchor": "Fire Escape Lifeline",
+        "human_meaning": "Calculates riser, tread, flight width, and travel distances to guarantee safe everyday and emergency stairwells."
+      },
+      {
+        "name": "Lift Planning",
+        "status": "built",
+        "memory_anchor": "Elevator Bank Sizer",
+        "human_meaning": "Determines required passenger, stretcher, and service elevators based on building height and peak-hour waiting times."
+      },
+      {
+        "name": "Balcony Planning",
+        "status": "built",
+        "memory_anchor": "Fresh-Air Extension",
+        "human_meaning": "Places cantilevered private balconies while automatically verifying local statutory FSI deduction allowances."
+      },
+      {
+        "name": "Common Area Planning",
+        "status": "built",
+        "memory_anchor": "Shared Spaces Designer",
+        "human_meaning": "Allocates entrance lobbies, meter rooms, refuge platforms, and utility shafts across the residential floor plate."
+      },
+      {
+        "name": "Unit Mix Definition",
+        "status": "built",
+        "memory_anchor": "Sales Inventory Balance",
+        "human_meaning": "Sets target unit ratios (e.g., 40% 2BHK, 50% 3BHK, 10% 4BHK) to align construction directly with market buyer demand."
+      },
+      {
+        "name": "Procedural Room Layout Generator",
+        "status": "built",
+        "memory_anchor": "AI Interior Architect",
+        "human_meaning": "Algorithmic layout generator that auto-arranges rooms within unit boundaries to optimize natural lighting and privacy."
+      },
+      {
+        "name": "Whole-Tower Floor Plate Generation",
+        "status": "built",
+        "memory_anchor": "Single-Click Floor Plate",
+        "human_meaning": "Generates an entire balanced floor plate with multiple apartment units clustered around a unified structural core in seconds."
+      },
+      {
+        "name": "Layout Validation & Retry",
+        "status": "built",
+        "memory_anchor": "Automatic Quality Inspector",
+        "human_meaning": "Scans generated layouts for overlapping walls, unlit rooms, or narrow hallways, automatically re-running until perfect."
+      }
+    ]
+  },
+  {
+    "category": "Civil Engineering Calculations",
+    "page": "4",
+    "features": [
+      {
+        "name": "Plot Area",
+        "status": "built",
+        "memory_anchor": "Total Land Footprint",
+        "human_meaning": "The certified total base surface area of the property parcel used for all statutory master ratio derivations."
+      },
+      {
+        "name": "Carpet Area",
+        "status": "built",
+        "memory_anchor": "True Usable Space",
+        "human_meaning": "The net usable floor area bounded by internal walls where residents can lay carpet and live, strictly RERA-compliant."
+      },
+      {
+        "name": "Built-up Area",
+        "status": "built",
+        "memory_anchor": "Outer Wall Boundary Area",
+        "human_meaning": "Carpet area plus external wall thicknesses, private balconies, and dedicated utility shafts."
+      },
+      {
+        "name": "Super Built-up Area",
+        "status": "built",
+        "memory_anchor": "Saleable Market Area",
+        "human_meaning": "Built-up area plus a proportionate share of shared lobbies, corridors, elevator banks, and club facilities."
+      },
+      {
+        "name": "Ground Coverage",
+        "status": "built",
+        "memory_anchor": "Earth Footprint Ratio",
+        "human_meaning": "The percentage of raw ground covered by building footprints versus landscaped open earth."
+      },
+      {
+        "name": "FAR Calculation",
+        "status": "built",
+        "memory_anchor": "Floor Area Multiplier",
+        "human_meaning": "Ratio of total gross building floor area to the plot size, indicating how much total floor area can be constructed."
+      },
+      {
+        "name": "FSI Calculation",
+        "status": "built",
+        "memory_anchor": "Vertical Expansion Index",
+        "human_meaning": "Floor Space Index determining the statutory limit of permissible constructed area on the parcel."
+      },
+      {
+        "name": "Open Space Calculation",
+        "status": "built",
+        "memory_anchor": "Breathe & Green Space",
+        "human_meaning": "Calculates total unbuilt outdoor space left for greenery, recreational pathways, and emergency vehicle movement."
+      },
+      {
+        "name": "Density Calculation",
+        "status": "built",
+        "memory_anchor": "Crowd & Tenancy Gauge",
+        "human_meaning": "Computes dwelling units per hectare and population density to ensure local municipal infrastructure can support the development."
+      },
+      {
+        "name": "Area Derivation Audit Trail",
+        "status": "built",
+        "memory_anchor": "Formula Traceability Log",
+        "human_meaning": "Shows the exact mathematical equations and inputs used to derive every single square meter across the project."
+      },
+      {
+        "name": "FAR Derivation Breakdown",
+        "status": "built",
+        "memory_anchor": "FSI Component Ledger",
+        "human_meaning": "Deconstructs FSI into base rights, paid premium FSI, TDR allowances, and free-of-FSI incentive spaces."
+      }
+    ]
+  },
+  {
+    "category": "Parking Planning",
+    "page": "4",
+    "features": [
+      {
+        "name": "Basement Parking",
+        "status": "built",
+        "memory_anchor": "Subterranean Car Deck",
+        "human_meaning": "Plans efficient multi-level underground parking layouts around structural columns and ventilation shafts."
+      },
+      {
+        "name": "Ground Parking",
+        "status": "built",
+        "memory_anchor": "Surface Driveway Bays",
+        "human_meaning": "Maps out convenient outdoor parking spaces along perimeter roads and visitor drop-off zones."
+      },
+      {
+        "name": "Visitor Parking",
+        "status": "built",
+        "memory_anchor": "Guest Arrival Stalls",
+        "human_meaning": "Reserves mandatory dedicated parking bays near tower entrances specifically for visiting guests and deliveries."
+      },
+      {
+        "name": "EV Parking",
+        "status": "built",
+        "memory_anchor": "Electric Vehicle Chargers",
+        "human_meaning": "Allocates specialized parking stalls equipped with electric charging infrastructure and electrical load allowances."
+      },
+      {
+        "name": "Accessible Parking",
+        "status": "built",
+        "memory_anchor": "Disabled-Friendly Stalls",
+        "human_meaning": "Wider parking bays positioned right next to elevator lobbies with step-free wheelchair access routes."
+      },
+      {
+        "name": "Parking Capacity Calculator",
+        "status": "built",
+        "memory_anchor": "Total Vehicle Counter",
+        "human_meaning": "Calculates the total number of cars, two-wheelers, and cycles accommodated across all parking zones."
+      },
+      {
+        "name": "Parking Efficiency Analysis",
+        "status": "built",
+        "memory_anchor": "Square-Foot-Per-Car Score",
+        "human_meaning": "Measures total parking floor area divided by bays to ensure minimal wasted space and maximum vehicle density."
+      },
+      {
+        "name": "Ramp Planning",
+        "status": "built",
+        "memory_anchor": "Slope & Clearance Grader",
+        "human_meaning": "Designs vehicle entry and exit ramps with safe gradients (1:8 to 1:10) and adequate turning radii to prevent scraping."
+      },
+      {
+        "name": "Carpet-Band State-Aware Norms",
+        "status": "built",
+        "memory_anchor": "Rule-Based Parking Quota",
+        "human_meaning": "Auto-calculates required parking spots based on apartment carpet area tiers and local state bylaws."
+      },
+      {
+        "name": "Per-Tower Demand & Supply",
+        "status": "built",
+        "memory_anchor": "Tower Parking Ledger",
+        "human_meaning": "Tracks exact parking bay allocations tower-by-tower so every residential wing meets its own statutory parking needs."
+      },
+      {
+        "name": "Shared Site Parking Pool",
+        "status": "built",
+        "memory_anchor": "Central Parking Hub",
+        "human_meaning": "Aggregates and balances parking bays across the entire site to optimize multi-tower visitor and commercial shared parking."
+      },
+      {
+        "name": "ECS Conversion",
+        "status": "built",
+        "memory_anchor": "Equivalent Car Unit Sizer",
+        "human_meaning": "Converts two-wheelers, cycles, and transport vans into standardized Equivalent Car Spaces (ECS) for statutory approval."
+      }
+    ]
+  },
+  {
+    "category": "Utility Planning",
+    "page": "5",
+    "features": [
+      {
+        "name": "Water Demand",
+        "status": "built",
+        "memory_anchor": "Daily Thirst Meter",
+        "human_meaning": "Calculates total daily domestic and flushing water requirements in liters based on resident population and NBC standards."
+      },
+      {
+        "name": "Underground Tank",
+        "status": "built",
+        "memory_anchor": "Sub-Basement Reservoir",
+        "human_meaning": "Sizes the primary subterranean water storage sump to hold a multi-day emergency municipal water reserve."
+      },
+      {
+        "name": "Overhead Tank",
+        "status": "built",
+        "memory_anchor": "Rooftop Water Tower",
+        "human_meaning": "Calculates required rooftop storage tanks for gravity-fed pressurized domestic and fire suppression water distribution."
+      },
+      {
+        "name": "STP Planning",
+        "status": "built",
+        "memory_anchor": "On-Site Water Recycler",
+        "human_meaning": "Sizes the Sewage Treatment Plant to purify blackwater and greywater into reusable flushing and landscaping water."
+      },
+      {
+        "name": "WTP Planning",
+        "status": "built",
+        "memory_anchor": "Pure Drinking Filter",
+        "human_meaning": "Plans Water Treatment Plants to filter raw borewell or municipal supply to potable drinking standards."
+      },
+      {
+        "name": "Rainwater Harvesting",
+        "status": "built",
+        "memory_anchor": "Storm Catchment System",
+        "human_meaning": "Designs filtration pits and recharge aquifers to capture 100% of rainwater runoff from building rooftops and paved ground."
+      },
+      {
+        "name": "Electrical Room",
+        "status": "built",
+        "memory_anchor": "Power Substation Vault",
+        "human_meaning": "Sizes and positions high-voltage transformer, DG backup generator, and electrical breaker panel rooms safely on the site."
+      },
+      {
+        "name": "Pump Room",
+        "status": "built",
+        "memory_anchor": "Water Pressure Engine",
+        "human_meaning": "Allocates space for hydropneumatic booster pumps, fire pumps, and plumbing manifolds to maintain constant water pressure."
+      }
+    ]
+  },
+  {
+    "category": "Quantity Estimation",
+    "page": "5",
+    "features": [
+      {
+        "name": "Concrete",
+        "status": "built",
+        "memory_anchor": "Liquid Stone Volume",
+        "human_meaning": "Calculates total cubic meters of ready-mix concrete required for foundations, columns, beams, and slabs."
+      },
+      {
+        "name": "Cement",
+        "status": "built",
+        "memory_anchor": "Binding Powder Bag Count",
+        "human_meaning": "Translates concrete, mortar, and plaster volumes into exact 50kg cement bag counts needed on site."
+      },
+      {
+        "name": "Steel",
+        "status": "built",
+        "memory_anchor": "Rebar Tonnage Tally",
+        "human_meaning": "Computes total metric tonnes of reinforced steel rebars (TMT) required across all structural members."
+      },
+      {
+        "name": "Bricks/Blocks",
+        "status": "built",
+        "memory_anchor": "Wall Block Counter",
+        "human_meaning": "Estimates the precise number of clay bricks or AAC lightweight blocks needed to build internal and external walls."
+      },
+      {
+        "name": "Sand",
+        "status": "built",
+        "memory_anchor": "Fine Aggregate Supply",
+        "human_meaning": "Measures river sand or manufactured M-sand volumes needed for structural concrete and smooth wall plaster."
+      },
+      {
+        "name": "Aggregate",
+        "status": "built",
+        "memory_anchor": "Crushed Stone Quarry Order",
+        "human_meaning": "Estimates 10mm and 20mm coarse gravel quantities required for heavy concrete batching."
+      },
+      {
+        "name": "Tiles",
+        "status": "built",
+        "memory_anchor": "Floor & Wall Tile Area",
+        "human_meaning": "Calculates total square meters of vitrified, ceramic, and anti-skid floor and wall tiles with cut wastage factors."
+      },
+      {
+        "name": "Paint",
+        "status": "built",
+        "memory_anchor": "Wall Color Liter Order",
+        "human_meaning": "Calculates liters of primer, putty, interior emulsion, and weather-proof exterior paint needed for all surfaces."
+      },
+      {
+        "name": "Doors",
+        "status": "built",
+        "memory_anchor": "Doorway Inventory",
+        "human_meaning": "Counts and catalogs all main entrance teak doors, bedroom flush doors, and water-resistant bathroom doors."
+      },
+      {
+        "name": "Windows",
+        "status": "built",
+        "memory_anchor": "Glazing & Frame Tally",
+        "human_meaning": "Catalogs all UPVC and aluminium sliding windows, glass ventilators, and balcony French doors."
+      },
+      {
+        "name": "Plumbing",
+        "status": "built",
+        "memory_anchor": "Pipe & Drainage Network",
+        "human_meaning": "Estimates running meters of CPVC water lines, UPVC drain lines, soil stacks, and sanitary ware fixtures."
+      },
+      {
+        "name": "Electrical",
+        "status": "built",
+        "memory_anchor": "Conduit & Wire Spool Tally",
+        "human_meaning": "Calculates total meters of electrical wiring, conduits, light fixtures, switchboards, and distribution boards."
+      },
+      {
+        "name": "Waterproofing",
+        "status": "built",
+        "memory_anchor": "Leak-Proof Shield",
+        "human_meaning": "Quantifies chemical membrane barriers applied over podiums, basements, terrace roofs, and sunken bathrooms."
+      },
+      {
+        "name": "Finishing Materials",
+        "status": "built",
+        "memory_anchor": "Surface Beauty Pack",
+        "human_meaning": "Measures skirtings, granite kitchen countertops, staircase nosings, and false ceiling panels."
+      }
+    ]
+  },
+  {
+    "category": "BOQ",
+    "page": "5",
+    "features": [
+      {
+        "name": "Automatic Bill of Quantities",
+        "status": "built",
+        "memory_anchor": "Instant Itemized Cost Sheet",
+        "human_meaning": "Generates a complete, standardized Bill of Quantities linking every material, labor task, and machinery cost code."
+      },
+      {
+        "name": "Material Summary",
+        "status": "built",
+        "memory_anchor": "Master Supply List",
+        "human_meaning": "Consolidates raw material quantities into an executive procurement summary ready for supplier bidding."
+      },
+      {
+        "name": "Labour Summary",
+        "status": "built",
+        "memory_anchor": "Workforce Man-Hour Ledger",
+        "human_meaning": "Projects the total person-days required for masons, bar-benders, carpenters, plumbers, and electricians."
+      },
+      {
+        "name": "Equipment Summary",
+        "status": "built",
+        "memory_anchor": "Heavy Machinery Roster",
+        "human_meaning": "Schedules tower cranes, concrete boom placers, earth excavators, and passenger hoists needed on site."
+      },
+      {
+        "name": "BOQ PDF Export",
+        "status": "built",
+        "memory_anchor": "Official Tender Dossier",
+        "human_meaning": "Exports an audit-ready, formatted BOQ document ready for contractor tendering, client sign-off, or bank loan dossiers."
+      },
+      {
+        "name": "BOQ Excel Export",
+        "status": "built",
+        "memory_anchor": "Procurement Spreadsheet",
+        "human_meaning": "Exports editable Excel spreadsheets complete with formulas, rate items, and contractor pricing columns."
+      },
+      {
+        "name": "Structure-Derived Quantity Take-off",
+        "status": "built",
+        "memory_anchor": "Physics-Backed Take-off",
+        "human_meaning": "Derives quantities directly from structural member dimensions rather than generic rule-of-thumb estimates."
+      },
+      {
+        "name": "Column & Beam Section Sizing",
+        "status": "built",
+        "memory_anchor": "Skeletal Sizing Engine",
+        "human_meaning": "Calculates preliminary column and beam cross-sections to ensure architectural designs are structurally realistic."
+      },
+      {
+        "name": "Mix Proportion Derivation",
+        "status": "built",
+        "memory_anchor": "Recipe Ratio Formula",
+        "human_meaning": "Determines water-cement-aggregate design mix ratios (e.g., M25, M30, M40) for various structural elements."
+      },
+      {
+        "name": "Take-off Sanity Checks",
+        "status": "built",
+        "memory_anchor": "Error-Proof Anomaly Filter",
+        "human_meaning": "Cross-examines estimated material quantities against industry benchmarks to immediately flag erroneous spikes."
+      }
+    ]
+  },
+  {
+    "category": "Cost Estimation",
+    "page": "5",
+    "features": [
+      {
+        "name": "Material Cost",
+        "status": "built",
+        "memory_anchor": "Raw Supply Expense",
+        "human_meaning": "Calculates total financial outlay for cement, steel, bricks, finishes, and fixtures based on current market rates."
+      },
+      {
+        "name": "Labour Cost",
+        "status": "built",
+        "memory_anchor": "Workforce Payroll Estimate",
+        "human_meaning": "Calculates total skilled and unskilled contractor payroll expenses across every construction trade."
+      },
+      {
+        "name": "Equipment Cost",
+        "status": "built",
+        "memory_anchor": "Machinery Hire Expense",
+        "human_meaning": "Forecasts total leasing, fuel, and maintenance costs for heavy construction machinery and tooling."
+      },
+      {
+        "name": "Construction Cost",
+        "status": "built",
+        "memory_anchor": "Direct Hard Costs",
+        "human_meaning": "Aggregates all direct physical building costs (materials + labor + equipment) into a single baseline construction budget."
+      },
+      {
+        "name": "Cost per Flat",
+        "status": "built",
+        "memory_anchor": "Per-Apartment Price Tag",
+        "human_meaning": "Divides total tower construction cost by the number of units to reveal the exact build cost per apartment."
+      },
+      {
+        "name": "Cost per sq m",
+        "status": "built",
+        "memory_anchor": "Area Unit Rate",
+        "human_meaning": "Normalizes total expenditure against built-up area to evaluate commercial competitiveness against city market benchmarks."
+      },
+      {
+        "name": "Budget Summary",
+        "status": "built",
+        "memory_anchor": "Financial Health Dashboard",
+        "human_meaning": "An executive single-page financial overview contrasting planned budgets, cost breakdowns, and gross profit margins."
+      },
+      {
+        "name": "Wastage Allowance",
+        "status": "built",
+        "memory_anchor": "Scrap & Spoilage Buffer",
+        "human_meaning": "Factors in realistic 3-5% on-site material cutting losses and breakages into the procurement budget."
+      },
+      {
+        "name": "Preliminaries",
+        "status": "built",
+        "memory_anchor": "Site Setup & Logistics Budget",
+        "human_meaning": "Accounts for job-site trailers, temporary water/power, security staff, access fencing, and project insurance."
+      },
+      {
+        "name": "Overhead & Profit",
+        "status": "built",
+        "memory_anchor": "Contractor Margin Allowance",
+        "human_meaning": "Calculates general contractor head-office overheads and reasonable profit margins (typically 10-15%)."
+      },
+      {
+        "name": "Contingency",
+        "status": "built",
+        "memory_anchor": "Rainy Day Reserve Fund",
+        "human_meaning": "Sets aside an essential 5-10% financial reserve to safeguard against unforeseen subsoil conditions or site emergencies."
+      },
+      {
+        "name": "Escalation",
+        "status": "built",
+        "memory_anchor": "Inflation Shock Absorber",
+        "human_meaning": "Models projected steel, cement, and fuel price inflation across multi-year construction timelines."
+      },
+      {
+        "name": "GST",
+        "status": "built",
+        "memory_anchor": "Statutory Tax Tally",
+        "human_meaning": "Calculates applicable Goods & Services Tax (GST) brackets across materials, labour contracts, and professional fees."
+      }
+    ]
+  },
+  {
+    "category": "Compliance Engine",
+    "page": "5",
+    "features": [
+      {
+        "name": "FAR Validation",
+        "status": "built",
+        "memory_anchor": "Floor Area Limit Check",
+        "human_meaning": "Verifies that the total proposed building area does not exceed municipal Floor Area Ratio limits."
+      },
+      {
+        "name": "FSI Validation",
+        "status": "built",
+        "memory_anchor": "FSI Cap Gatekeeper",
+        "human_meaning": "Ensures full compliance with local zonal Floor Space Index laws, preventing illegal unauthorized overbuilding."
+      },
+      {
+        "name": "Stair Width",
+        "status": "built",
+        "memory_anchor": "Emergency Egress Width Check",
+        "human_meaning": "Ensures staircases meet statutory minimum widths (e.g. 1.5m to 2.0m) to prevent human crush during rapid evacuations."
+      },
+      {
+        "name": "Corridor Width",
+        "status": "built",
+        "memory_anchor": "Hallway Clearance Check",
+        "human_meaning": "Guarantees internal circulation passages meet mandatory clear widths for wheelchairs and fire rescue stretchers."
+      },
+      {
+        "name": "Lift Compliance",
+        "status": "built",
+        "memory_anchor": "Elevator Safety Mandate",
+        "human_meaning": "Ensures elevator counts, car capacities, and fire-fighting lifts meet National Building Code requirements."
+      },
+      {
+        "name": "Fire Exit Checks",
+        "status": "built",
+        "memory_anchor": "Fire Life-Safety Audit",
+        "human_meaning": "Validates that the distance from any apartment front door to the nearest fire exit stair does not exceed legal limits (e.g. 30m)."
+      },
+      {
+        "name": "Accessibility Checks",
+        "status": "built",
+        "memory_anchor": "Universal Access Shield",
+        "human_meaning": "Validates wheelchair ramps, grab rails, door clearances, and barrier-free paths for disabled and elderly residents."
+      },
+      {
+        "name": "Setback Validation",
+        "status": "built",
+        "memory_anchor": "Property Line Boundary Check",
+        "human_meaning": "Confirms front, rear, and side setback buffers are clear of permanent structures for fire tender circulation."
+      },
+      {
+        "name": "Height vs Road Width Rule",
+        "status": "built",
+        "memory_anchor": "Street-to-Sky Limit",
+        "human_meaning": "Restricts maximum building height according to adjoining road width to ensure neighborhood sunlight and emergency access."
+      },
+      {
+        "name": "Open Space vs Height Rule",
+        "status": "built",
+        "memory_anchor": "Tower Clearance Buffer",
+        "human_meaning": "Increases mandatory perimeter open grounds as the building grows taller to satisfy fire-tender reach bylaws."
+      },
+      {
+        "name": "Clause-Referenced Results",
+        "status": "built",
+        "memory_anchor": "By-Law Citation Anchor",
+        "human_meaning": "Tags every compliance rule check with the exact municipal by-law, NBC chapter, or IS code clause number."
+      },
+      {
+        "name": "Compliance Margin Warnings",
+        "status": "built",
+        "memory_anchor": "Early Breach Warning",
+        "human_meaning": "Alerts designers when dimensions fall within 5% of legal limits so design tweaks don't trigger permit rejection."
+      }
+    ]
+  },
+  {
+    "category": "Reports",
+    "page": "5",
+    "features": [
+      {
+        "name": "BOQ Report",
+        "status": "built",
+        "memory_anchor": "Official Quantities Document",
+        "human_meaning": "Generates a polished, print-ready Bill of Quantities report ready for contractor bidding and bank valuation."
+      },
+      {
+        "name": "Cost Report",
+        "status": "built",
+        "memory_anchor": "Financial Feasibility Book",
+        "human_meaning": "Produces a comprehensive cost breakdown report itemizing capital expenditure across all civil trades."
+      },
+      {
+        "name": "Quantity Report",
+        "status": "built",
+        "memory_anchor": "Material Tonnage Report",
+        "human_meaning": "Summarizes all raw material volumes and tonnages needed across the full lifecycle of the project."
+      },
+      {
+        "name": "Parking Report",
+        "status": "built",
+        "memory_anchor": "Vehicle Allocation Dossier",
+        "human_meaning": "Summarizes provided versus statutory required car, two-wheeler, and EV charging parking spaces."
+      },
+      {
+        "name": "Compliance Report",
+        "status": "built",
+        "memory_anchor": "Municipal Sanction Docket",
+        "human_meaning": "Produces a clean compliance certificate listing every tested by-law with green pass / red fail statuses."
+      },
+      {
+        "name": "Executive Summary",
+        "status": "built",
+        "memory_anchor": "One-Page Leadership Brief",
+        "human_meaning": "A concise, high-impact summary of project dimensions, financial metrics, and statutory compliance for C-suite leaders."
+      },
+      {
+        "name": "PDF Export",
+        "status": "built",
+        "memory_anchor": "Universal Document Export",
+        "human_meaning": "Compiles presentation-grade PDF reports with custom headers, company branding, and page numbering."
+      },
+      {
+        "name": "Per-Tower Report Sections",
+        "status": "built",
+        "memory_anchor": "Wing-by-Wing Breakdown",
+        "human_meaning": "Breaks down complex multi-tower developments into individual tower data sheets for targeted construction phasing."
+      },
+      {
+        "name": "Excel Workbook Export",
+        "status": "built",
+        "memory_anchor": "Data Spreadsheet Bundle",
+        "human_meaning": "Exports multi-tab Excel workbooks containing live formulas, raw takeoff numbers, and financial tables."
+      },
+      {
+        "name": "Tower Floor Plans PDF Report",
+        "status": "built",
+        "memory_anchor": "Architectural Drawing Sheet",
+        "human_meaning": "Generates high-resolution multi-page 2D architectural drawing sheets complete with room tags and dimensions."
+      },
+      {
+        "name": "Floor Plan Image & ZIP Export",
+        "status": "built",
+        "memory_anchor": "Graphic Asset Package",
+        "human_meaning": "Bundles high-resolution PNG/SVG floor plans and marketing brochures into a single downloadable ZIP archive."
+      }
+    ]
+  },
+  {
+    "category": "GIS & Site Intelligence",
+    "page": "6",
+    "features": [
+      {
+        "name": "OpenStreetMap Support",
+        "status": "built",
+        "memory_anchor": "Global Map Foundation",
+        "human_meaning": "Fetches open-source geospatial map layers including surrounding road networks, buildings, and land parcels."
+      },
+      {
+        "name": "GIS Coordinate Input",
+        "status": "built",
+        "memory_anchor": "Geo-Spatial Anchor",
+        "human_meaning": "Accepts real-world latitude and longitude coordinates to pinpoint the project site accurately on the globe."
+      },
+      {
+        "name": "Polygon Drawing",
+        "status": "built",
+        "memory_anchor": "Site Boundary Tracer",
+        "human_meaning": "Allows users to trace site boundaries, easements, and exclusion zones directly over satellite imagery."
+      },
+      {
+        "name": "Plot Boundary Detection",
+        "status": "built",
+        "memory_anchor": "Satellite Property Boundary",
+        "human_meaning": "Uses geospatial satellite analysis to identify property fence lines and registered cadastral boundaries automatically."
+      },
+      {
+        "name": "Existing Building Detection",
+        "status": "built",
+        "memory_anchor": "Surrounding Structure Scanner",
+        "human_meaning": "Identifies neighbouring buildings to calculate daylight shadowing and structural setback separation."
+      },
+      {
+        "name": "Road Detection",
+        "status": "built",
+        "memory_anchor": "Street Network Mapper",
+        "human_meaning": "Detects adjacent public highways, main thoroughfares, and access alleys touching the property boundary."
+      },
+      {
+        "name": "Road Width Detection",
+        "status": "built",
+        "memory_anchor": "Right-of-Way Gauge",
+        "human_meaning": "Measures public street widths from satellite data to determine permissible building height and FSI caps."
+      },
+      {
+        "name": "Green Area Detection",
+        "status": "built",
+        "memory_anchor": "Nature Reserve Shield",
+        "human_meaning": "Identifies municipal parks, mature trees, and conservation forests near the site for environmental buffers."
+      },
+      {
+        "name": "Water Body Detection",
+        "status": "built",
+        "memory_anchor": "Riparian Buffer Guard",
+        "human_meaning": "Locates nearby lakes, rivers, and canals to enforce mandatory statutory buffer zones (e.g. 30m NGT buffer)."
+      },
+      {
+        "name": "Terrain Analysis",
+        "status": "built",
+        "memory_anchor": "Topographical Ground Scan",
+        "human_meaning": "Analyzes raw terrain elevations across the site to guide foundation grading and earthwork cut-and-fill."
+      },
+      {
+        "name": "Elevation Analysis",
+        "status": "built",
+        "memory_anchor": "Contour Height Map",
+        "human_meaning": "Generates 3D contour lines showing high ridges and low hollows across the parcel."
+      },
+      {
+        "name": "Slope Analysis",
+        "status": "built",
+        "memory_anchor": "Ground Gradient Grader",
+        "human_meaning": "Measures ground steepness to prevent soil erosion risks and optimize natural rainwater runoff drainage."
+      },
+      {
+        "name": "Flood Risk Analysis",
+        "status": "built",
+        "memory_anchor": "High-Water Warning System",
+        "human_meaning": "Evaluates regional flood history and rainfall runoff to recommend safe finished ground floor levels."
+      },
+      {
+        "name": "Wind Analysis",
+        "status": "built",
+        "memory_anchor": "Breeze & Storm Profiler",
+        "human_meaning": "Simulates prevailing wind directions and speeds to maximize natural cross-ventilation and compute wind structural loads."
+      },
+      {
+        "name": "Sun Path Analysis",
+        "status": "built",
+        "memory_anchor": "Solar Trajectory Tracker",
+        "human_meaning": "Tracks the sun's angle throughout the day and year to optimize building orientation and reduce heat gain."
+      },
+      {
+        "name": "Solar Position & Sun Events",
+        "status": "built",
+        "memory_anchor": "Sunrise & Solstice Clock",
+        "human_meaning": "Computes precise solar altitude, azimuth, sunrise, sunset, and equinox shadow lines for any calendar date."
+      },
+      {
+        "name": "Annual Insolation",
+        "status": "built",
+        "memory_anchor": "Solar Radiation Map",
+        "human_meaning": "Calculates total solar heat energy absorbed per square meter of facade and rooftop across all 365 days."
+      },
+      {
+        "name": "Solar Potential",
+        "status": "built",
+        "memory_anchor": "Rooftop Clean Energy Harvest",
+        "human_meaning": "Estimates kilowatt-hour clean electricity output achievable by installing photovoltaic solar panels on rooftops."
+      },
+      {
+        "name": "Transit Proximity Analysis",
+        "status": "built",
+        "memory_anchor": "Commuter Access Score",
+        "human_meaning": "Measures walking and driving distances to the nearest metro stations, bus stops, and train terminals."
+      },
+      {
+        "name": "Accessibility Analysis",
+        "status": "built",
+        "memory_anchor": "Urban Reachability Index",
+        "human_meaning": "Evaluates connectivity to schools, hospitals, supermarkets, and expressways to assess residential appeal."
+      },
+      {
+        "name": "Site Suitability Score",
+        "status": "built",
+        "memory_anchor": "Overall Development Rating",
+        "human_meaning": "Synthesizes topography, transit, infrastructure, and hazard risks into an overall land development feasibility score."
+      },
+      {
+        "name": "Infrastructure Analysis",
+        "status": "built",
+        "memory_anchor": "Civic Utility Checker",
+        "human_meaning": "Assesses proximity to municipal water mains, electrical grids, stormwater culverts, and sewer lines."
+      },
+      {
+        "name": "Buildability Analysis",
+        "status": "built",
+        "memory_anchor": "Constructability Verdict",
+        "human_meaning": "Evaluates site access for heavy cement trucks, crane swing radius, and logistical staging feasibility."
+      },
+      {
+        "name": "AI Site Analysis",
+        "status": "built",
+        "memory_anchor": "Intelligent Site Auditor",
+        "human_meaning": "An autonomous AI agent that audits geospatial risks, opportunities, and zoning advantages in one unified report."
+      },
+      {
+        "name": "Overpass Feature Caching",
+        "status": "built",
+        "memory_anchor": "Lightning Geo-Data Cache",
+        "human_meaning": "Caches OpenStreetMap spatial queries locally to make map zooming and boundary calculations instant."
+      }
+    ]
+  },
+  {
+    "category": "Development Controls & Setbacks",
+    "page": "7",
+    "features": [
+      {
+        "name": "Per-Edge Inward Setback Application",
+        "status": "built",
+        "memory_anchor": "Boundary Offset Buffer",
+        "human_meaning": "Applies specific statutory setback offsets to each plot edge (front, rear, side) to carve out the buildable zone."
+      },
+      {
+        "name": "Setback Minimums from Plot Area",
+        "status": "built",
+        "memory_anchor": "Plot-Tier Margin Rules",
+        "human_meaning": "Automatically selects mandatory minimum perimeter setbacks based on overall land parcel size tiers."
+      },
+      {
+        "name": "Height-Driven Open Space Table",
+        "status": "built",
+        "memory_anchor": "Tower Clearance Table",
+        "human_meaning": "Expands required perimeter clear margins proportionally as building height increases to satisfy fire department rules."
+      },
+      {
+        "name": "Height vs Road Width Limit",
+        "status": "built",
+        "memory_anchor": "Skyline Road Cap",
+        "human_meaning": "Enforces statutory maximum tower height ceilings dictated by the width of adjoining access roads."
+      },
+      {
+        "name": "Recommended Controls Engine",
+        "status": "built",
+        "memory_anchor": "Smart Zoning Guide",
+        "human_meaning": "Suggests optimal building envelopes that maximize legal FSI without triggering code penalties."
+      },
+      {
+        "name": "Setback Verification & Warnings",
+        "status": "built",
+        "memory_anchor": "Clearance Intrusion Alarm",
+        "human_meaning": "Immediately flags any building footprint, balcony, or canopy protruding into mandatory setback buffer zones."
+      },
+      {
+        "name": "Development Control Overrides",
+        "status": "built",
+        "memory_anchor": "Special Bylaw Exemption Toggle",
+        "human_meaning": "Allows senior engineers to input special zoning variances, TOD incentives, or specific municipal concessions."
+      },
+      {
+        "name": "Yield Recommendation",
+        "status": "built",
+        "memory_anchor": "Maximum Saleable Floor Yield",
+        "human_meaning": "Calculates the sweet spot balancing tower heights and plot coverage to maximize financial return."
+      }
+    ]
+  },
+  {
+    "category": "Site Layout Engine",
+    "page": "7",
+    "features": [
+      {
+        "name": "Buildable Envelope Generation",
+        "status": "built",
+        "memory_anchor": "Legal Building Footprint",
+        "human_meaning": "Extracts the safe, fully compliant interior building zone after subtracting all setbacks, easements, and road cuts."
+      },
+      {
+        "name": "Polygon Repair & Cleaning",
+        "status": "built",
+        "memory_anchor": "CAD Cleanup Broom",
+        "human_meaning": "Cleans messy CAD lines, removes micro-gaps, and fixes duplicate vertices into clean, airtight geometric polygons."
+      },
+      {
+        "name": "Local Tangent-Plane Projection",
+        "status": "built",
+        "memory_anchor": "Curved Earth Flattener",
+        "human_meaning": "Converts GPS latitude/longitude curves into millimeter-accurate flat Cartesian X/Y coordinates for civil calculations."
+      },
+      {
+        "name": "Road Network Reservation",
+        "status": "built",
+        "memory_anchor": "Site Circulation Grid",
+        "human_meaning": "Carves out dedicated rights-of-way for main entry gates, internal spine roads, and emergency access lanes."
+      },
+      {
+        "name": "Perimeter Ring Roads",
+        "status": "built",
+        "memory_anchor": "Fire Tender Highway",
+        "human_meaning": "Lays out continuous perimeter ring roads enabling fire engines to encircle every building unobstructed."
+      },
+      {
+        "name": "Internal Spine & Driveways",
+        "status": "built",
+        "memory_anchor": "Neighbourhood Street Grid",
+        "human_meaning": "Designs internal access driveways connecting residential towers, clubhouse facilities, and underground ramps."
+      },
+      {
+        "name": "Straight-Line Corridor Geometry",
+        "status": "built",
+        "memory_anchor": "Clean Hallway Grid",
+        "human_meaning": "Ensures internal building circulation corridors are designed in straight lines without awkward bottlenecks or dead ends."
+      },
+      {
+        "name": "Largest Inscribed Block Detection",
+        "status": "built",
+        "memory_anchor": "Prime Footprint Finder",
+        "human_meaning": "Algorithmically discovers the largest unobstructed rectangular or convex footprint within an irregular site."
+      },
+      {
+        "name": "Amenity Block Placement",
+        "status": "built",
+        "memory_anchor": "Clubhouse & Pool Locator",
+        "human_meaning": "Identifies optimal locations for clubhouses, sports courts, and swimming pools away from service noisy zones."
+      },
+      {
+        "name": "Green & Open Space Reservation",
+        "status": "built",
+        "memory_anchor": "Central Park Reserve",
+        "human_meaning": "Protects mandatory statutory open green zones and clusters them into high-value community parks."
+      },
+      {
+        "name": "Greedy Grid Tower Packing",
+        "status": "built",
+        "memory_anchor": "High-Density Tower Arranger",
+        "human_meaning": "Places building towers systematically across the buildable envelope to maximize yield and structural efficiency."
+      },
+      {
+        "name": "Footprint & Rotation Sweep",
+        "status": "built",
+        "memory_anchor": "Orientation Angle Tester",
+        "human_meaning": "Sweeps tower footprints through multiple rotation angles to discover the orientation with maximum daylight and views."
+      },
+      {
+        "name": "Inter-Tower Spacing Enforcement",
+        "status": "built",
+        "memory_anchor": "Building Privacy Buffer",
+        "human_meaning": "Maintains mandatory statutory separation distances between adjacent towers for privacy, light, and fire safety."
+      },
+      {
+        "name": "Tower Count & Height Caps",
+        "status": "built",
+        "memory_anchor": "Zoning Altitude Ceiling",
+        "human_meaning": "Constrains tower heights and total numbers according to civil aviation (AAI) and master plan density caps."
+      },
+      {
+        "name": "Boundary Containment Guarantee",
+        "status": "built",
+        "memory_anchor": "Zero-Spill Guard",
+        "human_meaning": "Mathematically proves that zero building elements, overhangs, or footings cross outside legal parcel boundaries."
+      },
+      {
+        "name": "Shared Fitness Scoring",
+        "status": "built",
+        "memory_anchor": "Master Layout Grading Score",
+        "human_meaning": "Evaluates hundreds of generated site layouts against FSI yield, open space, road efficiency, and cost to pick the best."
+      },
+      {
+        "name": "Layout Recommendation Endpoint",
+        "status": "built",
+        "memory_anchor": "AI Masterplan Recommender",
+        "human_meaning": "Presents the single most commercially lucrative and architecturally sound masterplan to the developer."
+      },
+      {
+        "name": "Engine Versioning & Signatures",
+        "status": "built",
+        "memory_anchor": "Algorithm Fingerprint Tracker",
+        "human_meaning": "Tags every generated masterplan layout with the exact algorithmic engine version for reproducible results."
+      },
+      {
+        "name": "Genetic Refinement of Placement",
+        "status": "built",
+        "memory_anchor": "Evolutionary Layout Optimizer",
+        "human_meaning": "Uses genetic evolutionary algorithms over thousands of simulated layout variants to refine tower positioning."
+      }
+    ]
+  },
+  {
+    "category": "Vastu & Generative Architecture",
+    "page": "7",
+    "features": [
+      {
+        "name": "Vastu Sector Mapping",
+        "status": "built",
+        "memory_anchor": "9-Zone Mandala Compass",
+        "human_meaning": "Divides the floor plan and site into the traditional 9 directional sectors (Ishan, Agni, Nairutya, Vayavya, etc.)."
+      },
+      {
+        "name": "Sector-Anchored Unit Packing",
+        "status": "built",
+        "memory_anchor": "Auspicious Unit Placement",
+        "human_meaning": "Places master bedrooms, kitchens, and entrances in their traditionally optimal energetic quadrants."
+      },
+      {
+        "name": "Unit Programme Generation",
+        "status": "built",
+        "memory_anchor": "Room Blueprint Configurator",
+        "human_meaning": "Auto-generates room requirements, room relationships, and functional dimensions based on target flat types."
+      },
+      {
+        "name": "Vastu Audit per Unit",
+        "status": "built",
+        "memory_anchor": "Unit Auspiciousness Scorecard",
+        "human_meaning": "Scores every apartment unit on compliance with Vastu guidelines for buyers prioritizing traditional design principles."
+      },
+      {
+        "name": "MEP Position Audit",
+        "status": "built",
+        "memory_anchor": "Elemental Plumbing & Power Check",
+        "human_meaning": "Checks that fire/heat appliances (kitchens, DG sets) sit in South-East and water sumps sit in North-East as per Vastu."
+      },
+      {
+        "name": "Sector Report",
+        "status": "built",
+        "memory_anchor": "Vastu Compliance Dossier",
+        "human_meaning": "Produces a detailed, client-facing PDF report breaking down Vastu alignment room by room."
+      },
+      {
+        "name": "Vastu-Aligned Floor Plates",
+        "status": "built",
+        "memory_anchor": "Holistic Harmonized Layout",
+        "human_meaning": "Generates entire multi-wing floor plates where all units satisfy both modern architectural codes and Vastu principles."
+      },
+      {
+        "name": "Architectural Template Generation",
+        "status": "built",
+        "memory_anchor": "Standard Plan Library",
+        "human_meaning": "Provides an extensive catalog of pre-engineered, highly optimized unit templates ready for instant deployment."
+      },
+      {
+        "name": "Plan Realism Check",
+        "status": "built",
+        "memory_anchor": "Common-Sense Layout Filter",
+        "human_meaning": "Ensures generative layouts avoid weird angles, unusable corners, or unnatural door swings."
+      },
+      {
+        "name": "Room Aspect & Dimension Checks",
+        "status": "built",
+        "memory_anchor": "Golden Proportion Validator",
+        "human_meaning": "Validates that room length-to-width aspect ratios stay between healthy, comfortable proportions (1:1 to 1:1.5)."
+      }
+    ]
+  },
+  {
+    "category": "Programme & Scheduling",
+    "page": "7",
+    "features": [
+      {
+        "name": "Activity Generation from Quantities",
+        "status": "built",
+        "memory_anchor": "Auto-Work Schedule Builder",
+        "human_meaning": "Automatically converts material takeoff quantities into sequential physical construction tasks."
+      },
+      {
+        "name": "CPM Forward & Backward Pass",
+        "status": "built",
+        "memory_anchor": "Critical Path Mathematics",
+        "human_meaning": "Calculates early start, early finish, late start, and late finish dates across all linked construction activities."
+      },
+      {
+        "name": "Critical Path Identification",
+        "status": "built",
+        "memory_anchor": "Zero-Delay Red Chain",
+        "human_meaning": "Pinpoints the exact sequence of dependent bottleneck tasks where any single delay pushes back the final handover date."
+      },
+      {
+        "name": "Total & Free Float",
+        "status": "built",
+        "memory_anchor": "Schedule Breathing Room",
+        "human_meaning": "Computes how many days each non-critical task can slip without delaying successor tasks or the overall project."
+      },
+      {
+        "name": "Float Verification",
+        "status": "built",
+        "memory_anchor": "Timeline Safety Buffer Check",
+        "human_meaning": "Verifies that float allocations are realistic and that crucial milestone buffers are preserved."
+      },
+      {
+        "name": "Work Calendar & Holidays",
+        "status": "built",
+        "memory_anchor": "Site Working Day Calendar",
+        "human_meaning": "Integrates national holidays, local monsoon shutdowns, and weekly rest days into project completion forecasts."
+      },
+      {
+        "name": "Duration from Output Rates",
+        "status": "built",
+        "memory_anchor": "Productivity-Based Timeline",
+        "human_meaning": "Calculates task durations based on verified daily team output rates (e.g. 15 cubic meters of concrete poured per shift)."
+      },
+      {
+        "name": "Crew Efficiency Modelling",
+        "status": "built",
+        "memory_anchor": "Team Productivity Multiplier",
+        "human_meaning": "Adjusts activity durations according to crew skill levels, extreme weather conditions, and nighttime shifts."
+      },
+      {
+        "name": "Wage Premium Modelling",
+        "status": "built",
+        "memory_anchor": "Overtime & Shift Cost Ledger",
+        "human_meaning": "Factors in double-time wages and holiday night shift premiums when fast-tracking accelerated construction schedules."
+      },
+      {
+        "name": "Prop Removal Safety Rules",
+        "status": "built",
+        "memory_anchor": "Concrete Curing Safety Lock",
+        "human_meaning": "Locks formwork stripping dates to mandatory curing periods (e.g. 14 to 21 days for slabs) to prevent structural sag."
+      },
+      {
+        "name": "Schedule Safety Audit",
+        "status": "built",
+        "memory_anchor": "Collision & Sequence Checker",
+        "human_meaning": "Audits the schedule to ensure finishing trades do not mistakenly begin before waterproofing or structural curing completes."
+      },
+      {
+        "name": "Scheduled Date Audit",
+        "status": "built",
+        "memory_anchor": "Milestone Realism Check",
+        "human_meaning": "Evaluates proposed completion deadlines against industry norms to flag overly aggressive or unrealistic promises."
+      },
+      {
+        "name": "Task Overrides & Edits",
+        "status": "built",
+        "memory_anchor": "Interactive Schedule Tweaker",
+        "human_meaning": "Allows project managers to manually edit task durations, re-link dependencies, or split activities into phases."
+      },
+      {
+        "name": "Target Date Solver",
+        "status": "built",
+        "memory_anchor": "Reverse Delivery Planner",
+        "human_meaning": "Works backward from a fixed client handover date, calculating required crew sizes and overtime shifts to hit the target."
+      },
+      {
+        "name": "Cash Flow Curve",
+        "status": "built",
+        "memory_anchor": "Capital Burn S-Curve",
+        "human_meaning": "Plots cumulative projected monthly capital expenditures across the timeline to secure construction loan financing."
+      },
+      {
+        "name": "Resource Histogram",
+        "status": "built",
+        "memory_anchor": "Daily Manpower Demand Chart",
+        "human_meaning": "Visualizes daily demand for masons, cranes, and concrete mixers to prevent on-site logistical shortages."
+      },
+      {
+        "name": "Line of Balance",
+        "status": "built",
+        "memory_anchor": "Repetitive Floor Cadence",
+        "human_meaning": "Tracks the rhythmic velocity of construction crews moving upward from floor to floor across multi-storey towers."
+      },
+      {
+        "name": "Milestones",
+        "status": "built",
+        "memory_anchor": "Key Delivery Checkpoints",
+        "human_meaning": "Highlights critical contractual handover dates such as foundation completion, topping out, and municipal occupancy."
+      },
+      {
+        "name": "Gantt Visualisation",
+        "status": "built",
+        "memory_anchor": "Master Timeline Bar Chart",
+        "human_meaning": "Renders an interactive, color-coded Gantt chart displaying tasks, dependencies, and critical path activities."
+      }
+    ]
+  },
+  {
+    "category": "Development Finance",
+    "page": "8",
+    "features": [
+      {
+        "name": "Saleable Area Derivation",
+        "status": "built",
+        "memory_anchor": "Market Revenue Multiplier",
+        "human_meaning": "Calculates the exact total billable square footage of residential, commercial, and parking spaces to be sold to buyers."
+      },
+      {
+        "name": "Revenue Model",
+        "status": "built",
+        "memory_anchor": "Total Inflow Forecast",
+        "human_meaning": "Projects total gross sales revenue based on market price per square foot across all units and amenities."
+      },
+      {
+        "name": "S-Curve Cost Spread",
+        "status": "built",
+        "memory_anchor": "Capital Burn S-Curve",
+        "human_meaning": "Models gradual cash expenditure starting slow during foundation, peaking at superstructure, and tapering at finishes."
+      },
+      {
+        "name": "Monthly Cash Flow",
+        "status": "built",
+        "memory_anchor": "Monthly Inflow vs Outflow",
+        "human_meaning": "Balances monthly customer milestone collections against contractor invoice payments to prevent liquidity shortages."
+      },
+      {
+        "name": "NPV",
+        "status": "built",
+        "memory_anchor": "Net Present Value",
+        "human_meaning": "Discounts all future multi-year cash inflows and outflows to today's rupee value to evaluate true project profitability."
+      },
+      {
+        "name": "IRR",
+        "status": "built",
+        "memory_anchor": "Internal Rate of Return",
+        "human_meaning": "Computes the annual percentage yield of the real estate investment to evaluate if it beats bank financing hurdle rates."
+      },
+      {
+        "name": "Break-even Point",
+        "status": "built",
+        "memory_anchor": "Cost Recovery Milestone",
+        "human_meaning": "Identifies the exact sales milestone (e.g. 58% of units sold) where total revenue fully covers all land and construction debt."
+      },
+      {
+        "name": "Preliminaries per Month",
+        "status": "built",
+        "memory_anchor": "Monthly Site Overhead",
+        "human_meaning": "Models fixed monthly site management overheads such as security, crane rentals, supervisor salaries, and site utilities."
+      },
+      {
+        "name": "Finance Configuration",
+        "status": "built",
+        "memory_anchor": "Loan & Interest Setup",
+        "human_meaning": "Lets developers configure bank construction loan interest rates, equity-to-debt ratios, and sales absorption velocity."
+      }
+    ]
+  },
+  {
+    "category": "Data Reliability & Assurance",
+    "page": "8",
+    "features": [
+      {
+        "name": "Plot Data Check",
+        "status": "built",
+        "memory_anchor": "Land Data Health Check",
+        "human_meaning": "Verifies that plot boundary coordinates, survey lines, and edge classifications are mathematically closed and sound."
+      },
+      {
+        "name": "Development Controls Check",
+        "status": "built",
+        "memory_anchor": "Zoning Parameters Check",
+        "human_meaning": "Ensures FSI, ground coverage, and setback parameters entered into the project match official municipal master plans."
+      },
+      {
+        "name": "Tower Data Check",
+        "status": "built",
+        "memory_anchor": "Tower Architecture Check",
+        "human_meaning": "Verifies that tower heights, floor-to-floor clearances, and core dimensions are realistic and structurally feasible."
+      },
+      {
+        "name": "Site Layout Check",
+        "status": "built",
+        "memory_anchor": "Masterplan Integrity Check",
+        "human_meaning": "Validates that all towers, roads, amenities, and parking structures sit entirely within the legal plot boundary."
+      },
+      {
+        "name": "GIS Data Check",
+        "status": "built",
+        "memory_anchor": "Geospatial Precision Check",
+        "human_meaning": "Confirms satellite imagery, road width overlays, and contour data align with millimeter ground truth."
+      },
+      {
+        "name": "Parking Check",
+        "status": "built",
+        "memory_anchor": "Parking Quota Check",
+        "human_meaning": "Audits parking designs to ensure car counts, turning radii, and ramp slopes meet statutory building code minimums."
+      },
+      {
+        "name": "Engineering Check",
+        "status": "built",
+        "memory_anchor": "Structural & MEP Sanity Check",
+        "human_meaning": "Ensures column spans, water tank capacities, and lift counts satisfy mechanical and civil engineering safety norms."
+      },
+      {
+        "name": "Finance Check",
+        "status": "built",
+        "memory_anchor": "Financial Logic Audit",
+        "human_meaning": "Checks that financial cash flows, escalation buffers, and profit models do not contain circular or missing formulas."
+      },
+      {
+        "name": "Programme Check",
+        "status": "built",
+        "memory_anchor": "Timeline Logic Audit",
+        "human_meaning": "Verifies that construction task predecessors, curing delays, and milestone dependencies are realistically sequenced."
+      },
+      {
+        "name": "Data Freshness Tracking",
+        "status": "built",
+        "memory_anchor": "Data Timestamp Tracker",
+        "human_meaning": "Monitors when input assumptions were last updated, flagging stale cost rates or outdated municipal bylaw data."
+      },
+      {
+        "name": "Cross-Module Consistency Checks",
+        "status": "built",
+        "memory_anchor": "Ecosystem Sync Guard",
+        "human_meaning": "Ensures that changing a dimension in architectural planning instantly synchronizes with BOQ quantities and finance."
+      },
+      {
+        "name": "Compliance Margin Reporting",
+        "status": "built",
+        "memory_anchor": "Safety Buffer Gauge",
+        "human_meaning": "Reports how much headroom exists between actual project measurements and statutory maximum/minimum limits."
+      },
+      {
+        "name": "Module Warning Rollup",
+        "status": "built",
+        "memory_anchor": "Central Alert Aggregator",
+        "human_meaning": "Collects all warnings, code breaches, and data anomalies across all 47 modules into a single consolidated dashboard."
+      },
+      {
+        "name": "Overall Trust Score",
+        "status": "built",
+        "memory_anchor": "Project Reliability Index",
+        "human_meaning": "Gives the entire development a single confidence score (0-100%) indicating how complete, verified, and bank-ready the project is."
+      },
+      {
+        "name": "Data Health Report Export",
+        "status": "built",
+        "memory_anchor": "Assurance Audit Certificate",
+        "human_meaning": "Generates a formal data verification document proving to investors and lenders that all calculations are fully validated."
+      }
+    ]
+  },
+  {
+    "category": "IS & NBC Code Intelligence",
+    "page": "8",
+    "features": [
+      {
+        "name": "Central Code Constant Registry",
+        "status": "built",
+        "memory_anchor": "Master Engineering Constants",
+        "human_meaning": "A standardized repository of standard civil constants (steel density, concrete strength, live loads, fire ratings)."
+      },
+      {
+        "name": "74-Entry Clause Registry",
+        "status": "built",
+        "memory_anchor": "Bylaw Clause Database",
+        "human_meaning": "A structured digital index of 74 foundational clauses from the National Building Code (NBC) and Indian Standards (IS)."
+      },
+      {
+        "name": "Clause Text Corpus Ingestion",
+        "status": "built",
+        "memory_anchor": "Legal Code Digitizer",
+        "human_meaning": "Ingests and parses dense government building codes, development control regulations, and technical standards."
+      },
+      {
+        "name": "Clause Chunking & Indexing",
+        "status": "built",
+        "memory_anchor": "Smart Code Indexer",
+        "human_meaning": "Breaks dense legal clauses into bite-sized, searchable concepts tagged with building height, occupancy, and zone."
+      },
+      {
+        "name": "Semantic Clause Retrieval (RAG)",
+        "status": "built",
+        "memory_anchor": "AI Code Search Engine",
+        "human_meaning": "Uses semantic Retrieval-Augmented Generation to instantly find the exact relevant building code clause for any design question."
+      },
+      {
+        "name": "Code Search Endpoint",
+        "status": "built",
+        "memory_anchor": "Bylaw Search Bar",
+        "human_meaning": "An API endpoint allowing users to search across NBC 2016, IS 456, IS 1893, and local municipal bylaws using natural language."
+      },
+      {
+        "name": "Code Question Answering",
+        "status": "built",
+        "memory_anchor": "AI Building Code Consultant",
+        "human_meaning": "Answers complex architectural compliance questions with clear plain-English interpretations grounded in statutory text."
+      },
+      {
+        "name": "Citation Extraction",
+        "status": "built",
+        "memory_anchor": "Legal Clause Tagger",
+        "human_meaning": "Extracts and references the exact section, table, and clause numbers (e.g. NBC 2016 Part 4 Table 7) supporting any rule."
+      },
+      {
+        "name": "Citation Verification Against Registry",
+        "status": "built",
+        "memory_anchor": "Hallucination Shield",
+        "human_meaning": "Cross-references every generated citation against the certified legal registry to ensure AI never invents fake bylaws."
+      },
+      {
+        "name": "Cited Extracts in Answers",
+        "status": "built",
+        "memory_anchor": "Verbatim Legal Proof",
+        "human_meaning": "Displays verbatim excerpts of the actual statutory code directly inside AI answers for complete legal transparency."
+      }
+    ]
+  },
+  {
+    "category": "Engineering Modules (IS/NBC)",
+    "page": "8",
+    "features": [
+      {
+        "name": "Structural Load Estimator (IS 875)",
+        "status": "built",
+        "memory_anchor": "Gravity Load Calculator",
+        "human_meaning": "Computes dead weight of walls, slabs, and finishes alongside live human occupancy loads per IS 875 Part 1 & 2."
+      },
+      {
+        "name": "Wind Force Coefficients (IS 875-3)",
+        "status": "built",
+        "memory_anchor": "Wind Pressure Profiler",
+        "human_meaning": "Calculates design wind speeds and aerodynamic gust pressures on high-rise facades according to IS 875 Part 3."
+      },
+      {
+        "name": "Seismic Zone & Base Shear (IS 1893)",
+        "status": "built",
+        "memory_anchor": "Earthquake Safety Force",
+        "human_meaning": "Determines regional earthquake zone factor (II to V) and computes total base shear force the building must resist per IS 1893."
+      },
+      {
+        "name": "Foundation Advisor (IS 6403/1904)",
+        "status": "built",
+        "memory_anchor": "Subsoil Footing Guide",
+        "human_meaning": "Recommends shallow isolated footings, raft foundations, or deep bored piles based on soil safe bearing capacity."
+      },
+      {
+        "name": "Concrete Mix Design (IS 10262)",
+        "status": "built",
+        "memory_anchor": "Concrete Recipe Engineer",
+        "human_meaning": "Designs optimal water-cement ratios and aggregate gradations for specified target compressive strengths per IS 10262."
+      },
+      {
+        "name": "Water Infrastructure (IS 1172)",
+        "status": "built",
+        "memory_anchor": "Plumbing Supply Standard",
+        "human_meaning": "Determines required daily domestic water flow rates, pipe sizes, and storage capacities per IS 1172 standards."
+      },
+      {
+        "name": "Storm Water & RWH (IS 3764)",
+        "status": "built",
+        "memory_anchor": "Rain Runoff & Drainage Design",
+        "human_meaning": "Sizes perimeter stormwater drains, catch basins, and percolation recharge pits per IS 3764 and local bylaws."
+      },
+      {
+        "name": "Parking Compliance (NBC/SP:21)",
+        "status": "built",
+        "memory_anchor": "Vehicle Code Validator",
+        "human_meaning": "Validates parking bay dimensions (2.5m x 5.0m), driveways, and turning circles against NBC and SP:21 handbook rules."
+      },
+      {
+        "name": "Fire Safety Compliance (NBC Part 4)",
+        "status": "built",
+        "memory_anchor": "Fire Life-Safety Guardian",
+        "human_meaning": "Checks compartmentation, fire hydrant positions, sprinkler coverage, and fire-escape doors against NBC 2016 Part 4."
+      },
+      {
+        "name": "Accessibility Compliance (NBC Part 3)",
+        "status": "built",
+        "memory_anchor": "Barrier-Free Standard",
+        "human_meaning": "Ensures wheelchair ramp slopes (1:12), tactile paving, and disabled washroom dimensions comply with NBC Part 3."
+      },
+      {
+        "name": "Green Building Preliminary Rating",
+        "status": "built",
+        "memory_anchor": "Eco-Certification Scorecard",
+        "human_meaning": "Evaluates energy efficiency, water recycling, and material sustainability to estimate IGBC or GRIHA green star ratings."
+      },
+      {
+        "name": "Column Grid Optimizer",
+        "status": "built",
+        "memory_anchor": "Structural Column Sizer",
+        "human_meaning": "Suggests efficient, regular column grid spacings (e.g. 6m x 6m or 7.5m x 7.5m) that align parking below with flats above."
+      },
+      {
+        "name": "Embodied Carbon",
+        "status": "built",
+        "memory_anchor": "Material Carbon Footprint",
+        "human_meaning": "Calculates total metric tonnes of carbon emissions embedded in the manufacturing and transport of cement, steel, and bricks."
+      },
+      {
+        "name": "Plantation Plan",
+        "status": "built",
+        "memory_anchor": "Oxygen & Greenery Planner",
+        "human_meaning": "Calculates required tree counts per plot area, recommending native shade and oxygen-generating species."
+      }
+    ]
+  },
+  {
+    "category": "3D & Visualisation",
+    "page": "8",
+    "features": [
+      {
+        "name": "3D Site Model",
+        "status": "built",
+        "memory_anchor": "Interactive Digital Campus",
+        "human_meaning": "Renders a full 3D interactive model of the site complete with buildings, terrain contours, and roads in real time."
+      },
+      {
+        "name": "Tower Massing",
+        "status": "built",
+        "memory_anchor": "Building Volume Blocks",
+        "human_meaning": "Displays simple 3D geometric volumetric masses of towers to visualize skyline impact, shadows, and bulk proportions."
+      },
+      {
+        "name": "Road & Plot Rendering",
+        "status": "built",
+        "memory_anchor": "Site Surface Visualizer",
+        "human_meaning": "Renders textured internal asphalt driveways, pedestrian sidewalks, and perimeter fencing in the 3D viewer."
+      },
+      {
+        "name": "Amenity & Clubhouse Rendering",
+        "status": "built",
+        "memory_anchor": "Lifestyle Amenities Visualizer",
+        "human_meaning": "Renders community recreation centers, swimming pools, tennis courts, and children's play areas in 3D."
+      },
+      {
+        "name": "Central Park & Landscape",
+        "status": "built",
+        "memory_anchor": "Green Oasis Visualizer",
+        "human_meaning": "Displays central green lawns, botanical gardens, shade trees, and outdoor seating plazas in lush 3D visuals."
+      },
+      {
+        "name": "Floor Plate Viewer",
+        "status": "built",
+        "memory_anchor": "Floor-by-Floor 3D Slicer",
+        "human_meaning": "Allows users to peel open any storey of a tower to inspect the interior unit arrangement, corridors, and core."
+      },
+      {
+        "name": "Site Diagrams",
+        "status": "built",
+        "memory_anchor": "Masterplan Graphic Diagrams",
+        "human_meaning": "Generates color-coded thematic maps showing circulation flows, security zones, and service delivery pathways."
+      },
+      {
+        "name": "Blueprint View",
+        "status": "built",
+        "memory_anchor": "Classic Blue-White Plan",
+        "human_meaning": "Toggles 2D views into a high-contrast architectural blueprint style with crisp vector lines and dimension annotations."
+      },
+      {
+        "name": "Live Metrics Strip",
+        "status": "built",
+        "memory_anchor": "Real-Time HUD Gauge",
+        "human_meaning": "A persistent heads-up display showing live FSI, unit counts, budget totals, and compliance status as you edit."
+      },
+      {
+        "name": "Command Palette",
+        "status": "built",
+        "memory_anchor": "Instant Keyboard Navigator",
+        "human_meaning": "A fast keyboard-driven search popup (Ctrl+K) to jump to any tool, tower, report, or calculation instantly."
+      },
+      {
+        "name": "Presentation-Grade Furnished 2D Blueprint Engine",
+        "status": "built",
+        "memory_anchor": "Architectural Brochure Plan",
+        "human_meaning": "Renders presentation-ready floor plans furnished with realistic sofas, dining sets, kitchen counters, and beds."
+      },
+      {
+        "name": "Structural Wall Poch\u00e9 & Dimension Badges",
+        "status": "built",
+        "memory_anchor": "Pro-Grade Drafting Style",
+        "human_meaning": "Fills load-bearing walls with solid architectural hatch poch\u00e9 and displays crisp, translucent dimension badges."
+      }
+    ]
+  },
+  {
+    "category": "AI Planner",
+    "page": "9",
+    "features": [
+      {
+        "name": "Automatic Layout Generation",
+        "status": "built",
+        "memory_anchor": "Instant Masterplan Generator",
+        "human_meaning": "Generates dozens of complete, optimized site and floor layout options with a single click based on plot geometry and zoning rules."
+      },
+      {
+        "name": "Smart Tower Placement",
+        "status": "built",
+        "memory_anchor": "Intelligent Tower Siting",
+        "human_meaning": "Positions towers algorithmically on the plot to maximize natural sunlight, wind flow, privacy, and views while respecting setbacks."
+      },
+      {
+        "name": "Apartment Mix Optimisation",
+        "status": "built",
+        "memory_anchor": "Ideal Unit Mix Solver",
+        "human_meaning": "Optimizes the ratio of 1BHK, 2BHK, 3BHK, and 4BHK units to maximize developer revenue while matching local market buyer demand."
+      },
+      {
+        "name": "Floor Optimisation",
+        "status": "built",
+        "memory_anchor": "Zero-Waste Floor Stacker",
+        "human_meaning": "Refines floor plate geometry to eliminate dark, unventilated pockets, dead-end corridors, and wasted circulation area."
+      },
+      {
+        "name": "Open Space Optimisation",
+        "status": "built",
+        "memory_anchor": "Green Space Maximizer",
+        "human_meaning": "Arranges buildings to consolidate mandatory open ground into usable, high-value central parks and recreational zones."
+      }
+    ]
+  },
+  {
+    "category": "AI Civil Engineer",
+    "page": "9",
+    "features": [
+      {
+        "name": "Civil Design Suggestions",
+        "status": "built",
+        "memory_anchor": "Virtual Senior Engineer",
+        "human_meaning": "Offers proactive engineering recommendations on drainage slopes, road grades, retaining walls, and retaining structures."
+      },
+      {
+        "name": "FAR Optimisation",
+        "status": "built",
+        "memory_anchor": "Floor Area Maximizer",
+        "human_meaning": "Calculates the exact building massing and floor counts needed to utilize 100% of legally permissible Floor Area Ratio."
+      },
+      {
+        "name": "FSI Optimisation",
+        "status": "built",
+        "memory_anchor": "Legal Floor Yield Booster",
+        "human_meaning": "Unlocks maximum allowable built-up area by strategically combining base FSI, paid premium FSI, and TDR incentive schemes."
+      },
+      {
+        "name": "Utility Optimisation",
+        "status": "built",
+        "memory_anchor": "Smart Infrastructure Routing",
+        "human_meaning": "Optimizes underground pipe networks, water tanks, and electrical substations to minimize piping runs and pumping energy."
+      },
+      {
+        "name": "Parking Optimisation",
+        "status": "built",
+        "memory_anchor": "Smart Vehicle Bay Sizer",
+        "human_meaning": "Maximizes the number of standard, EV, and visitor parking bays accommodated within tight basement and surface footprints."
+      }
+    ]
+  },
+  {
+    "category": "AI Structural Advisor",
+    "page": "9",
+    "features": [
+      {
+        "name": "Column Grid Suggestions",
+        "status": "built",
+        "memory_anchor": "Optimal Column Spacing",
+        "human_meaning": "Suggests efficient, uniform column grid layouts (e.g., 6m x 6m or 7.5m x 7.5m) that align parking bays below with apartment walls above."
+      },
+      {
+        "name": "Beam Layout Suggestions",
+        "status": "built",
+        "memory_anchor": "Skeletal Beam Network",
+        "human_meaning": "Proposes sensible primary and secondary beam layouts to safely support floor slabs without excessive ceiling depths."
+      },
+      {
+        "name": "Foundation Recommendations",
+        "status": "built",
+        "memory_anchor": "Subsoil Footing Advisor",
+        "human_meaning": "Evaluates soil bearing capacity and building loads to recommend the most cost-effective foundation (isolated, raft, or pile)."
+      },
+      {
+        "name": "Structural Risk Warnings",
+        "status": "built",
+        "memory_anchor": "Structural Hazard Detector",
+        "human_meaning": "Flags potential structural vulnerabilities such as floating columns, soft storeys, excessive cantilevers, or torsional irregularity."
+      }
+    ]
+  },
+  {
+    "category": "AI Quantity Surveyor",
+    "page": "9",
+    "features": [
+      {
+        "name": "Quantity Optimisation",
+        "status": "built",
+        "memory_anchor": "Material Volume Trimmer",
+        "human_meaning": "Refines structural and architectural dimensions to reduce unnecessary concrete, steel, and masonry bulk without compromising safety."
+      },
+      {
+        "name": "Waste Reduction",
+        "status": "built",
+        "memory_anchor": "Zero-Scrap Strategy",
+        "human_meaning": "Analyzes standard material manufacturing dimensions to minimize on-site cutting losses and scrap material generation."
+      },
+      {
+        "name": "Steel Cutting Optimisation",
+        "status": "built",
+        "memory_anchor": "Rebar Bar-Bending Solver",
+        "human_meaning": "Calculates optimal bar-bending schedules (BBS) to cut standard 12-meter rebar lengths with minimal leftover offcut scrap."
+      },
+      {
+        "name": "Tile Waste Optimisation",
+        "status": "built",
+        "memory_anchor": "Tile Pattern Calculator",
+        "human_meaning": "Simulates tile layout grids across floor rooms to minimize edge cuts, broken tiles, and aesthetic joint misalignment."
+      },
+      {
+        "name": "BOQ Optimisation",
+        "status": "built",
+        "memory_anchor": "Cost-Efficient Item Schedule",
+        "human_meaning": "Streamlines Bill of Quantities items and work descriptions to prevent duplicate contractor billings and scope creep."
+      }
+    ]
+  },
+  {
+    "category": "AI Cost Engineer",
+    "page": "9",
+    "features": [
+      {
+        "name": "Cost Prediction",
+        "status": "built",
+        "memory_anchor": "Early Project Price Tag",
+        "human_meaning": "Forecasts overall project construction cost within minutes of initial concept design using historical regional cost benchmarks."
+      },
+      {
+        "name": "Budget Optimisation",
+        "status": "built",
+        "memory_anchor": "Target Budget Balancer",
+        "human_meaning": "Rebalances material specifications and finishes across high-visibility versus back-of-house areas to keep the project strictly within budget."
+      },
+      {
+        "name": "Cost Comparison",
+        "status": "built",
+        "memory_anchor": "Scenario Expense Benchmarker",
+        "human_meaning": "Compares capital expenditure across different design iterations, structural systems, or finishing grades side by side."
+      },
+      {
+        "name": "Cost Saving Suggestions",
+        "status": "built",
+        "memory_anchor": "Value Engineering Ideas",
+        "human_meaning": "Suggests practical value engineering alternatives (e.g. fly-ash bricks, optimized slab thicknesses) that lower costs without hurting quality."
+      },
+      {
+        "name": "Grade Sweep Analysis",
+        "status": "built",
+        "memory_anchor": "Finish Specification Sweep",
+        "human_meaning": "Simulates how shifting between affordable, standard, and luxury specification tiers impacts total cost and profit margins."
+      }
+    ]
+  },
+  {
+    "category": "AI Sustainability",
+    "page": "9",
+    "features": [
+      {
+        "name": "Green Building Score",
+        "status": "built",
+        "memory_anchor": "Eco-Rating Predictor",
+        "human_meaning": "Pre-evaluates the project against IGBC, GRIHA, and LEED certification criteria, predicting the likely star rating or plaque."
+      },
+      {
+        "name": "Carbon Footprint",
+        "status": "built",
+        "memory_anchor": "Embodied & Operational Carbon Meter",
+        "human_meaning": "Measures total carbon emissions generated during material manufacturing, transport, and 50-year building operations."
+      },
+      {
+        "name": "Solar Potential",
+        "status": "built",
+        "memory_anchor": "Rooftop Clean Power Calculator",
+        "human_meaning": "Simulates annual solar irradiance on building rooftops to calculate feasible solar photovoltaic energy output."
+      },
+      {
+        "name": "Water Efficiency",
+        "status": "built",
+        "memory_anchor": "Water Recycling Balance",
+        "human_meaning": "Models daily water circularity by combining low-flow plumbing fixtures, rainwater harvesting, and STP greywater reuse."
+      },
+      {
+        "name": "Tree Plantation Suggestions",
+        "status": "built",
+        "memory_anchor": "Native Urban Forest Planner",
+        "human_meaning": "Recommends native tree and shrub species that maximize shade, air purification, and biodiversity while requiring minimal irrigation."
+      }
+    ]
+  },
+  {
+    "category": "AI Business Consultant",
+    "page": "9",
+    "features": [
+      {
+        "name": "ROI Analysis",
+        "status": "built",
+        "memory_anchor": "Return on Investment Calculator",
+        "human_meaning": "Projects the percentage return on invested equity across the entire project lifecycle to demonstrate bankability to investors."
+      },
+      {
+        "name": "Profit Forecast",
+        "status": "built",
+        "memory_anchor": "Bottom-Line Profit Projection",
+        "human_meaning": "Forecasts net developer profit after subtracting land cost, approval fees, construction expenditure, financing interest, and marketing."
+      },
+      {
+        "name": "Project Feasibility",
+        "status": "built",
+        "memory_anchor": "Go / No-Go Decision Engine",
+        "human_meaning": "Evaluates market absorption rates, regulatory constraints, and financial viability to give an objective verdict on land acquisition."
+      },
+      {
+        "name": "Break-even Analysis",
+        "status": "built",
+        "memory_anchor": "Debt-Free Sales Target",
+        "human_meaning": "Identifies the exact sales milestone (in units and rupees) where total cash inflows completely cover all project expenditures."
+      }
+    ]
+  },
+  {
+    "category": "AI Recommendation Engine",
+    "page": "9",
+    "features": [
+      {
+        "name": "Design Improvements",
+        "status": "built",
+        "memory_anchor": "Aesthetic & Functional Tips",
+        "human_meaning": "Suggests subtle architectural tweaks to enhance room proportions, cross-ventilation, natural daylighting, and aesthetic balance."
+      },
+      {
+        "name": "Engineering Suggestions",
+        "status": "built",
+        "memory_anchor": "Smart Structural Tweaks",
+        "human_meaning": "Identifies opportunities to streamline plumbing shafts, simplify structural spans, and standardize window opening sizes."
+      },
+      {
+        "name": "Cost Optimisation",
+        "status": "built",
+        "memory_anchor": "Commercial Sweet Spot",
+        "human_meaning": "Pinpoints where small architectural changes can yield major structural savings without sacrificing livability."
+      },
+      {
+        "name": "Material Recommendations",
+        "status": "built",
+        "memory_anchor": "Best-Fit Material Selector",
+        "human_meaning": "Recommends durable, eco-friendly, locally sourced building materials tailored to the specific microclimate and budget tier."
+      }
+    ]
+  },
+  {
+    "category": "APT: In-App AI Assistant",
+    "page": "10",
+    "features": [
+      {
+        "name": "Project Q&A;",
+        "status": "built",
+        "memory_anchor": "Conversational Civil Co-Pilot",
+        "human_meaning": "An interactive chat assistant that answers any question about the project's areas, costs, bylaws, and engineering metrics in plain English."
+      },
+      {
+        "name": "Civil Engineering Guidance",
+        "status": "built",
+        "memory_anchor": "On-Demand Engineering Expert",
+        "human_meaning": "Explains complex civil engineering principles, formula derivations, and design codes in simple, accessible language."
+      },
+      {
+        "name": "Report Explanation",
+        "status": "built",
+        "memory_anchor": "Report Translator",
+        "human_meaning": "Translates dense engineering reports, BOQs, and financial schedules into clear executive summaries for non-technical stakeholders."
+      },
+      {
+        "name": "Scenario Comparison",
+        "status": "built",
+        "memory_anchor": "Design Trade-off Explainer",
+        "human_meaning": "Narrates the pros, cons, and financial differences between alternative architectural schemes in everyday terms."
+      },
+      {
+        "name": "Streaming Responses",
+        "status": "built",
+        "memory_anchor": "Instant Thought Streaming",
+        "human_meaning": "Streams conversational answers token-by-token in real time, eliminating frustrating loading delays during design discussions."
+      },
+      {
+        "name": "Module-Aware Opening Questions",
+        "status": "built",
+        "memory_anchor": "Contextual Conversation Starter",
+        "human_meaning": "Suggests smart, relevant follow-up questions tailored to whichever module (parking, structural, finance) the user is currently viewing."
+      },
+      {
+        "name": "Project State Context Builder",
+        "status": "built",
+        "memory_anchor": "Live Project Memory",
+        "human_meaning": "Feeds current real-time project dimensions, costs, and compliance numbers into the AI prompt so answers are always grounded in fact."
+      },
+      {
+        "name": "Context & Analysis Caching",
+        "status": "built",
+        "memory_anchor": "High-Speed Memory Cache",
+        "human_meaning": "Caches complex analytical calculations so the assistant can answer follow-up questions in milliseconds without re-computing."
+      },
+      {
+        "name": "Query Classification",
+        "status": "built",
+        "memory_anchor": "Smart Intent Router",
+        "human_meaning": "Directs user questions to the appropriate specialized internal engine (e.g. structural, municipal bylaw, or financial)."
+      },
+      {
+        "name": "Capability Questions",
+        "status": "built",
+        "memory_anchor": "Feature Discovery Guide",
+        "human_meaning": "Answers questions about what Aptimizer can do, guiding new users step-by-step through advanced platform tools."
+      },
+      {
+        "name": "Chat Threads & History",
+        "status": "built",
+        "memory_anchor": "Design Discussion Archive",
+        "human_meaning": "Saves organized chat histories and design deliberation threads so teams can revisit previous design rationales anytime."
+      },
+      {
+        "name": "Citation Verification",
+        "status": "built",
+        "memory_anchor": "Bylaw Grounding Verifier",
+        "human_meaning": "Verifies that every bylaw clause cited by the assistant exists in the official NBC/IS database before showing it to the user."
+      },
+      {
+        "name": "Provider Fallback & Retry",
+        "status": "built",
+        "memory_anchor": "Zero-Downtime AI Engine",
+        "human_meaning": "Automatically switches between backup AI foundation models if primary cloud services experience latency or temporary outages."
+      }
+    ]
+  },
+  {
+    "category": "Scenario Comparison",
+    "page": "10",
+    "features": [
+      {
+        "name": "Compare Layouts",
+        "status": "built",
+        "memory_anchor": "Side-by-Side Floor Plans",
+        "human_meaning": "Visually displays two or more architectural masterplans side-by-side to compare tower positioning, road layout, and circulation."
+      },
+      {
+        "name": "Compare Costs",
+        "status": "built",
+        "memory_anchor": "Multi-Scheme Cost Contrast",
+        "human_meaning": "Contrasts capital expenditures, material takeoff quantities, and per-square-foot rates across competing design schemes."
+      },
+      {
+        "name": "Compare Parking",
+        "status": "built",
+        "memory_anchor": "Parking Yield Showdown",
+        "human_meaning": "Evaluates how different basement and podium parking layouts compare in car count, efficiency ratio, and ramp complexity."
+      },
+      {
+        "name": "Compare Sustainability",
+        "status": "built",
+        "memory_anchor": "Green Score Benchmark",
+        "human_meaning": "Compares embodied carbon footprints, water circularity percentages, and potential green ratings across alternative concepts."
+      },
+      {
+        "name": "Compare ROI",
+        "status": "built",
+        "memory_anchor": "Profitability Showdown",
+        "human_meaning": "Compares Internal Rate of Return (IRR), Net Present Value (NPV), and payback timelines across different developer schemes."
+      }
+    ]
+  },
+  {
+    "category": "Collaboration & Workflow",
+    "page": "11",
+    "features": [
+      {
+        "name": "Multi-user Collaboration",
+        "status": "built",
+        "memory_anchor": "Live Multi-Seat Workspace",
+        "human_meaning": "Enables multiple team members (architects, civil engineers, quantity surveyors) to work simultaneously within the same project."
+      },
+      {
+        "name": "Project Sharing",
+        "status": "built",
+        "memory_anchor": "Secure Permission Sharing",
+        "human_meaning": "Allows project owners to grant read-only, commenting, or full editing privileges to external consultants and partners."
+      },
+      {
+        "name": "Team Roles",
+        "status": "built",
+        "memory_anchor": "Disciplinary Access Tiers",
+        "human_meaning": "Assigns specialized interface views and editing permissions tailored to specific team roles (e.g. Lead Architect, Cost Estimator)."
+      },
+      {
+        "name": "Version Control",
+        "status": "built",
+        "memory_anchor": "Milestone Version Keeper",
+        "human_meaning": "Maintains a clean historical record of major design milestones, preventing accidental overwrites and lost work."
+      },
+      {
+        "name": "Activity Logs",
+        "status": "built",
+        "memory_anchor": "Audit Trail Tracker",
+        "human_meaning": "Records an immutable chronological log of who altered which parameters, ran calculations, or exported reports."
+      },
+      {
+        "name": "Task Assignment",
+        "status": "built",
+        "memory_anchor": "Engineering Task Manager",
+        "human_meaning": "Allows project leads to assign specific design tasks (e.g. 'Resolve Rear Setback Violation') with deadlines to team members."
+      },
+      {
+        "name": "Approval Workflow",
+        "status": "built",
+        "memory_anchor": "Multi-Gate Sign-Off Chain",
+        "human_meaning": "Implements a formal multi-stage sign-off process requiring Lead Architect and Structural Engineer approval before plan finalization."
+      },
+      {
+        "name": "Comments & Reviews",
+        "status": "built",
+        "memory_anchor": "On-Plan Markup Notes",
+        "human_meaning": "Enables team members to pin sticky comment notes and threaded review questions directly onto specific rooms, columns, or drawings."
+      },
+      {
+        "name": "Workflow Automation",
+        "status": "built",
+        "memory_anchor": "Smart Event Triggers",
+        "human_meaning": "Automatically triggers downstream actions (such as re-running BOQ takeoff or alerting the cost engineer) when layouts change."
+      }
+    ]
+  },
+  {
+    "category": "Engineering Decision Support",
+    "page": "11",
+    "features": [
+      {
+        "name": "Construction Timeline",
+        "status": "built",
+        "memory_anchor": "Phased Delivery Timeline",
+        "human_meaning": "Simulates the duration of each construction phase (excavation, substructure, super-structure, MEP, finishes) to guide commitments."
+      },
+      {
+        "name": "Labour Planning",
+        "status": "built",
+        "memory_anchor": "Trade Workforce Scheduler",
+        "human_meaning": "Forecasts daily and monthly labor headcounts needed across different trades to prevent on-site workforce bottlenecks."
+      },
+      {
+        "name": "Equipment Planning",
+        "status": "built",
+        "memory_anchor": "Heavy Machinery Logistics",
+        "human_meaning": "Schedules the deployment and mobilization timing of critical equipment like tower cranes, concrete batching plants, and hoists."
+      },
+      {
+        "name": "Utility Network Planning",
+        "status": "built",
+        "memory_anchor": "Site Infrastructure Spine",
+        "human_meaning": "Coordinates external stormwater, sewage, electrical, and telecom duct paths to prevent underground utility collisions."
+      }
+    ]
+  },
+  {
+    "category": "BIM Readiness",
+    "page": "12",
+    "features": [
+      {
+        "name": "IFC Export",
+        "status": "built",
+        "memory_anchor": "Open BIM Standard Export",
+        "human_meaning": "Exports standardized IFC4 (Industry Foundation Classes) 3D building models containing complete architectural and structural metadata."
+      },
+      {
+        "name": "DWG Export",
+        "status": "built",
+        "memory_anchor": "Industry Standard CAD Export",
+        "human_meaning": "Exports native DWG format drawings compatible with AutoCAD and standard professional drafting suites."
+      },
+      {
+        "name": "DXF Export",
+        "status": "built",
+        "memory_anchor": "Universal Vector CAD File",
+        "human_meaning": "Exports clean layered DXF vector drawings with dedicated layers for walls, dimensions, doors, and furniture."
+      },
+      {
+        "name": "Revit Compatibility",
+        "status": "built",
+        "memory_anchor": "Direct Revit Import Bridge",
+        "human_meaning": "Ensures exported BIM geometry maps seamlessly into Autodesk Revit families, floors, walls, and structural columns."
+      },
+      {
+        "name": "AutoCAD Compatibility",
+        "status": "built",
+        "memory_anchor": "AutoCAD Layer Mapping",
+        "human_meaning": "Maintains standard line weights, text styles, and layer names for seamless drafting workflows in AutoCAD."
+      }
+    ]
+  },
+  {
+    "category": "Digital Twin Preparation",
+    "page": "12",
+    "features": [
+      {
+        "name": "IoT Readiness",
+        "status": "built",
+        "memory_anchor": "Smart Sensor Architecture",
+        "human_meaning": "Establishes a digital data model ready to map incoming real-time IoT sensor telemetry from the physical building."
+      },
+      {
+        "name": "Smart Sensor Integration",
+        "status": "built",
+        "memory_anchor": "Telemetry Stream Connector",
+        "human_meaning": "Provides endpoints to connect structural strain gauges, temperature sensors, energy meters, and water flow meters."
+      },
+      {
+        "name": "Progress Tracking",
+        "status": "built",
+        "memory_anchor": "Planned vs Actual Monitor",
+        "human_meaning": "Compares as-built construction site progress against the master schedule to instantly flag schedule slippages."
+      },
+      {
+        "name": "Quality Monitoring",
+        "status": "built",
+        "memory_anchor": "Quality Assurance Gate",
+        "human_meaning": "Logs inspection checklists, concrete cube test results, and non-conformance reports against specific building members."
+      },
+      {
+        "name": "Safety Monitoring",
+        "status": "built",
+        "memory_anchor": "Jobsite Safety Inspector",
+        "human_meaning": "Tracks on-site safety incidents, hazardous zones, and required protective equipment compliance across the active worksite."
+      },
+      {
+        "name": "Delay Prediction",
+        "status": "built",
+        "memory_anchor": "Schedule Slip Early Warning",
+        "human_meaning": "Uses predictive analytics to flag potential upcoming project delays weeks before they impact the critical path."
+      },
+      {
+        "name": "Predictive Maintenance",
+        "status": "built",
+        "memory_anchor": "Equipment Health Watchdog",
+        "human_meaning": "Analyzes operational telemetry to forecast when elevators, water pumps, and DG backup generators require servicing."
+      },
+      {
+        "name": "Facility Management",
+        "status": "built",
+        "memory_anchor": "Post-Handover Asset Guide",
+        "human_meaning": "Organizes operational warranties, equipment serial numbers, and maintenance schedules for building facility managers."
+      }
+    ]
+  },
+  {
+    "category": "AI Operating System",
+    "page": "13",
+    "features": [
+      {
+        "name": "AI Engineering Copilot",
+        "status": "built",
+        "memory_anchor": "Always-On Engineering Partner",
+        "human_meaning": "An autonomous AI assistant embedded across all workflows that suggests optimizations, catches errors, and accelerates tasks."
+      },
+      {
+        "name": "AI Engineering Consultant",
+        "status": "built",
+        "memory_anchor": "Advisory Knowledge Hub",
+        "human_meaning": "Provides deep technical counsel on complex zoning codes, foundation engineering, and structural framing strategies."
+      },
+      {
+        "name": "Engineering Knowledge Graph",
+        "status": "built",
+        "memory_anchor": "Connected Civil Knowledge Web",
+        "human_meaning": "A comprehensive semantic graph linking building codes, material behaviors, structural principles, and cost databases."
+      },
+      {
+        "name": "Engineering Memory",
+        "status": "built",
+        "memory_anchor": "Long-Term Project Recall",
+        "human_meaning": "Remembers past design choices, client preferences, and past engineering calculations across the entire project lifecycle."
+      },
+      {
+        "name": "Engineering Decision Log",
+        "status": "built",
+        "memory_anchor": "Decision Rationale Archive",
+        "human_meaning": "Maintains a clear historical log of why specific architectural or structural decisions were approved and by whom."
+      },
+      {
+        "name": "Explainable AI",
+        "status": "built",
+        "memory_anchor": "Transparent Logic Window",
+        "human_meaning": "Explains the exact mathematical formulas, engineering codes, and logical assumptions behind every AI-generated suggestion."
+      }
+    ]
+  },
+  {
+    "category": "Intelligent Planning",
+    "page": "13",
+    "features": [
+      {
+        "name": "One-Click Project Generation",
+        "status": "built",
+        "memory_anchor": "Instant Project Spawner",
+        "human_meaning": "Initializes a complete, turnkey development project with plot boundaries, preliminary towers, and financial models in seconds."
+      },
+      {
+        "name": "AI Layout Generator",
+        "status": "built",
+        "memory_anchor": "Generative Floor Plan Engine",
+        "human_meaning": "Creates hundreds of compliant, ergonomically optimized floor plate variations automatically based on high-level constraints."
+      },
+      {
+        "name": "AI Township Planner",
+        "status": "built",
+        "memory_anchor": "Large-Scale Masterplanner",
+        "human_meaning": "Coordinates multi-parcel mega developments, planning residential sectors, commercial high streets, schools, and central parks."
+      },
+      {
+        "name": "Mixed-Use Development Planning",
+        "status": "built",
+        "memory_anchor": "Retail & Residential Integrator",
+        "human_meaning": "Harmonizes high-traffic retail shopping podiums with private residential towers above, separating security and logistics."
+      },
+      {
+        "name": "Apartment Capacity Prediction",
+        "status": "built",
+        "memory_anchor": "Maximum Unit Yield Forecast",
+        "human_meaning": "Accurately estimates how many livable units of specific configurations can comfortably fit onto a given parcel of land."
+      },
+      {
+        "name": "Land Suitability Analysis",
+        "status": "built",
+        "memory_anchor": "Site Feasibility Scorecard",
+        "human_meaning": "Ranks potential land purchases based on soil quality, flood susceptibility, road access, and statutory FSI potential."
+      },
+      {
+        "name": "Smart Building Recommendations",
+        "status": "built",
+        "memory_anchor": "High-Performance Design Tips",
+        "human_meaning": "Recommends passive shading, high-efficiency glass, and energy-saving building configurations tailored to local climate."
+      }
+    ]
+  },
+  {
+    "category": "GIS & Urban Intelligence",
+    "page": "13",
+    "features": [
+      {
+        "name": "City Growth Prediction",
+        "status": "built",
+        "memory_anchor": "Urban Expansion Forecaster",
+        "human_meaning": "Analyzes historical demographic and satellite data to predict which urban corridors will experience the highest population growth."
+      },
+      {
+        "name": "Land Value Prediction",
+        "status": "built",
+        "memory_anchor": "Property Price Forecaster",
+        "human_meaning": "Forecasts future land appreciation rates based on planned infrastructure investments and neighborhood transit connectivity."
+      },
+      {
+        "name": "Infrastructure Growth Prediction",
+        "status": "built",
+        "memory_anchor": "Civic Grid Roadmap",
+        "human_meaning": "Tracks government masterplans for upcoming metro lines, highway expansions, water pipelines, and electrical grid upgrades."
+      },
+      {
+        "name": "Climate Analysis",
+        "status": "built",
+        "memory_anchor": "Local Microclimate Profiler",
+        "human_meaning": "Evaluates seasonal rainfall, temperature extremes, humidity, and heat island effects specific to the project's exact location."
+      },
+      {
+        "name": "Disaster Risk Analysis",
+        "status": "built",
+        "memory_anchor": "Natural Hazard Vulnerability Scan",
+        "human_meaning": "Assesses site exposure to regional earthquakes, cyclones, storm surges, and landslides to inform structural safety factors."
+      },
+      {
+        "name": "Earthquake Analysis",
+        "status": "built",
+        "memory_anchor": "Seismic Zone Risk Assessor",
+        "human_meaning": "Identifies proximity to active tectonic fault lines and calculates required structural ductility and shear wall requirements."
+      },
+      {
+        "name": "Flood Analysis",
+        "status": "built",
+        "memory_anchor": "Storm Runoff Inundation Map",
+        "human_meaning": "Simulates 100-year storm flood levels and local watershed drainage patterns to ensure buildings remain safely above floodlines."
+      },
+      {
+        "name": "Wind Analysis",
+        "status": "built",
+        "memory_anchor": "Wind Tunnel Aerodynamic Scan",
+        "human_meaning": "Simulates high-velocity wind pressures on high-rise facades and pedestrian comfort zones around building podiums."
+      },
+      {
+        "name": "Noise & Pollution Analysis",
+        "status": "built",
+        "memory_anchor": "Acoustic & Air Quality Shield",
+        "human_meaning": "Maps traffic noise corridors and industrial particulate levels to guide acoustic double-glazing and landscape green buffers."
+      }
+    ]
+  },
+  {
+    "category": "Smart Procurement",
+    "page": "13",
+    "features": [
+      {
+        "name": "Live Material Prices",
+        "status": "built",
+        "memory_anchor": "Real-Time Commodity Ticker",
+        "human_meaning": "Feeds live regional wholesale prices for cement, TMT steel, sand, and bricks directly into project cost models."
+      },
+      {
+        "name": "Material Price Forecasting",
+        "status": "built",
+        "memory_anchor": "Commodity Inflation Predictor",
+        "human_meaning": "Uses predictive market trends to forecast future price swings for steel and cement over the coming 6 to 18 months."
+      },
+      {
+        "name": "Supplier Intelligence",
+        "status": "built",
+        "memory_anchor": "Vendor Rating & Directory",
+        "human_meaning": "Maintains a performance-rated directory of certified local suppliers, concrete batching plants, and fabricators."
+      },
+      {
+        "name": "Procurement Calendar",
+        "status": "built",
+        "memory_anchor": "Material Delivery Timeline",
+        "human_meaning": "Synchronizes material purchase order lead times with the on-site construction schedule to prevent worksite stockouts."
+      },
+      {
+        "name": "Inventory Planning",
+        "status": "built",
+        "memory_anchor": "Worksite Storage Balancer",
+        "human_meaning": "Calculates safe minimum inventory storage levels on site without tying up excess working capital or risking material damage."
+      }
+    ]
+  },
+  {
+    "category": "Financial Intelligence",
+    "page": "13",
+    "features": [
+      {
+        "name": "Cash Flow Planning",
+        "status": "built",
+        "memory_anchor": "Developer Liquidity Planner",
+        "human_meaning": "Projects monthly cash inflows from apartment customer milestone installments against contractor payment obligations."
+      },
+      {
+        "name": "Lifecycle Cost Analysis",
+        "status": "built",
+        "memory_anchor": "Total Cost of Ownership",
+        "human_meaning": "Calculates cumulative costs over a 30-year horizon including initial construction, energy utility bills, and maintenance."
+      },
+      {
+        "name": "Investment Analysis",
+        "status": "built",
+        "memory_anchor": "Capital Allocation Scorecard",
+        "human_meaning": "Evaluates project financial health against key benchmark metrics like hurdle rate, equity multiple, and debt-service coverage."
+      },
+      {
+        "name": "ROI Forecasting",
+        "status": "built",
+        "memory_anchor": "Return on Investment Forecaster",
+        "human_meaning": "Models projected financial returns across optimistic, moderate, and conservative market sales absorption scenarios."
+      },
+      {
+        "name": "Profitability Dashboard",
+        "status": "built",
+        "memory_anchor": "Executive Margin Tracker",
+        "human_meaning": "A consolidated executive dashboard displaying gross margin, net developer profit, and cost variance in real time."
+      }
+    ]
+  },
+  {
+    "category": "Sustainability",
+    "page": "13",
+    "features": [
+      {
+        "name": "Green Building Planner",
+        "status": "built",
+        "memory_anchor": "Eco-Architecture Guide",
+        "human_meaning": "Coordinates passive shading, energy-efficient HVAC, water conservation, and native landscaping to achieve green certifications."
+      },
+      {
+        "name": "Carbon Emission Calculator",
+        "status": "built",
+        "memory_anchor": "Greenhouse Gas Footprint Meter",
+        "human_meaning": "Calculates total metric tonnes of CO2 emitted during construction (embodied carbon) and annual building occupancy (operational carbon)."
+      },
+      {
+        "name": "Solar Energy Planning",
+        "status": "built",
+        "memory_anchor": "Rooftop Clean Energy Strategy",
+        "human_meaning": "Sizes rooftop photovoltaic solar arrays to maximize on-site renewable clean electricity generation for common area lighting."
+      },
+      {
+        "name": "Water Conservation Analysis",
+        "status": "built",
+        "memory_anchor": "Zero-Liquid Discharge Strategy",
+        "human_meaning": "Models water self-sufficiency through dual-plumbing networks, rainwater aquifers, and 100% on-site greywater treatment."
+      },
+      {
+        "name": "ESG Reporting",
+        "status": "built",
+        "memory_anchor": "Corporate ESG Disclosure Dossier",
+        "human_meaning": "Generates formal Environmental, Social, and Governance (ESG) compliance reports for institutional green financing and investors."
+      }
+    ]
+  },
+  {
+    "category": "Construction Intelligence",
+    "page": "13",
+    "features": [
+      {
+        "name": "Construction Timeline Optimisation",
+        "status": "built",
+        "memory_anchor": "Fast-Track Schedule Solver",
+        "human_meaning": "Simulates schedule compression techniques (crashing and fast-tracking) to shorten overall construction duration safely."
+      },
+      {
+        "name": "Resource Allocation",
+        "status": "built",
+        "memory_anchor": "Worksite Asset Balancer",
+        "human_meaning": "Distributes shared site resources (hoists, tower cranes, concrete pumps) across multiple towers to eliminate idle downtime."
+      },
+      {
+        "name": "Labour Optimisation",
+        "status": "built",
+        "memory_anchor": "Crew Productivity Multiplier",
+        "human_meaning": "Sizes and coordinates trade crews (carpenters, masons, steel fixers) to maintain smooth, continuous workflow without overcrowding."
+      },
+      {
+        "name": "Equipment Scheduling",
+        "status": "built",
+        "memory_anchor": "Heavy Machinery Dispatcher",
+        "human_meaning": "Creates daily dispatch schedules for concrete transit mixers, piling rigs, and excavators to optimize rental expenses."
+      },
+      {
+        "name": "Construction Delay Prediction",
+        "status": "built",
+        "memory_anchor": "Schedule Bottleneck Forecaster",
+        "human_meaning": "Identifies high-risk tasks likely to cause delays (weather disruptions, complex transfers) before they impact project delivery."
+      },
+      {
+        "name": "Risk Prediction",
+        "status": "built",
+        "memory_anchor": "Proactive Site Hazard Radar",
+        "human_meaning": "Evaluates logistical, contractual, subsoil, and regulatory risks to assign mitigation plans before construction begins."
+      }
+    ]
+  },
+  {
+    "category": "Reports & Decision Support",
+    "page": "13",
+    "features": [
+      {
+        "name": "AI Report Writer",
+        "status": "built",
+        "memory_anchor": "Automated Technical Scribe",
+        "human_meaning": "Generates complete, publication-grade engineering reports, project narratives, and technical specifications automatically."
+      },
+      {
+        "name": "Executive Dashboards",
+        "status": "built",
+        "memory_anchor": "C-Suite KPI Dashboard",
+        "human_meaning": "Presents key executive metrics (project yield, cost per square foot, statutory compliance, timeline) in clear visual dashboards."
+      },
+      {
+        "name": "Interactive Analytics",
+        "status": "built",
+        "memory_anchor": "Deep-Dive Project Analytics",
+        "human_meaning": "Enables users to filter, slice, and cross-examine project data across individual towers, cost heads, and floor levels."
+      },
+      {
+        "name": "Decision Sandbox",
+        "status": "built",
+        "memory_anchor": "What-If Strategy Simulator",
+        "human_meaning": "Allows developers to test hypothetical changes (e.g. 'What if we add 3 floors and upgrade finishes?') without altering the live project."
+      },
+      {
+        "name": "Scenario Simulation",
+        "status": "built",
+        "memory_anchor": "Multi-Variable Scenario Engine",
+        "human_meaning": "Simulates hundreds of combinations of unit mixes, floor counts, and material grades to identify the optimal commercial solution."
+      },
+      {
+        "name": "Engineering Benchmarking",
+        "status": "built",
+        "memory_anchor": "Industry Standard Benchmark",
+        "human_meaning": "Compares the project's structural steel consumption, concrete intensity, and cost against regional industry best practices."
+      }
+    ]
+  },
+  {
+    "category": "Marketplace & Ecosystem",
+    "page": "14",
+    "features": [
+      {
+        "name": "Engineering Marketplace",
+        "status": "built",
+        "memory_anchor": "Specialist Consultant Exchange",
+        "human_meaning": "Connects developers with vetted third-party structural consultants, MEP designers, landscape architects, and peer reviewers."
+      },
+      {
+        "name": "Plugin Marketplace",
+        "status": "built",
+        "memory_anchor": "Extensible Tool Directory",
+        "human_meaning": "Enables users to install custom software plugins, specialized regional bylaw packages, and third-party calculation modules."
+      },
+      {
+        "name": "API Marketplace",
+        "status": "built",
+        "memory_anchor": "Developer Integration Gateway",
+        "human_meaning": "Provides secure REST API endpoints allowing external enterprise ERP, BIM, and CRM systems to integrate directly with Aptimizer."
+      },
+      {
+        "name": "Educational Mode",
+        "status": "built",
+        "memory_anchor": "Interactive Civil Classroom",
+        "human_meaning": "Provides step-by-step explanatory walkthroughs of engineering formulas and architectural principles for students and junior engineers."
+      },
+      {
+        "name": "Government Approval Assistant",
+        "status": "built",
+        "memory_anchor": "Municipal Sanction Checklist",
+        "human_meaning": "Prepares and organizes all required drawings, compliance certificates, and documents for municipal building sanction submission."
+      },
+      {
+        "name": "Tender Document Generator",
+        "status": "built",
+        "memory_anchor": "Contractor Bidding Package",
+        "human_meaning": "Assembles comprehensive contractor tender packages complete with technical specifications, BOQs, and general conditions of contract."
+      }
+    ]
+  },
+  {
+    "category": "Autonomous AI Engineering",
+    "page": "15",
+    "features": [
+      {
+        "name": "Conversational Project Design",
+        "status": "built",
+        "memory_anchor": "Chat-to-Blueprint Architect",
+        "human_meaning": "Allows users to describe building requirements in everyday natural language and instantly see complete parametric models generated."
+      },
+      {
+        "name": "Multi-Agent Engineering Teams",
+        "status": "built",
+        "memory_anchor": "Virtual Engineering Bureau",
+        "human_meaning": "Coordinates specialized autonomous AI agents (Planner, Civil, Structural, QS, Cost) collaborating together to refine the project."
+      },
+      {
+        "name": "Autonomous Compliance Checking",
+        "status": "built",
+        "memory_anchor": "Self-Auditing Building Inspector",
+        "human_meaning": "Continuously monitors every design adjustment in real time, automatically correcting any rule breaches without human intervention."
+      },
+      {
+        "name": "Autonomous BOQ & Costing",
+        "status": "built",
+        "memory_anchor": "Self-Updating Cost Engine",
+        "human_meaning": "Instantly recomputes material takeoffs, labor budgets, and procurement schedules the second any wall or slab is modified."
+      }
+    ]
+  },
+  {
+    "category": "Generative Design",
+    "page": "15",
+    "features": [
+      {
+        "name": "AI-Generated 2D Floor Plans",
+        "status": "built",
+        "memory_anchor": "Automated Floor Plan Creator",
+        "human_meaning": "Uses generative neural algorithms to generate dozens of functional, livable, and fully compliant apartment floor plan schemes."
+      },
+      {
+        "name": "AI-Generated 3D Building Concepts",
+        "status": "built",
+        "memory_anchor": "Concept Massing Generator",
+        "human_meaning": "Creates striking 3D architectural massing concepts, stepped terraces, and landmark skyline profiles tailored to the site."
+      },
+      {
+        "name": "Facade Design Suggestions",
+        "status": "built",
+        "memory_anchor": "Exterior Elevation Stylist",
+        "human_meaning": "Generates beautiful, climate-responsive exterior facade concepts with passive shading fins, glass louvers, and balconies."
+      },
+      {
+        "name": "Landscape Design",
+        "status": "built",
+        "memory_anchor": "Generative Park & Garden Planner",
+        "human_meaning": "Designs lush community garden layouts, jogging tracks, water features, and outdoor gathering plazas optimized for foot traffic."
+      },
+      {
+        "name": "Parking Layout Generation",
+        "status": "built",
+        "memory_anchor": "Automated Bay Packing Engine",
+        "human_meaning": "Algorithmically packs the maximum number of parking bays and driveways into irregular basements and podium floor plates."
+      }
+    ]
+  },
+  {
+    "category": "Smart City Platform",
+    "page": "15",
+    "features": [
+      {
+        "name": "City-Scale Planning",
+        "status": "built",
+        "memory_anchor": "Metropolitan Masterplanner",
+        "human_meaning": "Scales planning algorithms up to masterplan entire neighborhoods, development corridors, and smart satellite townships."
+      },
+      {
+        "name": "Traffic Simulation",
+        "status": "built",
+        "memory_anchor": "Urban Traffic Flow Simulator",
+        "human_meaning": "Simulates vehicle and pedestrian traffic congestion at project entry gates, arterial junctions, and public transit nodes."
+      },
+      {
+        "name": "Utility Network Optimisation",
+        "status": "built",
+        "memory_anchor": "District Utility Grid Sizer",
+        "human_meaning": "Optimizes city-scale regional water supply mains, high-voltage electrical grids, and district cooling distribution networks."
+      },
+      {
+        "name": "Urban Digital Twin",
+        "status": "built",
+        "memory_anchor": "Living City 3D Replica",
+        "human_meaning": "Maintains a high-fidelity 3D digital model of the surrounding urban district to monitor environmental impact and growth over time."
+      },
+      {
+        "name": "Infrastructure Demand Forecasting",
+        "status": "built",
+        "memory_anchor": "Civic Resource Predictor",
+        "human_meaning": "Projects 20-year municipal demand for drinking water, power capacity, waste management, and school seats across the district."
+      }
+    ]
+  }
+]

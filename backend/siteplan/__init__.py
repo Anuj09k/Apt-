@@ -64,6 +64,27 @@ def reserve_site(project: Dict[str, Any],
     The payload is a superset of stage 1's, so a client can render both from one call.
     """
     plot = project.get("plot") or {}
+    overrides = dict(overrides or {})
+    if "amenities" not in overrides:
+        society_amenities = project.get("society_amenities")
+        if society_amenities is not None:
+            if len(society_amenities) == 0:
+                overrides["amenities"] = {"enabled": False, "blocks": []}
+            else:
+                blocks = []
+                for idx, am in enumerate(society_amenities):
+                    key = f"amenity_{idx}"
+                    name = am.get("name") or f"Amenity {idx+1}"
+                    area = float(am.get("area") or 200.0)
+                    blocks.append({
+                        "key": key,
+                        "name": name,
+                        "area_sqm": area,
+                        "height_m": 4.5,
+                        "floors": 1,
+                    })
+                overrides["amenities"] = {"enabled": True, "blocks": blocks}
+
     cfg = SiteLayoutConfig.from_dict(overrides)
     try:
         return reserve_from_coordinates(plot.get("coordinates") or [],

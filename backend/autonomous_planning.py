@@ -16,10 +16,11 @@ import math
 import re
 from typing import Any, Dict, List, Optional
 
+import engine
 from siteplan.frame import LocalFrame
 from siteplan.devcontrols import recommend, setback_minimums
 from residential_defaults import (
-    new_residential_policy, configure_tower, update_tower_parking,
+    new_residential_policy, configure_tower, update_tower_parking, add_penthouse,
     parking_summary, summarize_units, tower_index,
 )
 
@@ -121,10 +122,14 @@ def one_click_generate(params: Dict[str, Any]) -> Dict[str, Any]:
             "structural_system": "RCC Shear Wall" if floors > 12 else "RCC Frame",
         })
 
-    # Assign each building one tier in the repeating A–E residential program.
+    # Assign each building one tier in the repeating A–E residential program. A luxury
+    # scheme crowns every tower with one full-storey penthouse, so the mix a buyer is shown
+    # includes the top-of-the-building home the tier promises.
     residential_policy = new_residential_policy()
     for index, tower in enumerate(towers):
         configure_tower(tower, index, policy=residential_policy)
+        if tier == "luxury":
+            add_penthouse(tower, residential_policy)
     unit_mix = summarize_units(towers)
 
     # Total units & parking
@@ -516,7 +521,7 @@ def conversational_design(project: Dict[str, Any], instruction: str) -> Dict[str
         }
         mutations_applied.append(f"Set the 1BHK optional parking pool to {spaces:g} spaces per apartment")
 
-    ev_match = re.search(r"(?:add|set|increase)\s*(\d+)\s*(?:ev|electric)\s*(?:slots?|bays?)", text)
+    ev_match = re.search(r"(?:add|set|increase)\s*(\d+)\s*(?:ev|electric)(?:\s+charging)?\s*(?:slots?|bays?|points?)", text)
     if ev_match:
         ev_slots = int(ev_match.group(1))
         parking = dict(updated_project.get("parking") or {})
@@ -571,6 +576,31 @@ def conversational_design(project: Dict[str, Any], instruction: str) -> Dict[str
 
 # --------------------------------------------------------------------------- 3. Multi-Agent Engineering Teams
 
+def _project_area_metrics(project: Dict[str, Any]) -> Dict[str, float]:
+    plot = project.get("plot") or {}
+    towers = project.get("towers") or []
+    metrics = engine.area_metrics(project)
+    plot_area = float(metrics.get("plot_area_sqm") or plot.get("area_sqm") or 10000.0)
+    builtup = float(
+        metrics.get("total_builtup_sqm")
+        or math.fsum(float(t.get("footprint_sqm") or t.get("footprint_area") or 600.0) * int(t.get("floors") or 1) for t in towers)
+    )
+    ground_cov = float(
+        metrics.get("ground_footprint_sqm")
+        or math.fsum(float(t.get("footprint_sqm") or t.get("footprint_area") or 600.0) for t in towers)
+    )
+    units_est = int(
+        metrics.get("total_units")
+        or sum(int(t.get("floors") or 1) * int(t.get("units_per_floor") or 4) for t in towers)
+    )
+    return {
+        "plot_area": plot_area,
+        "builtup": builtup,
+        "ground_cov": ground_cov,
+        "units_est": units_est,
+    }
+
+
 def multi_agent_review(project: Dict[str, Any]) -> Dict[str, Any]:
     """Simulates a 5-agent collaborative engineering team audit.
 
@@ -581,17 +611,18 @@ def multi_agent_review(project: Dict[str, Any]) -> Dict[str, Any]:
       4. Quantity Surveyor & Cost Agent
       5. Compliance & Safety Officer
     """
-    plot = project.get("plot") or {}
-    plot_area = float(plot.get("area_sqm") or 10000.0)
+    am = _project_area_metrics(project)
+    plot_area = am["plot_area"]
     towers = project.get("towers") or []
     floors = max((int(t.get("floors") or 1) for t in towers), default=12)
-    builtup = sum(float(t.get("footprint_sqm") or 600.0) * int(t.get("floors") or 1) for t in towers)
-    far = round(builtup / max(1.0, plot_area), 2)
+    builtup = am["builtup"]
+    far_raw = builtup / max(1.0, plot_area)
+    far = round(far_raw, 2)
     dev_controls = project.get("dev_controls") or {}
     perm_far = float(dev_controls.get("permissible_fsi") or 2.5)
 
     # 1. Architect Agent
-    arch_pass = far <= perm_far and len(towers) > 0
+    arch_pass = far_raw <= perm_far + 1e-9 and len(towers) > 0
     arch_agent = {
         "role": "Chief Architect Agent",
         "avatar": "compass",
@@ -630,8 +661,9 @@ def multi_agent_review(project: Dict[str, Any]) -> Dict[str, Any]:
     }
 
     # 3. MEP & Environmental Agent
-    units_est = sum(int(t.get("floors") or 1) * int(t.get("units_per_floor") or 4) for t in towers)
-    water_demand_kld = round(units_est * 5 * 135 / 1000.0, 1)
+    units_est = am["units_est"]
+    water_demand_kld_raw = units_est * 5 * 135 / 1000.0
+    water_demand_kld = round(water_demand_kld_raw, 1)
     mep_agent = {
         "role": "MEP & Sustainability Director Agent",
         "avatar": "zap",
@@ -640,7 +672,7 @@ def multi_agent_review(project: Dict[str, Any]) -> Dict[str, Any]:
         "verdict": "Utility demand balanced with NBC 2016 Part 9 norms and IGBC Green Gold standards.",
         "findings": [
             f"Domestic + flushing water demand: {water_demand_kld} KLD (IS 1172)",
-            f"STP capacity sized @ {round(water_demand_kld * 0.85, 1)} KLD (MBBR technology with tertiary ultrafiltration)",
+            f"STP capacity sized @ {round(water_demand_kld_raw * 0.85, 1)} KLD (MBBR technology with tertiary ultrafiltration)",
             "Rainwater harvesting collection efficiency: 84% from rooftop catchment (IS 3764)",
             "Rooftop solar PV capacity: 85 kWp potential across tower crowns"
         ],
@@ -712,12 +744,13 @@ def multi_agent_review(project: Dict[str, Any]) -> Dict[str, Any]:
 def autonomous_compliance_audit(project: Dict[str, Any]) -> Dict[str, Any]:
     """Deep statutory scanner against NBC 2016 & local municipal bye-laws."""
     plot = project.get("plot") or {}
-    plot_area = float(plot.get("area_sqm") or 10000.0)
+    am = _project_area_metrics(project)
+    plot_area = am["plot_area"]
     towers = project.get("towers") or []
     floors = max((int(t.get("floors") or 1) for t in towers), default=12)
     height_m = floors * 3.0
-    builtup = sum(float(t.get("footprint_sqm") or 600.0) * int(t.get("floors") or 1) for t in towers)
-    ground_cov = sum(float(t.get("footprint_sqm") or 600.0) for t in towers)
+    builtup = am["builtup"]
+    ground_cov = am["ground_cov"]
     ground_cov_pct = (ground_cov / max(1.0, plot_area)) * 100.0
     road_w = float(plot.get("road_width_m") or 18.0)
 
@@ -750,9 +783,9 @@ def autonomous_compliance_audit(project: Dict[str, Any]) -> Dict[str, Any]:
             "permissible": perm_far,
             "achieved": round(achieved_far, 2),
             "unit": "ratio",
-            "status": "pass" if achieved_far <= perm_far else "fail",
+            "status": "pass" if achieved_far <= perm_far + 1e-9 else "fail",
             "margin": round(perm_far - achieved_far, 2),
-            "remediation": None if achieved_far <= perm_far else "Reduce upper floor units or decrement floor count by 1.",
+            "remediation": None if achieved_far <= perm_far + 1e-9 else "Reduce upper floor units or decrement floor count by 1.",
         },
         {
             "id": "coverage_check",
@@ -761,9 +794,9 @@ def autonomous_compliance_audit(project: Dict[str, Any]) -> Dict[str, Any]:
             "permissible": 40.0,
             "achieved": round(ground_cov_pct, 1),
             "unit": "%",
-            "status": "pass" if ground_cov_pct <= 40.0 else "fail",
+            "status": "pass" if ground_cov_pct <= 40.0 + 1e-9 else "fail",
             "margin": round(40.0 - ground_cov_pct, 1),
-            "remediation": None if ground_cov_pct <= 40.0 else "Consolidate tower footprints into fewer, taller blocks.",
+            "remediation": None if ground_cov_pct <= 40.0 + 1e-9 else "Consolidate tower footprints into fewer, taller blocks.",
         },
         {
             "id": "height_road_check",
@@ -772,9 +805,9 @@ def autonomous_compliance_audit(project: Dict[str, Any]) -> Dict[str, Any]:
             "permissible": round(1.5 * (road_w + front_val), 1),
             "achieved": height_m,
             "unit": "metres",
-            "status": "pass" if height_m <= 1.5 * (road_w + front_val) else "fail",
+            "status": "pass" if height_m <= 1.5 * (road_w + front_val) + 1e-9 else "fail",
             "margin": round(1.5 * (road_w + front_val) - height_m, 1),
-            "remediation": None if height_m <= 1.5 * (road_w + front_val) else "Increase front setback or cap tower height.",
+            "remediation": None if height_m <= 1.5 * (road_w + front_val) + 1e-9 else "Increase front setback or cap tower height.",
         },
         {
             "id": "setback_front",
@@ -783,9 +816,9 @@ def autonomous_compliance_audit(project: Dict[str, Any]) -> Dict[str, Any]:
             "permissible": min_front,
             "achieved": front_val,
             "unit": "metres",
-            "status": "pass" if front_val >= min_front else "fail",
+            "status": "pass" if front_val >= min_front - 1e-9 else "fail",
             "margin": round(front_val - min_front, 1),
-            "remediation": None if front_val >= min_front else f"Expand front setback to at least {min_front}m.",
+            "remediation": None if front_val >= min_front - 1e-9 else f"Expand front setback to at least {min_front}m.",
         },
         {
             "id": "setback_rear",
@@ -794,9 +827,9 @@ def autonomous_compliance_audit(project: Dict[str, Any]) -> Dict[str, Any]:
             "permissible": min_rear,
             "achieved": rear_val,
             "unit": "metres",
-            "status": "pass" if rear_val >= min_rear else "fail",
+            "status": "pass" if rear_val >= min_rear - 1e-9 else "fail",
             "margin": round(rear_val - min_rear, 1),
-            "remediation": None if rear_val >= min_rear else f"Expand rear setback to at least {min_rear}m.",
+            "remediation": None if rear_val >= min_rear - 1e-9 else f"Expand rear setback to at least {min_rear}m.",
         },
         {
             "id": "fire_egress",
@@ -827,26 +860,25 @@ def autonomous_compliance_audit(project: Dict[str, Any]) -> Dict[str, Any]:
 
 def autonomous_boq_engine(project: Dict[str, Any]) -> Dict[str, Any]:
     """High-precision automated quantity takeoff and rate benchmarking."""
-    towers = project.get("towers") or []
-    builtup = sum(float(t.get("footprint_sqm") or 600.0) * int(t.get("floors") or 1) for t in towers)
+    builtup = _project_area_metrics(project)["builtup"]
 
-    # Parametric takeoffs grounded in Indian CPWD norms
-    concrete_m3 = round(builtup * 0.38, 1)
-    steel_mt = round(builtup * 0.042, 1)          # ~42 kg/m²
-    shuttering_sqm = round(builtup * 2.4, 1)
-    masonry_m3 = round(builtup * 0.18, 1)
-    flooring_sqm = round(builtup * 0.82, 1)
-    plaster_sqm = round(builtup * 2.8, 1)
-    paint_sqm = round(builtup * 3.2, 1)
+    # Parametric takeoffs grounded in Indian CPWD norms (unrounded intermediates)
+    concrete_m3_raw = builtup * 0.38
+    steel_mt_raw = builtup * 0.042          # ~42 kg/m²
+    shuttering_sqm_raw = builtup * 2.4
+    masonry_m3_raw = builtup * 0.18
+    flooring_sqm_raw = builtup * 0.82
+    plaster_sqm_raw = builtup * 2.8
+    paint_sqm_raw = builtup * 3.2
 
     items = [
-        {"item": "Reinforced Cement Concrete (M30/M35)", "quantity": concrete_m3, "unit": "m³", "rate_inr": 7200.0, "amount_inr": round(concrete_m3 * 7200.0)},
-        {"item": "High Yield Fe550D TMT Reinforcement Steel", "quantity": steel_mt, "unit": "MT", "rate_inr": 68500.0, "amount_inr": round(steel_mt * 68500.0)},
-        {"item": "Modular Aluminium / Film-Faced Shuttering", "quantity": shuttering_sqm, "unit": "m²", "rate_inr": 850.0, "amount_inr": round(shuttering_sqm * 850.0)},
-        {"item": "Autoclaved Aerated Concrete (AAC) Block Masonry", "quantity": masonry_m3, "unit": "m³", "rate_inr": 4800.0, "amount_inr": round(masonry_m3 * 4800.0)},
-        {"item": "Vitrified Tile Flooring & Skirting", "quantity": flooring_sqm, "unit": "m²", "rate_inr": 1450.0, "amount_inr": round(flooring_sqm * 1450.0)},
-        {"item": "Internal & External Cement Plastering", "quantity": plaster_sqm, "unit": "m²", "rate_inr": 380.0, "amount_inr": round(plaster_sqm * 380.0)},
-        {"item": "Premium Acrylic Emulsion Painting", "quantity": paint_sqm, "unit": "m²", "rate_inr": 220.0, "amount_inr": round(paint_sqm * 220.0)},
+        {"item": "Reinforced Cement Concrete (M30/M35)", "quantity": round(concrete_m3_raw, 1), "unit": "m³", "rate_inr": 7200.0, "amount_inr": round(concrete_m3_raw * 7200.0)},
+        {"item": "High Yield Fe550D TMT Reinforcement Steel", "quantity": round(steel_mt_raw, 1), "unit": "MT", "rate_inr": 68500.0, "amount_inr": round(steel_mt_raw * 68500.0)},
+        {"item": "Modular Aluminium / Film-Faced Shuttering", "quantity": round(shuttering_sqm_raw, 1), "unit": "m²", "rate_inr": 850.0, "amount_inr": round(shuttering_sqm_raw * 850.0)},
+        {"item": "Autoclaved Aerated Concrete (AAC) Block Masonry", "quantity": round(masonry_m3_raw, 1), "unit": "m³", "rate_inr": 4800.0, "amount_inr": round(masonry_m3_raw * 4800.0)},
+        {"item": "Vitrified Tile Flooring & Skirting", "quantity": round(flooring_sqm_raw, 1), "unit": "m²", "rate_inr": 1450.0, "amount_inr": round(flooring_sqm_raw * 1450.0)},
+        {"item": "Internal & External Cement Plastering", "quantity": round(plaster_sqm_raw, 1), "unit": "m²", "rate_inr": 380.0, "amount_inr": round(plaster_sqm_raw * 380.0)},
+        {"item": "Premium Acrylic Emulsion Painting", "quantity": round(paint_sqm_raw, 1), "unit": "m²", "rate_inr": 220.0, "amount_inr": round(paint_sqm_raw * 220.0)},
     ]
 
     direct_works_cost = sum(i["amount_inr"] for i in items)
@@ -879,8 +911,8 @@ def autonomous_boq_engine(project: Dict[str, Any]) -> Dict[str, Any]:
 
 def township_mixed_use_plan(project: Dict[str, Any], params: Dict[str, Any]) -> Dict[str, Any]:
     """Generates multi-sector master planning and mixed-use development zoning."""
-    plot = project.get("plot") or {}
-    total_area_sqm = float(params.get("township_area_sqm") or plot.get("area_sqm") or 50000.0)
+    am = _project_area_metrics(project)
+    total_area_sqm = float(params.get("township_area_sqm") or am["plot_area"] or 50000.0)
     is_mixed_use = bool(params.get("is_mixed_use", True))
 
     # Land use allocation percentages (Master Plan & UDPFI Guidelines)

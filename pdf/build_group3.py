@@ -1,0 +1,346 @@
+"""
+Builds Group 3: GIS & Site Intelligence, Development Controls & Setbacks, Site Layout Engine, Vastu, Programme & Scheduling
+"""
+
+import json
+
+GROUP_3 = {
+    "GIS & Site Intelligence": {
+        "OpenStreetMap Support": (
+            "Global Map Foundation",
+            "Fetches open-source geospatial map layers including surrounding road networks, buildings, and land parcels."
+        ),
+        "GIS Coordinate Input": (
+            "Geo-Spatial Anchor",
+            "Accepts real-world latitude and longitude coordinates to pinpoint the project site accurately on the globe."
+        ),
+        "Polygon Drawing": (
+            "Site Boundary Tracer",
+            "Allows users to trace site boundaries, easements, and exclusion zones directly over satellite imagery."
+        ),
+        "Plot Boundary Detection": (
+            "Satellite Property Boundary",
+            "Uses geospatial satellite analysis to identify property fence lines and registered cadastral boundaries automatically."
+        ),
+        "Existing Building Detection": (
+            "Surrounding Structure Scanner",
+            "Identifies neighbouring buildings to calculate daylight shadowing and structural setback separation."
+        ),
+        "Road Detection": (
+            "Street Network Mapper",
+            "Detects adjacent public highways, main thoroughfares, and access alleys touching the property boundary."
+        ),
+        "Road Width Detection": (
+            "Right-of-Way Gauge",
+            "Measures public street widths from satellite data to determine permissible building height and FSI caps."
+        ),
+        "Green Area Detection": (
+            "Nature Reserve Shield",
+            "Identifies municipal parks, mature trees, and conservation forests near the site for environmental buffers."
+        ),
+        "Water Body Detection": (
+            "Riparian Buffer Guard",
+            "Locates nearby lakes, rivers, and canals to enforce mandatory statutory buffer zones (e.g. 30m NGT buffer)."
+        ),
+        "Terrain Analysis": (
+            "Topographical Ground Scan",
+            "Analyzes raw terrain elevations across the site to guide foundation grading and earthwork cut-and-fill."
+        ),
+        "Elevation Analysis": (
+            "Contour Height Map",
+            "Generates 3D contour lines showing high ridges and low hollows across the parcel."
+        ),
+        "Slope Analysis": (
+            "Ground Gradient Grader",
+            "Measures ground steepness to prevent soil erosion risks and optimize natural rainwater runoff drainage."
+        ),
+        "Flood Risk Analysis": (
+            "High-Water Warning System",
+            "Evaluates regional flood history and rainfall runoff to recommend safe finished ground floor levels."
+        ),
+        "Wind Analysis": (
+            "Breeze & Storm Profiler",
+            "Simulates prevailing wind directions and speeds to maximize natural cross-ventilation and compute wind structural loads."
+        ),
+        "Sun Path Analysis": (
+            "Solar Trajectory Tracker",
+            "Tracks the sun's angle throughout the day and year to optimize building orientation and reduce heat gain."
+        ),
+        "Solar Position & Sun Events": (
+            "Sunrise & Solstice Clock",
+            "Computes precise solar altitude, azimuth, sunrise, sunset, and equinox shadow lines for any calendar date."
+        ),
+        "Annual Insolation": (
+            "Solar Radiation Map",
+            "Calculates total solar heat energy absorbed per square meter of facade and rooftop across all 365 days."
+        ),
+        "Solar Potential": (
+            "Rooftop Clean Energy Harvest",
+            "Estimates kilowatt-hour clean electricity output achievable by installing photovoltaic solar panels on rooftops."
+        ),
+        "Transit Proximity Analysis": (
+            "Commuter Access Score",
+            "Measures walking and driving distances to the nearest metro stations, bus stops, and train terminals."
+        ),
+        "Accessibility Analysis": (
+            "Urban Reachability Index",
+            "Evaluates connectivity to schools, hospitals, supermarkets, and expressways to assess residential appeal."
+        ),
+        "Site Suitability Score": (
+            "Overall Development Rating",
+            "Synthesizes topography, transit, infrastructure, and hazard risks into an overall land development feasibility score."
+        ),
+        "Infrastructure Analysis": (
+            "Civic Utility Checker",
+            "Assesses proximity to municipal water mains, electrical grids, stormwater culverts, and sewer lines."
+        ),
+        "Buildability Analysis": (
+            "Constructability Verdict",
+            "Evaluates site access for heavy cement trucks, crane swing radius, and logistical staging feasibility."
+        ),
+        "AI Site Analysis": (
+            "Intelligent Site Auditor",
+            "An autonomous AI agent that audits geospatial risks, opportunities, and zoning advantages in one unified report."
+        ),
+        "Overpass Feature Caching": (
+            "Lightning Geo-Data Cache",
+            "Caches OpenStreetMap spatial queries locally to make map zooming and boundary calculations instant."
+        ),
+    },
+    "Development Controls & Setbacks": {
+        "Per-Edge Inward Setback Application": (
+            "Boundary Offset Buffer",
+            "Applies specific statutory setback offsets to each plot edge (front, rear, side) to carve out the buildable zone."
+        ),
+        "Setback Minimums from Plot Area": (
+            "Plot-Tier Margin Rules",
+            "Automatically selects mandatory minimum perimeter setbacks based on overall land parcel size tiers."
+        ),
+        "Height-Driven Open Space Table": (
+            "Tower Clearance Table",
+            "Expands required perimeter clear margins proportionally as building height increases to satisfy fire department rules."
+        ),
+        "Height vs Road Width Limit": (
+            "Skyline Road Cap",
+            "Enforces statutory maximum tower height ceilings dictated by the width of adjoining access roads."
+        ),
+        "Recommended Controls Engine": (
+            "Smart Zoning Guide",
+            "Suggests optimal building envelopes that maximize legal FSI without triggering code penalties."
+        ),
+        "Setback Verification & Warnings": (
+            "Clearance Intrusion Alarm",
+            "Immediately flags any building footprint, balcony, or canopy protruding into mandatory setback buffer zones."
+        ),
+        "Development Control Overrides": (
+            "Special Bylaw Exemption Toggle",
+            "Allows senior engineers to input special zoning variances, TOD incentives, or specific municipal concessions."
+        ),
+        "Yield Recommendation": (
+            "Maximum Saleable Floor Yield",
+            "Calculates the sweet spot balancing tower heights and plot coverage to maximize financial return."
+        ),
+    },
+    "Site Layout Engine": {
+        "Buildable Envelope Generation": (
+            "Legal Building Footprint",
+            "Extracts the safe, fully compliant interior building zone after subtracting all setbacks, easements, and road cuts."
+        ),
+        "Polygon Repair & Cleaning": (
+            "CAD Cleanup Broom",
+            "Cleans messy CAD lines, removes micro-gaps, and fixes duplicate vertices into clean, airtight geometric polygons."
+        ),
+        "Local Tangent-Plane Projection": (
+            "Curved Earth Flattener",
+            "Converts GPS latitude/longitude curves into millimeter-accurate flat Cartesian X/Y coordinates for civil calculations."
+        ),
+        "Road Network Reservation": (
+            "Site Circulation Grid",
+            "Carves out dedicated rights-of-way for main entry gates, internal spine roads, and emergency access lanes."
+        ),
+        "Perimeter Ring Roads": (
+            "Fire Tender Highway",
+            "Lays out continuous perimeter ring roads enabling fire engines to encircle every building unobstructed."
+        ),
+        "Internal Spine & Driveways": (
+            "Neighbourhood Street Grid",
+            "Designs internal access driveways connecting residential towers, clubhouse facilities, and underground ramps."
+        ),
+        "Straight-Line Corridor Geometry": (
+            "Clean Hallway Grid",
+            "Ensures internal building circulation corridors are designed in straight lines without awkward bottlenecks or dead ends."
+        ),
+        "Largest Inscribed Block Detection": (
+            "Prime Footprint Finder",
+            "Algorithmically discovers the largest unobstructed rectangular or convex footprint within an irregular site."
+        ),
+        "Amenity Block Placement": (
+            "Clubhouse & Pool Locator",
+            "Identifies optimal locations for clubhouses, sports courts, and swimming pools away from service noisy zones."
+        ),
+        "Green & Open Space Reservation": (
+            "Central Park Reserve",
+            "Protects mandatory statutory open green zones and clusters them into high-value community parks."
+        ),
+        "Greedy Grid Tower Packing": (
+            "High-Density Tower Arranger",
+            "Places building towers systematically across the buildable envelope to maximize yield and structural efficiency."
+        ),
+        "Footprint & Rotation Sweep": (
+            "Orientation Angle Tester",
+            "Sweeps tower footprints through multiple rotation angles to discover the orientation with maximum daylight and views."
+        ),
+        "Inter-Tower Spacing Enforcement": (
+            "Building Privacy Buffer",
+            "Maintains mandatory statutory separation distances between adjacent towers for privacy, light, and fire safety."
+        ),
+        "Tower Count & Height Caps": (
+            "Zoning Altitude Ceiling",
+            "Constrains tower heights and total numbers according to civil aviation (AAI) and master plan density caps."
+        ),
+        "Boundary Containment Guarantee": (
+            "Zero-Spill Guard",
+            "Mathematically proves that zero building elements, overhangs, or footings cross outside legal parcel boundaries."
+        ),
+        "Shared Fitness Scoring": (
+            "Master Layout Grading Score",
+            "Evaluates hundreds of generated site layouts against FSI yield, open space, road efficiency, and cost to pick the best."
+        ),
+        "Layout Recommendation Endpoint": (
+            "AI Masterplan Recommender",
+            "Presents the single most commercially lucrative and architecturally sound masterplan to the developer."
+        ),
+        "Engine Versioning & Signatures": (
+            "Algorithm Fingerprint Tracker",
+            "Tags every generated masterplan layout with the exact algorithmic engine version for reproducible results."
+        ),
+        "Genetic Refinement of Placement": (
+            "Evolutionary Layout Optimizer",
+            "Uses genetic evolutionary algorithms over thousands of simulated layout variants to refine tower positioning."
+        ),
+    },
+    "Vastu & Generative Architecture": {
+        "Vastu Sector Mapping": (
+            "9-Zone Mandala Compass",
+            "Divides the floor plan and site into the traditional 9 directional sectors (Ishan, Agni, Nairutya, Vayavya, etc.)."
+        ),
+        "Sector-Anchored Unit Packing": (
+            "Auspicious Unit Placement",
+            "Places master bedrooms, kitchens, and entrances in their traditionally optimal energetic quadrants."
+        ),
+        "Unit Programme Generation": (
+            "Room Blueprint Configurator",
+            "Auto-generates room requirements, room relationships, and functional dimensions based on target flat types."
+        ),
+        "Vastu Audit per Unit": (
+            "Unit Auspiciousness Scorecard",
+            "Scores every apartment unit on compliance with Vastu guidelines for buyers prioritizing traditional design principles."
+        ),
+        "MEP Position Audit": (
+            "Elemental Plumbing & Power Check",
+            "Checks that fire/heat appliances (kitchens, DG sets) sit in South-East and water sumps sit in North-East as per Vastu."
+        ),
+        "Sector Report": (
+            "Vastu Compliance Dossier",
+            "Produces a detailed, client-facing PDF report breaking down Vastu alignment room by room."
+        ),
+        "Vastu-Aligned Floor Plates": (
+            "Holistic Harmonized Layout",
+            "Generates entire multi-wing floor plates where all units satisfy both modern architectural codes and Vastu principles."
+        ),
+        "Architectural Template Generation": (
+            "Standard Plan Library",
+            "Provides an extensive catalog of pre-engineered, highly optimized unit templates ready for instant deployment."
+        ),
+        "Plan Realism Check": (
+            "Common-Sense Layout Filter",
+            "Ensures generative layouts avoid weird angles, unusable corners, or unnatural door swings."
+        ),
+        "Room Aspect & Dimension Checks": (
+            "Golden Proportion Validator",
+            "Validates that room length-to-width aspect ratios stay between healthy, comfortable proportions (1:1 to 1:1.5)."
+        ),
+    },
+    "Programme & Scheduling": {
+        "Activity Generation from Quantities": (
+            "Auto-Work Schedule Builder",
+            "Automatically converts material takeoff quantities into sequential physical construction tasks."
+        ),
+        "CPM Forward & Backward Pass": (
+            "Critical Path Mathematics",
+            "Calculates early start, early finish, late start, and late finish dates across all linked construction activities."
+        ),
+        "Critical Path Identification": (
+            "Zero-Delay Red Chain",
+            "Pinpoints the exact sequence of dependent bottleneck tasks where any single delay pushes back the final handover date."
+        ),
+        "Total & Free Float": (
+            "Schedule Breathing Room",
+            "Computes how many days each non-critical task can slip without delaying successor tasks or the overall project."
+        ),
+        "Float Verification": (
+            "Timeline Safety Buffer Check",
+            "Verifies that float allocations are realistic and that crucial milestone buffers are preserved."
+        ),
+        "Work Calendar & Holidays": (
+            "Site Working Day Calendar",
+            "Integrates national holidays, local monsoon shutdowns, and weekly rest days into project completion forecasts."
+        ),
+        "Duration from Output Rates": (
+            "Productivity-Based Timeline",
+            "Calculates task durations based on verified daily team output rates (e.g. 15 cubic meters of concrete poured per shift)."
+        ),
+        "Crew Efficiency Modelling": (
+            "Team Productivity Multiplier",
+            "Adjusts activity durations according to crew skill levels, extreme weather conditions, and nighttime shifts."
+        ),
+        "Wage Premium Modelling": (
+            "Overtime & Shift Cost Ledger",
+            "Factors in double-time wages and holiday night shift premiums when fast-tracking accelerated construction schedules."
+        ),
+        "Prop Removal Safety Rules": (
+            "Concrete Curing Safety Lock",
+            "Locks formwork stripping dates to mandatory curing periods (e.g. 14 to 21 days for slabs) to prevent structural sag."
+        ),
+        "Schedule Safety Audit": (
+            "Collision & Sequence Checker",
+            "Audits the schedule to ensure finishing trades do not mistakenly begin before waterproofing or structural curing completes."
+        ),
+        "Scheduled Date Audit": (
+            "Milestone Realism Check",
+            "Evaluates proposed completion deadlines against industry norms to flag overly aggressive or unrealistic promises."
+        ),
+        "Task Overrides & Edits": (
+            "Interactive Schedule Tweaker",
+            "Allows project managers to manually edit task durations, re-link dependencies, or split activities into phases."
+        ),
+        "Target Date Solver": (
+            "Reverse Delivery Planner",
+            "Works backward from a fixed client handover date, calculating required crew sizes and overtime shifts to hit the target."
+        ),
+        "Cash Flow Curve": (
+            "Capital Burn S-Curve",
+            "Plots cumulative projected monthly capital expenditures across the timeline to secure construction loan financing."
+        ),
+        "Resource Histogram": (
+            "Daily Manpower Demand Chart",
+            "Visualizes daily demand for masons, cranes, and concrete mixers to prevent on-site logistical shortages."
+        ),
+        "Line of Balance": (
+            "Repetitive Floor Cadence",
+            "Tracks the rhythmic velocity of construction crews moving upward from floor to floor across multi-storey towers."
+        ),
+        "Milestones": (
+            "Key Delivery Checkpoints",
+            "Highlights critical contractual handover dates such as foundation completion, topping out, and municipal occupancy."
+        ),
+        "Gantt Visualisation": (
+            "Master Timeline Bar Chart",
+            "Renders an interactive, color-coded Gantt chart displaying tasks, dependencies, and critical path activities."
+        ),
+    },
+}
+
+with open("plain_english_group3.json", "w", encoding="utf-8") as f:
+    json.dump(GROUP_3, f, indent=2)
+print("Group 3 saved.")

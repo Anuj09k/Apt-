@@ -12,7 +12,9 @@ committing. So the cash flow is modelled month by month rather than as a single 
 and every headline figure is derived from that series.
 """
 from dataclasses import dataclass, field
+import math
 from typing import Any, Dict, List, Tuple
+from residential_defaults import storeys_of
 
 SQFT_PER_SQM = 10.7639
 
@@ -88,8 +90,8 @@ def saleable_areas(project: Dict[str, Any], areas: Dict[str, Any]) -> Dict[str, 
         floors = int(tm.get("floors") or 0)
         units = src.get("units") or []
         weights = [(u, (float(u.get("carpet_area") or 0) + float(u.get("balcony_area") or 0))
-                    * int(u.get("count") or 0)) for u in units]
-        total_w = sum(w for _, w in weights)
+                    * int(u.get("count") or 0) * storeys_of(u, floors)) for u in units]
+        total_w = math.fsum(w for _, w in weights)
         if total_w <= 0:
             continue
         tower_saleable = float(tm.get("super_builtup_sqm") or 0)
@@ -97,7 +99,7 @@ def saleable_areas(project: Dict[str, Any], areas: Dict[str, Any]) -> Dict[str, 
             if w <= 0:
                 continue
             key = str(u.get("type") or "custom").lower()
-            count = int(u.get("count") or 0) * floors
+            count = int(u.get("count") or 0) * storeys_of(u, floors)
             sqm = tower_saleable * (w / total_w)
             row = by_type.setdefault(key, {"units": 0, "saleable_sqm": 0.0})
             row["units"] += count
@@ -111,11 +113,12 @@ def saleable_areas(project: Dict[str, Any], areas: Dict[str, Any]) -> Dict[str, 
             "units": int(row["units"]),
             "saleable_sqm": round(row["saleable_sqm"], 2),
             "saleable_sqft": round(sqft, 2),
+            "saleable_sqft_raw": sqft,
             "sqft_per_unit": round(sqft / row["units"], 2) if row["units"] else 0.0,
         })
     return {
         "by_type": out,
-        "total_sqft": round(sum(r["saleable_sqft"] for r in out), 2),
+        "total_sqft": round(math.fsum(r["saleable_sqft_raw"] for r in out), 2),
         "total_units": sum(r["units"] for r in out),
     }
 
@@ -201,10 +204,12 @@ def analyse(project: Dict[str, Any], analysis: Dict[str, Any],
     # Revenue, priced per unit type so a mix change moves the top line.
     revenue = 0.0
     for row in sale["by_type"]:
-        rate = float(cfg.sale_rate_by_type.get(row["type"], cfg.sale_rate_per_sqft) or 0)
+        raw_rate = cfg.sale_rate_by_type.get(row["type"], cfg.sale_rate_per_sqft)
+        rate = float(raw_rate if raw_rate is not None else 0.0)
         row["rate_per_sqft"] = rate
-        row["revenue"] = round(row["saleable_sqft"] * rate, 2)
-        revenue += row["revenue"]
+        rev_raw = row.get("saleable_sqft_raw", row["saleable_sqft"]) * rate
+        row["revenue"] = round(rev_raw, 2)
+        revenue += rev_raw
     gross_revenue = revenue + cfg.other_income
 
     construction = float(analysis["cost"]["total"] or 0)

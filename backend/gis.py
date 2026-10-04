@@ -173,7 +173,7 @@ def _parse_overpass(data, coords, radius_m):
         out[cat].append(item)
     for k in out:
         out[k].sort(key=lambda f: f["distance_m"])
-        out[k] = out[k][:120]
+        out[k] = out[k][:1000]
     return out
 
 

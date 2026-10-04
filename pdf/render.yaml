@@ -1,0 +1,84 @@
+# Render Blueprint — two services from this one repo.
+#
+#   aptimizer-api   FastAPI, built from backend/Dockerfile   -> https://aptimizer-api.onrender.com
+#   aptimizer-web   React build + nginx, frontend/Dockerfile -> https://aptimizer-web.onrender.com
+#
+# The web container proxies /api/* to the API in API_UPSTREAM, so the browser only ever
+# talks to the web service's own origin. That removes CORS from the picture, which is what
+# "Network Error" on the sign-in screen is almost always about: the browser got no response
+# at all because the cross-origin preflight was refused.
+#
+# Deploy: push this file, then Render Dashboard -> New -> Blueprint -> pick the repo.
+# Render asks for each `sync: false` value below during creation. Walk-through and
+# troubleshooting: RENDER_DEPLOY.md in this folder.
+services:
+  # ---------------------------------------------------------------------- API
+  - type: web
+    name: aptimizer-api
+    runtime: docker
+    # Both paths are relative to the repo root. The context is what makes `COPY
+    # requirements.txt .` in backend/Dockerfile resolve -- without it the build starts at
+    # the repo root and cannot find the file.
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    # Only pushes that touch backend/ redeploy this service.
+    buildFilter:
+      paths:
+        - backend/**
+    # Both services must share a region. The web container reaches the API over the public
+    # internet (a free instance cannot receive private-network traffic), so staying in one
+    # region keeps that hop short.
+    region: singapore
+    # Free sleeps after 15 minutes idle and takes ~1 minute to wake. Move to a paid plan
+    # once people expect it to answer on the first click.
+    plan: free
+    healthCheckPath: /api/
+    envVars:
+      # MongoDB Atlas connection string, e.g.
+      # mongodb+srv://USER:PASSWORD@cluster0.xxxxx.mongodb.net/?retryWrites=true&w=majority
+      # Create the cluster, add a database user, and allow access from 0.0.0.0/0 (Render's
+      # outbound IPs are not fixed on the free plan; the database still needs credentials).
+      - key: MONGO_URL
+        sync: false
+      - key: DB_NAME
+        value: aptimizer
+      # Render generates a strong secret and keeps it. Never set this by hand.
+      - key: JWT_SECRET
+        generateValue: true
+      # The first admin account, created on first boot.
+      - key: ADMIN_EMAIL
+        value: admin@aptimizer.com
+      - key: ADMIN_PASSWORD
+        sync: false
+      # At least one AI key, or APT and the AI reports disable themselves.
+      - key: GEMINI_API_KEY
+        sync: false
+      # Only matters for requests that do arrive cross-origin. Keep it in step with the web
+      # service's actual URL; harmless if it drifts, since the UI is same-origin.
+      - key: FRONTEND_URL
+        value: https://aptimizer-web.onrender.com
+      - key: CORS_ORIGINS
+        value: https://aptimizer-web.onrender.com
+      # One worker on a 512 MB free instance. The API imports numpy, pandas, shapely,
+      # ifcopenshell and reportlab at startup; two copies of that do not fit.
+      - key: WEB_CONCURRENCY
+        value: "1"
+
+  # ---------------------------------------------------------------------- web
+  - type: web
+    name: aptimizer-web
+    runtime: docker
+    dockerfilePath: ./frontend/Dockerfile
+    dockerContext: ./frontend
+    buildFilter:
+      paths:
+        - frontend/**
+    region: singapore
+    plan: free
+    healthCheckPath: /
+    envVars:
+      # Where nginx forwards /api/*. This must be the API's *public* URL: free Render
+      # instances cannot receive private-network traffic. If Render had to change the API's
+      # name because "aptimizer-api" was taken, correct this value to match.
+      - key: API_UPSTREAM
+        value: https://aptimizer-api.onrender.com

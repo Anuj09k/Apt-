@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { motion, useMotionValueEvent, useReducedMotion, useScroll } from "framer-motion";
+import { motion, useMotionValueEvent, useReducedMotion, useScroll, useSpring, useTransform } from "framer-motion";
 import { ArrowRight, ArrowDown, ArrowUpRight, Menu, X, Check, Compass, Ruler, Layers, ShieldCheck, BookOpen, AlertTriangle } from "lucide-react";
 import { Brand } from "../components/Brand";
 import { ScrollScene } from "../components/ScrollScene";
@@ -22,53 +22,115 @@ const PIPELINE = [
 ];
 const CODES = [
   ["Structural loads", "IS 875 Parts 1–3"], ["Seismic actions", "IS 1893 (Part 1)"],
-  ["Concrete structures", "IS 456"], ["Foundation references", "IS 6403 / IS 1904"],
-  ["Concrete mix design", "IS 10262"], ["Water demand", "IS 1172"],
-  ["Fire & life safety", "NBC 2016 Part 4"], ["Accessibility", "NBC Part 3 / RPwD"],
-  ["Green assessment", "GRIHA / IGBC"],
+  ["Concrete structures", "IS 456:2000"], ["Ductile detailing", "IS 13920:2016"],
+  ["Foundation references", "IS 6403 / IS 1904"], ["Concrete mix design", "IS 10262:2019"],
+  ["Water supply & drainage", "IS 1172 / IS 1742"], ["Fire & life safety", "NBC 2016 Part 4"],
+  ["Accessibility & setbacks", "NBC Part 3 / RPwD"], ["Construction plant & cranes", "IS 4573 / IS 4925 / IS 5121"],
+  ["Concrete maturity & testing", "ASTM C1074 / IS 516"], ["Green & environmental norms", "GRIHA / IGBC / LEED / CPCB"],
 ];
 
 export default function Landing() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const hero = useRef(null);
   const reduced = useReducedMotion();
   const [menu, setMenu] = useState(false);
   const [solid, setSolid] = useState(false);
   const { scrollYProgress, scrollY } = useScroll();
   // The ref must be measured in its owning component, after its DOM has committed.
-  const { scrollYProgress: heroProgress } = useScroll({ target: hero, offset: ["start 64px", "end end"] });
+  // Map [0, 0.92] -> [0, 1] so frame 60 completes while the sticky stage is still pinned in view.
+  const { scrollYProgress: rawHeroProgress } = useScroll({ target: hero, offset: ["start 64px", "end end"] });
+  const heroProgress = useTransform(rawHeroProgress, [0, 0.92], [0, 1]);
+  // The reading bar is spring-followed: it keeps pace with the page while the
+  // wheel is still settling instead of snapping on every scroll event.
+  const barProgress = useSpring(scrollYProgress, { stiffness: 240, damping: 40, mass: 0.4, restDelta: 0.001 });
+  // The hero copy rises and yields as the model completes. Transform and
+  // opacity only -- both run on the compositor, so this costs the scroll
+  // nothing, and both are inert when the hero is static (reduced motion).
+  const headingY = useTransform(heroProgress, [0, 1], [0, -48]);
+  const headingFade = useTransform(heroProgress, [0.4, 0.92], [1, 0.08]);
+  const footFade = useTransform(heroProgress, [0.4, 0.92], [1, 0.18]);
   useMotionValueEvent(scrollY, "change", value => setSolid(previous => previous === (value > 20) ? previous : value > 20));
   const href = user ? "/projects" : "/register";
   const cta = user ? "Open workspace" : "Start a project";
 
   return <div className="landing-page" data-testid="landing-page">
     <a href="#workspace" className="landing-skip" data-testid="landing-skip-content">Skip to workspace overview</a>
-    <motion.div aria-hidden="true" className="fixed inset-x-0 top-0 z-50 h-0.5 origin-left bg-blue-600" style={{ scaleX: scrollYProgress }} data-testid="landing-scroll-progress" />
+    <motion.div aria-hidden="true" className="fixed inset-x-0 top-0 z-50 h-0.5 origin-left bg-blue-600" style={{ scaleX: barProgress }} data-testid="landing-scroll-progress" />
     <header className={`landing-nav ${solid ? "landing-nav-solid" : ""}`} data-testid="landing-nav">
       <div className="landing-container flex h-16 items-center justify-between gap-3">
         <Link to="/" aria-label="Aptimizer home" data-testid="landing-nav-brand"><Brand testid="landing-nav-brand-lockup" markClass="h-8 w-auto" wordClass="text-lg" /></Link>
         <nav className="hidden items-center gap-7 lg:flex" aria-label="Main navigation">{NAV.map(([name, id]) => <a key={id} href={`#${id}`} data-testid={`landing-nav-${id}`} className="landing-nav-link">{name}</a>)}</nav>
         <div className="flex items-center gap-2">
-          {!user && <Link to="/login" className="landing-nav-link hidden sm:block mr-3" data-testid="landing-nav-sign-in">Sign in</Link>}
+          {user ? (
+            <div className="flex items-center gap-2 mr-1">
+              <span className="hidden md:inline-block text-xs text-slate-500 font-mono truncate max-w-[140px]">
+                {user.email || user.name || "Signed in"}
+              </span>
+              <Link
+                to="/login"
+                className="text-xs font-medium text-slate-700 hover:text-blue-600 px-2.5 py-1.5 rounded-sm border border-slate-200 hover:border-blue-400 bg-white shadow-2xs transition-colors"
+                data-testid="landing-nav-sign-in"
+              >
+                Sign in
+              </Link>
+              <button
+                type="button"
+                onClick={logout}
+                className="text-xs text-slate-500 hover:text-red-600 px-1.5 py-1 transition-colors"
+                data-testid="landing-nav-sign-out"
+              >
+                Sign out
+              </button>
+            </div>
+          ) : (
+            <Link
+              to="/login"
+              className="text-xs font-semibold text-slate-700 hover:text-blue-600 px-3 py-1.5 rounded-sm border border-slate-200 hover:border-blue-400 bg-white shadow-2xs mr-1 transition-colors"
+              data-testid="landing-nav-sign-in"
+            >
+              Sign in
+            </Link>
+          )}
           <ReactiveButton as={Link} to={href} size="sm" icon={<ArrowUpRight size={15} />} className="!px-3" data-testid="landing-nav-primary-cta">{cta}</ReactiveButton>
           <button className="p-2 lg:hidden text-slate-600" aria-label={menu ? "Close navigation" : "Open navigation"} aria-expanded={menu} aria-controls="landing-mobile-nav" onClick={() => setMenu(!menu)} data-testid="landing-menu-toggle">{menu ? <X size={20} /> : <Menu size={20} />}</button>
         </div>
       </div>
-      {menu && <nav id="landing-mobile-nav" className="landing-container grid gap-1 border-t py-4 lg:hidden" aria-label="Mobile navigation" data-testid="landing-mobile-nav">{[...NAV, ...(!user ? [["Sign in", "/login"]] : [])].map(([name, id]) => <a key={id} href={id.startsWith("/") ? id : `#${id}`} onClick={() => setMenu(false)} data-testid={`landing-mobile-${id.replace("/", "")}`} className="py-2 text-sm text-slate-700">{name}</a>)}</nav>}
+      {menu && (
+        <nav id="landing-mobile-nav" className="landing-container grid gap-1 border-t py-4 lg:hidden" aria-label="Mobile navigation" data-testid="landing-mobile-nav">
+          {NAV.map(([name, id]) => (
+            <a key={id} href={`#${id}`} onClick={() => setMenu(false)} data-testid={`landing-mobile-${id}`} className="py-2 text-sm text-slate-700">
+              {name}
+            </a>
+          ))}
+          <Link to="/login" onClick={() => setMenu(false)} data-testid="landing-mobile-login" className="py-2 text-sm font-semibold text-blue-600">
+            Sign in
+          </Link>
+          {user && (
+            <button
+              type="button"
+              onClick={() => { logout(); setMenu(false); }}
+              data-testid="landing-mobile-logout"
+              className="py-2 text-sm text-left font-medium text-red-600"
+            >
+              Sign out ({user.email || user.name})
+            </button>
+          )}
+        </nav>
+      )}
     </header>
 
     <main>
       <section ref={hero} className={`landing-hero ${reduced ? "landing-hero-static" : ""}`} data-testid="landing-hero">
         <div className="landing-stage">
           <ScrollScene progress={heroProgress} className="landing-scene-media" />
-          <div className="landing-hero-heading landing-container">
+          <motion.div className="landing-hero-heading landing-container" style={{ y: headingY, opacity: headingFade }}>
             <p className="landing-eyebrow">Aptimizer / Built for Indian engineering</p>
             <h1 data-testid="landing-heading">From the first line.<br /><span>To the bigger picture.</span></h1>
-          </div>
-          <div className="landing-hero-bottom landing-container">
+          </motion.div>
+          <motion.div className="landing-hero-bottom landing-container" style={{ opacity: footFade }}>
             <p className="max-w-xs text-xs leading-relaxed text-slate-700">Site. Structure. Cost. One connected project.</p>
             <a href="#workspace" data-testid="landing-explore" className="flex items-center gap-3 text-xs font-medium text-slate-800">Explore Aptimizer <ArrowDown size={16} /></a>
-          </div>
+          </motion.div>
         </div>
       </section>
 
@@ -94,7 +156,7 @@ export default function Landing() {
 
       <ParameterDirectory />
 
-      <section id="pipeline" className="landing-section landing-pipeline scroll-mt-16" data-testid="landing-pipeline">
+      <section id="pipeline" className="landing-section !pt-8 landing-pipeline scroll-mt-16" data-testid="landing-pipeline">
         <div className="landing-container"><Reveal><p className="landing-eyebrow">03 / The layout pipeline</p><h2 className="landing-title">From boundary to a considered scheme.</h2></Reveal>
           <Stagger className="mt-10 grid gap-x-12 gap-y-8 sm:grid-cols-2 lg:grid-cols-3" step={0.05}>{PIPELINE.map(([name, body], i) => <RevealItem key={name} data-testid={`landing-pipeline-step-${i}`}>
             <div className="border-t border-slate-300 pt-5"><span className="font-mono text-xs text-blue-600">0{i + 1}</span><h3 className="mt-4 text-base font-semibold">{name}</h3><p className="mt-2 max-w-xs text-sm leading-relaxed text-slate-600">{body}</p></div>
@@ -134,6 +196,15 @@ export default function Landing() {
       </section>
       <section className="landing-section bg-[#11231f] text-white" data-testid="landing-cta"><div className="landing-container flex flex-wrap items-center justify-between gap-8"><div><p className="font-mono text-xs text-emerald-300">YOUR NEXT PROJECT</p><h2 className="mt-4 text-lg font-semibold">Start with the site. Keep the whole picture.</h2></div><ReactiveButton as={Link} to={href} size="lg" icon={<ArrowUpRight size={18} />} data-testid="landing-cta-primary">{cta}</ReactiveButton></div></section>
     </main>
-    <footer className="border-t bg-white py-8" data-testid="landing-footer"><div className="landing-container flex flex-wrap items-center justify-between gap-6"><Brand testid="landing-footer-brand-lockup" markClass="h-7 w-auto" wordClass="text-base" /><p className="text-xs text-slate-500">Civil engineering & real-estate planning · Indian codes · INR</p><a href="#parameters" className="landing-nav-link" data-testid="landing-footer-parameters">Parameter directory <ArrowUpRight className="inline ml-1" size={13} /></a></div></footer>
+    <footer className="border-t bg-white py-8" data-testid="landing-footer">
+      <div className="landing-container flex flex-wrap items-center justify-between gap-6">
+        <Brand testid="landing-footer-brand-lockup" markClass="h-7 w-auto" wordClass="text-base" />
+        <p className="text-xs text-slate-500">Civil engineering &amp; real-estate planning · Indian codes · INR</p>
+        <div className="flex items-center gap-5">
+          <Link to="/login" className="landing-nav-link" data-testid="landing-footer-sign-in">Sign in</Link>
+          <a href="#parameters" className="landing-nav-link" data-testid="landing-footer-parameters">Parameter directory <ArrowUpRight className="inline ml-1" size={13} /></a>
+        </div>
+      </div>
+    </footer>
   </div>;
 }

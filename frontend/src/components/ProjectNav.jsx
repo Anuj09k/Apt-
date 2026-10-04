@@ -41,6 +41,7 @@ const DESCRIPTIONS = {
   gis: "Satellite imagery, terrain elevation, slope, and solar analysis",
   township: "Macro-parcel master zoning & mixed-use commercial planning",
   "autonomous-studio": "Quick-start generative layouts from plot area and budget tier",
+  planning: "Tower massing, building shapes, 5BHK penthouses, unit mix, and society amenities",
   parking: "Required and provided bays, basement layouts, and vehicular circulation",
   studio: "Apartment planning, AI floor plans, facade, landscape, and parking generation",
   "3d": "Interactive 3D massing model, floor stacking, and structural bays",

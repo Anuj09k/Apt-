@@ -27,19 +27,36 @@ from typing import Any, Dict, Optional, Tuple
 # ---------------------------------------------------------------- intent gate
 # Whole-message patterns only. "thanks" is chit-chat; "thanks, why is the base shear
 # 1,240 kN" is not, and anchoring both ends is what keeps the two apart.
-_CHITCHAT_TOKEN = (
-    r"(?:hi|hey|hello|yo|hiya|good\s+(?:morning|afternoon|evening)|"
-    r"thanks?|thank\s+you|thx|cheers|ok(?:ay)?|got\s+it|nice|great|cool|perfect|"
-    r"bye|goodbye|see\s+you)")
+_GREETING_TOKEN = (
+    r"(?:hi|hey|hello|yo|hiya|hola|namaste|greetings|"
+    r"good\s+(?:morning|afternoon|evening|day|night)|"
+    r"how\s+(?:are\s+you(?:\s+doing)?|r\s+u|do\s+you\s+do|is\s+it\s+going|are\s+things|is\s+everything)(?:\s+today)?|"
+    r"how\'?s\s+(?:it\s+going|everything)|"
+    r"what\'?s\s+up|wassup|sup|what\s+is\s+up|"
+    r"(?:are\s+you|you)\s+(?:there|ready|online)|"
+    r"nice\s+to\s+meet\s+you)"
+)
+
+_POLITE_TOKEN = (
+    r"(?:thanks?|thank\s+you(?:\s+(?:so\s+much|very\s+much|a\s+lot))?|thx|cheers|many\s+thanks|"
+    r"ok(?:ay)?|k|got\s+it|nice|great|cool|perfect|awesome|alright|all\s+right|sure|fine|understood|noted|"
+    r"bye|goodbye|see\s+you(?:\s+later)?|see\s+ya|cya|talk\s+to\s+you\s+later|"
+    r"have\s+a\s+(?:good|nice|great)\s+day|take\s+care|"
+    r"good\s+job|great\s+job|well\s+done|nice\s+work)"
+)
+
+_CHITCHAT_TOKEN = rf"(?:{_GREETING_TOKEN}|{_POLITE_TOKEN})"
 # A run of them, not just one: people write "ok thanks" and "ok, got it" as readily as
 # "ok", and matching a single token classified those as real questions.
 _CHITCHAT = re.compile(
-    r"^\s*" + _CHITCHAT_TOKEN + r"(?:[\s!.,]+" + _CHITCHAT_TOKEN + r")*[\s!.,]*$",
+    r"^\s*" + _CHITCHAT_TOKEN + r"(?:[\s!.,]+" + _CHITCHAT_TOKEN + r")*[\s!.,?]*$",
     re.IGNORECASE)
 
 _CAPABILITY = re.compile(
     r"^\s*(what\s+(can|do)\s+you\s+do|who\s+are\s+you|what\s+are\s+you|"
-    r"how\s+can\s+you\s+help|help|what\s+is\s+apt)"
+    r"how\s+can\s+you\s+help|help|what\s+is\s+apt|"
+    r"who\s+(?:made|created|built)\s+you|"
+    r"tell\s+me\s+about\s+yourself)"
     r"[\s?!.]*$", re.IGNORECASE)
 
 # A question earns the full payload when it names something the full payload contains.
@@ -79,11 +96,39 @@ def is_capability_question(message: str) -> bool:
     return bool(_CAPABILITY.match((message or "").strip()))
 
 
+# Sub-patterns to route local chit-chat into appropriate natural replies
+_HOW_ARE_YOU_TOKEN = (
+    r"(?:how\s+(?:are\s+you(?:\s+doing)?|r\s+u|do\s+you\s+do|is\s+it\s+going|are\s+things|is\s+everything)(?:\s+today)?|"
+    r"how\'?s\s+(?:it\s+going|everything)|"
+    r"what\'?s\s+up|wassup|sup|what\s+is\s+up)"
+)
+_HOW_ARE_YOU = re.compile(r"\b" + _HOW_ARE_YOU_TOKEN + r"\b", re.IGNORECASE)
+_THANKS = re.compile(r"\b(?:thanks?|thank\s+you|thx|cheers|many\s+thanks)\b", re.IGNORECASE)
+_BYE = re.compile(r"\b(?:bye|goodbye|see\s+you|see\s+ya|cya|take\s+care|talk\s+to\s+you\s+later)\b", re.IGNORECASE)
+_ACK = re.compile(r"^(?:\s*(?:ok(?:ay)?|k|got\s+it|nice|great|cool|perfect|awesome|alright|all\s+right|sure|fine|understood|noted)[\s!.,]*)+$", re.IGNORECASE)
+
 # Fixed replies for the no-context path. Written here rather than generated because a
 # model round trip to say "hello" is the thing this module exists to avoid.
 GREETING = (
     "Ready. Ask me about any number in this project — where it came from, which IS or NBC "
     "clause governs it, or what would change if you moved an input."
+)
+
+GREETING_HOW_ARE_YOU = (
+    "I'm doing well and ready to help! Ask me about any number in this project — "
+    "where it came from, which IS or NBC clause governs it, or what would change if you moved an input."
+)
+
+THANKS_REPLY = (
+    "You're welcome! Let me know if you want to explore any other numbers, clauses, or what-ifs in this project."
+)
+
+BYE_REPLY = (
+    "Goodbye! Have a productive design session."
+)
+
+ACK_REPLY = (
+    "Ready whenever you are. Ask about any numbers, compliance rules, or structural and cost details."
 )
 
 CAPABILITY = (
@@ -98,6 +143,22 @@ CAPABILITY = (
     "I explain the engine's output; I do not recalculate it, and I am not a substitute for "
     "a licensed engineer's sign-off."
 )
+
+
+def reply_for(message: str) -> str:
+    """Return an appropriate instant, deterministic local reply for tier == NONE questions."""
+    text = (message or "").strip()
+    if is_capability_question(text):
+        return CAPABILITY
+    if _HOW_ARE_YOU.search(text):
+        return GREETING_HOW_ARE_YOU
+    if _THANKS.search(text):
+        return THANKS_REPLY
+    if _BYE.search(text):
+        return BYE_REPLY
+    if _ACK.match(text):
+        return ACK_REPLY
+    return GREETING
 
 
 # ---------------------------------------------------------------- analysis cache

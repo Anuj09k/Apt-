@@ -48,6 +48,10 @@ def mongo():
         pytest.skip(f"MongoDB not reachable: {exc}")
     db = client[os.environ["DB_NAME"]]
     yield db
+    try:
+        db.projects.delete_many({"client": "QA"})
+    except Exception:
+        pass
     client.close()
 
 

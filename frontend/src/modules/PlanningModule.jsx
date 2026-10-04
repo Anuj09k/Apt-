@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { toast } from "sonner";
-import { Plus, RefreshCw, Sparkles, Trash2, Building2, Compass, ShieldCheck, CheckCircle2, LayoutGrid } from "lucide-react";
+import { Plus, RefreshCw, Sparkles, Trash2, Building2, Compass, ShieldCheck, CheckCircle2, LayoutGrid, ZoomIn, ZoomOut, RotateCcw, Maximize2, Minimize2, Edit3, X, Move } from "lucide-react";
 import { api, apiError, syncTowersFromLayout, API_BASE } from "../lib/api";
 import { Metric, NumField, Section, TextField } from "../components/Field";
 import OptimiserPanel from "../components/OptimiserPanel";
@@ -12,7 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from ".
 import { Slider } from "../components/ui/slider";
 import { int, num } from "../lib/format";
 
-const UNIT_TYPES = ["studio", "1bhk", "2bhk", "3bhk", "4bhk", "penthouse", "custom"];
+const UNIT_TYPES = ["studio", "1bhk", "2bhk", "3bhk", "4bhk", "5bhk", "penthouse", "custom"];
 const ROOM_TYPES = ["living", "bedroom", "kitchen", "bathroom", "balcony", "utility", "closet", "entrance", "passage", "study", "common", "pooja", "shaft", "servant", "terrace", "office", "pantry"];
 const STAIR_TYPES = ["dog-legged", "open-well", "spiral", "straight-flight"];
 
@@ -106,6 +106,393 @@ function RecommendationsSection({ projectId, readOnly }) {
   );
 }
 
+function PresentationFloorPlanViewer({
+  imageUrl,
+  towerName,
+  floor,
+  readOnly,
+  floorRooms,
+  setRooms,
+  setFloorPlanImageRevision,
+  fetchAiFloorLayout,
+  fetchFloorLayout,
+  floorLoading,
+}) {
+  const [zoom, setZoom] = useState(1.0);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [quickEditOpen, setQuickEditOpen] = useState(false);
+  const containerRef = useRef(null);
+
+  // Wheel zoom with passive: false to prevent scrolling parent container
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const handleWheel = (e) => {
+      e.preventDefault();
+      const delta = e.deltaY < 0 ? 0.15 : -0.15;
+      setZoom((prev) => Math.min(Math.max(Number((prev + delta).toFixed(2)), 0.4), 3.5));
+    };
+    el.addEventListener("wheel", handleWheel, { passive: false });
+    return () => el.removeEventListener("wheel", handleWheel);
+  }, []);
+
+  const handleMouseDown = (e) => {
+    if (e.button !== 0) return;
+    setIsDragging(true);
+    setDragStart({ x: e.clientX - pan.x, y: e.clientY - pan.y });
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDragging) return;
+    setPan({ x: e.clientX - dragStart.x, y: e.clientY - dragStart.y });
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const zoomIn = () => setZoom((z) => Math.min(Number((z + 0.25).toFixed(2)), 3.5));
+  const zoomOut = () => setZoom((z) => Math.max(Number((z - 0.25).toFixed(2)), 0.4));
+  const resetZoom = () => {
+    setZoom(1.0);
+    setPan({ x: 0, y: 0 });
+  };
+
+  const scrollToDiagram = () => {
+    const el = document.querySelector('[data-testid="room-planning-section"]');
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+      el.classList.add("ring-2", "ring-blue-500", "transition-all");
+      setTimeout(() => el.classList.remove("ring-2", "ring-blue-500"), 1800);
+    }
+  };
+
+  const updateRoomField = (idx, field, value) => {
+    const next = floorRooms.map((r, i) => (i === idx ? { ...r, [field]: value } : r));
+    setRooms(next);
+    setFloorPlanImageRevision((r) => r + 1);
+  };
+
+  const deleteRoom = (idx) => {
+    const next = floorRooms.filter((_, i) => i !== idx);
+    setRooms(next);
+    setFloorPlanImageRevision((r) => r + 1);
+  };
+
+  const addRoom = () => {
+    const next = [
+      ...floorRooms,
+      { id: uid(), name: "New room", type: "bedroom", x: 0, y: 0, w: 3.5, h: 3.2 },
+    ];
+    setRooms(next);
+    setFloorPlanImageRevision((r) => r + 1);
+  };
+
+  return (
+    <>
+      <div className="space-y-2">
+        {/* Controls Toolbar */}
+        <div className="flex flex-wrap items-center justify-between gap-2 bg-slate-100/90 p-2 rounded-sm border border-slate-200 text-xs">
+          <div className="flex items-center gap-1.5">
+            <span className="font-semibold text-slate-700">Zoom:</span>
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-7 w-7 p-0 rounded-sm"
+              onClick={zoomOut}
+              disabled={zoom <= 0.4}
+              title="Zoom out"
+              data-testid="presentation-zoom-out"
+            >
+              <ZoomOut className="h-3.5 w-3.5" />
+            </Button>
+            <span className="font-mono text-[11px] text-slate-600 w-12 text-center select-none" data-testid="presentation-zoom-level">
+              {Math.round(zoom * 100)}%
+            </span>
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-7 w-7 p-0 rounded-sm"
+              onClick={zoomIn}
+              disabled={zoom >= 3.5}
+              title="Zoom in"
+              data-testid="presentation-zoom-in"
+            >
+              <ZoomIn className="h-3.5 w-3.5" />
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-7 px-2 text-xs rounded-sm text-slate-600 hover:text-slate-900"
+              onClick={resetZoom}
+              title="Reset zoom and position"
+              data-testid="presentation-zoom-reset"
+            >
+              <RotateCcw className="h-3 w-3 mr-1" /> Reset
+            </Button>
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-7 text-xs rounded-sm text-slate-700"
+              onClick={() => setIsFullscreen(true)}
+              data-testid="presentation-fullscreen-toggle"
+            >
+              <Maximize2 className="h-3 w-3 mr-1" /> Fullscreen
+            </Button>
+            {!readOnly && (
+              <>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-7 text-xs rounded-sm text-blue-700 border-blue-200 bg-blue-50/60 hover:bg-blue-100"
+                  onClick={() => setQuickEditOpen(true)}
+                  data-testid="presentation-quick-edit-button"
+                >
+                  <Edit3 className="h-3 w-3 mr-1 text-blue-600" /> Quick Edit Rooms
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-7 text-xs rounded-sm text-slate-600 hover:text-slate-900"
+                  onClick={scrollToDiagram}
+                  title="Scroll to interactive SVG room diagram above"
+                >
+                  Diagram editor ↑
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Viewport */}
+        <div
+          ref={containerRef}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
+          className="relative bg-slate-900/5 border border-slate-200 rounded-sm h-[480px] md:h-[600px] flex items-center justify-center overflow-hidden select-none cursor-grab active:cursor-grabbing"
+          data-testid="presentation-floorplan-viewport"
+        >
+          <div
+            style={{
+              transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
+              transformOrigin: "center center",
+              transition: isDragging ? "none" : "transform 0.12s ease-out",
+            }}
+            className="w-full h-full flex items-center justify-center p-4 pointer-events-none"
+          >
+            <img
+              key={imageUrl}
+              src={imageUrl}
+              alt={`${towerName} floor ${floor} architectural plan`}
+              className="max-w-full max-h-full object-contain pointer-events-auto shadow-sm"
+              loading="lazy"
+              draggable={false}
+              data-testid="planning-presentation-floorplan-image"
+            />
+          </div>
+          <div className="absolute bottom-2 left-2 bg-white/90 backdrop-blur-xs border border-slate-200 text-[10px] text-slate-500 px-2 py-0.5 rounded shadow-2xs pointer-events-none">
+            Drag to pan · Scroll to zoom
+          </div>
+        </div>
+      </div>
+
+      {/* Fullscreen Overlay */}
+      {isFullscreen && (
+        <div className="fixed inset-0 z-50 bg-slate-950/95 flex flex-col p-4 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="flex items-center justify-between text-white pb-3 border-b border-slate-800">
+            <div>
+              <h3 className="text-sm font-semibold">{towerName} — Floor {floor} Architectural Plan</h3>
+              <p className="text-xs text-slate-400">Presentation quality drawing</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button size="sm" variant="outline" className="h-8 bg-slate-800 border-slate-700 text-white hover:bg-slate-700" onClick={zoomOut}>
+                <ZoomOut className="h-4 w-4" />
+              </Button>
+              <span className="font-mono text-xs w-12 text-center text-slate-300">
+                {Math.round(zoom * 100)}%
+              </span>
+              <Button size="sm" variant="outline" className="h-8 bg-slate-800 border-slate-700 text-white hover:bg-slate-700" onClick={zoomIn}>
+                <ZoomIn className="h-4 w-4" />
+              </Button>
+              <Button size="sm" variant="outline" className="h-8 bg-slate-800 border-slate-700 text-white hover:bg-slate-700" onClick={resetZoom}>
+                <RotateCcw className="h-3.5 w-3.5 mr-1" /> Reset
+              </Button>
+              <Button size="sm" variant="ghost" className="h-8 px-2 text-white hover:bg-slate-800" onClick={() => setIsFullscreen(false)}>
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+          </div>
+          <div
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
+            className="flex-1 overflow-hidden flex items-center justify-center cursor-grab active:cursor-grabbing relative"
+          >
+            <div
+              style={{
+                transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
+                transformOrigin: "center center",
+                transition: isDragging ? "none" : "transform 0.12s ease-out",
+              }}
+              className="w-full h-full flex items-center justify-center p-6 pointer-events-none"
+            >
+              <img
+                src={imageUrl}
+                alt={`${towerName} floor ${floor} architectural plan`}
+                className="max-w-full max-h-full object-contain pointer-events-auto"
+                draggable={false}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Quick Edit Rooms Modal */}
+      {quickEditOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-2xl max-w-2xl w-full max-h-[85vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between p-4 border-b border-slate-200">
+              <div>
+                <h3 className="text-sm font-semibold text-slate-900">
+                  Quick Edit Rooms &amp; Layout — {towerName}, Floor {floor}
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Update dimensions and types. Changes refresh the architectural floor plan instantly.
+                </p>
+              </div>
+              <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => setQuickEditOpen(false)}>
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-4 space-y-3">
+              <div className="flex items-center justify-between gap-2 pb-1 border-b border-slate-100">
+                <span className="text-xs font-semibold text-slate-700">
+                  {floorRooms.length} room(s) programmed
+                </span>
+                <div className="flex items-center gap-1.5">
+                  <Button
+                    size="sm"
+                    variant="ai"
+                    className="h-7 rounded-sm text-xs"
+                    disabled={floorLoading}
+                    onClick={async () => {
+                      await fetchAiFloorLayout();
+                      setFloorPlanImageRevision((r) => r + 1);
+                    }}
+                  >
+                    <Sparkles className={`h-3 w-3 mr-1 ${floorLoading ? "animate-spin" : ""}`} /> AI Re-generate
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-7 rounded-sm text-xs"
+                    disabled={floorLoading}
+                    onClick={async () => {
+                      await fetchFloorLayout(true);
+                      setFloorPlanImageRevision((r) => r + 1);
+                    }}
+                  >
+                    <RefreshCw className={`h-3 w-3 mr-1 ${floorLoading ? "animate-spin" : ""}`} /> Algorithmic
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-7 rounded-sm text-xs"
+                    onClick={addRoom}
+                  >
+                    <Plus className="h-3 w-3 mr-1" /> Add room
+                  </Button>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                {floorRooms.map((r, i) => (
+                  <div key={r.id || i} className="flex flex-wrap items-center gap-2 p-2 border border-slate-200 rounded-md bg-slate-50/50">
+                    <div className="flex-1 min-w-[140px]">
+                      <label className="text-[10px] text-slate-500 font-medium block">Room Name</label>
+                      <Input
+                        value={r.name || ""}
+                        className="h-7 text-xs bg-white"
+                        onChange={(e) => updateRoomField(i, "name", e.target.value)}
+                      />
+                    </div>
+                    <div className="w-28">
+                      <label className="text-[10px] text-slate-500 font-medium block">Type</label>
+                      <select
+                        value={r.type || "bedroom"}
+                        className="h-7 text-xs w-full rounded border border-slate-200 bg-white px-1.5"
+                        onChange={(e) => updateRoomField(i, "type", e.target.value)}
+                      >
+                        {ROOM_TYPES.map((t) => (
+                          <option key={t} value={t}>{t}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="w-20">
+                      <label className="text-[10px] text-slate-500 font-medium block">Width (m)</label>
+                      <Input
+                        type="number"
+                        step="0.1"
+                        value={r.w || ""}
+                        className="h-7 text-xs text-right font-mono bg-white"
+                        onChange={(e) => updateRoomField(i, "w", Number(e.target.value))}
+                      />
+                    </div>
+                    <div className="w-20">
+                      <label className="text-[10px] text-slate-500 font-medium block">Height (m)</label>
+                      <Input
+                        type="number"
+                        step="0.1"
+                        value={r.h || ""}
+                        className="h-7 text-xs text-right font-mono bg-white"
+                        onChange={(e) => updateRoomField(i, "h", Number(e.target.value))}
+                      />
+                    </div>
+                    <div className="w-16 text-right">
+                      <span className="text-[10px] text-slate-400 block">Area</span>
+                      <span className="font-mono text-xs text-slate-700">
+                        {num(Number(r.w || 0) * Number(r.h || 0), 1)} m²
+                      </span>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-7 w-7 p-0 text-red-600 hover:bg-red-50 mt-3"
+                      onClick={() => deleteRoom(i)}
+                      title="Delete room"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="p-3 border-t border-slate-200 bg-slate-50 flex items-center justify-between">
+              <span className="font-mono text-xs text-slate-500">
+                Total room area: {num(floorRooms.reduce((s, r) => s + Number(r.w || 0) * Number(r.h || 0), 0), 1)} m²
+              </span>
+              <Button size="sm" className="h-8 px-4" onClick={() => setQuickEditOpen(false)}>
+                Done Editing
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
 export default function PlanningModule({ project, analysis, update, readOnly, projectId, setProject, goToModule }) {
   const towers = project.towers || [];
   const societyAmenities = project.society_amenities || [];
@@ -147,8 +534,41 @@ export default function PlanningModule({ project, analysis, update, readOnly, pr
   };
 
   const setT = (key, value) => update((p) => { p.towers[activeIdx][key] = value; });
-  const setList = (key, list) => setT(key, list);
-  const setSocietyAmenities = (list) => update((p) => { p.society_amenities = list; });
+  const setSocietyAmenities = (list) => update((p) => {
+    p.society_amenities = list;
+    if (list.length === 0 && p.site_layout) {
+      p.site_layout.amenities = [];
+    }
+  });
+
+  const handlePenthouseChange = (val) => {
+    const count = Math.max(0, Math.min(2, Number(val) || 0));
+    update((p) => {
+      const tw = p.towers[activeIdx];
+      tw.penthouses = count;
+      const units = tw.units || [];
+      const pIdx = units.findIndex((u) => u.type === "5bhk" || u.type === "penthouse");
+      if (count > 0) {
+        if (pIdx >= 0) {
+          units[pIdx].count = count;
+          units[pIdx].type = "5bhk";
+          if (!units[pIdx].carpet_area) units[pIdx].carpet_area = 280;
+          if (!units[pIdx].balcony_area) units[pIdx].balcony_area = 45;
+        } else {
+          units.push({
+            id: uid(),
+            type: "5bhk",
+            count,
+            carpet_area: 280,
+            balcony_area: 45,
+          });
+        }
+      } else if (pIdx >= 0) {
+        units.splice(pIdx, 1);
+      }
+      tw.units = units;
+    });
+  };
 
   const addTower = async () => {
     try {
@@ -303,6 +723,30 @@ export default function PlanningModule({ project, analysis, update, readOnly, pr
             </div>
           </div>
         )}
+        {!readOnly && (
+          <div className="flex gap-1.5 flex-wrap pt-2 border-t border-slate-100 mt-2">
+            <span className="text-[11px] text-slate-400 self-center mr-1">Quick add:</span>
+            {[
+              { name: "Integrated Clubhouse", area: 350 },
+              { name: "Swimming Pool & Deck", area: 200 },
+              { name: "Fitness Gym", area: 150 },
+              { name: "Community Hall", area: 250 },
+              { name: "Yoga & Wellness Lawn", area: 100 },
+              { name: "Badminton / Sports Court", area: 180 },
+            ].map((item) => (
+              <Button
+                key={item.name}
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-6 text-[11px] px-2 rounded-sm text-slate-600 hover:text-blue-700 hover:border-blue-300"
+                onClick={() => setSocietyAmenities([...societyAmenities, { id: uid(), name: item.name, type: "amenity", area: item.area }])}
+              >
+                + {item.name} ({item.area} m²)
+              </Button>
+            ))}
+          </div>
+        )}
       </Section>
 
       <div
@@ -421,12 +865,79 @@ export default function PlanningModule({ project, analysis, update, readOnly, pr
             <NumField label="Corridor path length" suffix="m" value={t.corridor_length} disabled={readOnly} onChange={(v) => setT("corridor_length", v)} testid="tower-corridor-length-input" />
             <NumField label="Fire exits per floor" value={t.exits_per_floor} disabled={readOnly} onChange={(v) => setT("exits_per_floor", v)} testid="tower-exits-input" />
             <NumField label="Max travel distance to exit" suffix="m" value={t.max_travel_distance} disabled={readOnly} onChange={(v) => setT("max_travel_distance", v)} testid="tower-travel-distance-input" />
+
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-slate-700">Architectural 3D Form</label>
+              <Select
+                value={t.shape || "curved"}
+                disabled={readOnly}
+                onValueChange={(v) => setT("shape", v)}
+              >
+                <SelectTrigger className="h-8 rounded-sm text-xs" data-testid="tower-shape-select">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="curved">Curved &amp; Rounded Corners (Streamline)</SelectItem>
+                  <SelectItem value="cylindrical">Cylindrical / Elliptical Tower</SelectItem>
+                  <SelectItem value="stepped">Stepped Cascading Terraces</SelectItem>
+                  <SelectItem value="chamfered">Chamfered Prism (Diamond Cut)</SelectItem>
+                  <SelectItem value="rectangular">Rectangular Minimalist</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-slate-700">Top-Floor 5BHK Penthouse</label>
+              <Select
+                value={String(Number(t.penthouses) || 0)}
+                disabled={readOnly}
+                onValueChange={handlePenthouseChange}
+              >
+                <SelectTrigger className="h-8 rounded-sm text-xs font-mono" data-testid="tower-penthouse-select">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="0">0 — Standard Rooftop</SelectItem>
+                  <SelectItem value="1">1 — Signature 5BHK Sky Villa (Top Floor)</SelectItem>
+                  <SelectItem value="2">2 — Dual Luxury 5BHK Penthouses (Top Floor)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {Number(t.penthouses) > 0 && (
+              <div className="col-span-2 p-2.5 rounded-sm bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-300 text-amber-950 text-xs flex items-center justify-between shadow-xs">
+                <div className="flex items-center gap-2">
+                  <span className="text-base select-none">👑</span>
+                  <div>
+                    <div className="font-semibold text-amber-950">
+                      Level {t.floors}: {t.penthouses}x Luxury 5BHK Penthouse Crown Active
+                    </div>
+                    <div className="text-[11px] text-amber-800">
+                      Private sky deck, panoramic wrap-around terrace &amp; luxury master suites rendered in 3D.
+                    </div>
+                  </div>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-6 text-[11px] bg-white/90 border-amber-300 text-amber-900 hover:bg-amber-100"
+                  onClick={() => setFloor(Number(t.floors) || 1)}
+                >
+                  View Floor {t.floors} →
+                </Button>
+              </div>
+            )}
           </div>
           <div className="mt-4">
             <div className="flex items-center justify-between text-xs text-slate-500 mb-2">
               <span className="uppercase tracking-wide">Floor selector</span>
-              <span className="font-mono" data-testid="active-floor-label">
+              <span className="font-mono flex items-center gap-1.5" data-testid="active-floor-label">
                 Floor {floor} / {t.floors} · level {num((floor - 1) * (t.floor_height || 3), 1)} m
+                {Number(floor) === Number(t.floors) && Number(t.penthouses) > 0 && (
+                  <span className="bg-amber-100 text-amber-900 text-[10px] font-semibold px-1.5 py-0.5 rounded border border-amber-300">
+                    👑 5BHK Penthouse Level
+                  </span>
+                )}
               </span>
             </div>
             <Slider
@@ -798,19 +1309,21 @@ export default function PlanningModule({ project, analysis, update, readOnly, pr
 
       <Section
         title={`${t.name} — presentation floor plan`}
-        description="The same drawing shown on Reports, rendered from this floor’s saved layout. AI Generate updates this shared plan."
+        description="The same drawing shown on Reports, rendered from this floor’s saved layout. Zoom, pan, fullscreen or quick-edit rooms."
         testid="planning-presentation-floorplan"
       >
-        <div className="bg-slate-50 border border-slate-200 rounded-sm min-h-64 flex items-center justify-center overflow-hidden">
-          <img
-            key={floorPlanImageUrl}
-            src={floorPlanImageUrl}
-            alt={`${t.name} floor ${floor} architectural plan`}
-            className="w-full max-h-[640px] object-contain"
-            loading="lazy"
-            data-testid="planning-presentation-floorplan-image"
-          />
-        </div>
+        <PresentationFloorPlanViewer
+          imageUrl={floorPlanImageUrl}
+          towerName={t.name}
+          floor={floor}
+          readOnly={readOnly}
+          floorRooms={floorRooms}
+          setRooms={setRooms}
+          setFloorPlanImageRevision={setFloorPlanImageRevision}
+          fetchAiFloorLayout={fetchAiFloorLayout}
+          fetchFloorLayout={fetchFloorLayout}
+          floorLoading={floorLoading}
+        />
       </Section>
 
       <OptimiserPanel projectId={projectId} only="planning" readOnly={readOnly} />

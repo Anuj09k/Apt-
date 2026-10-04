@@ -1,0 +1,157 @@
+{
+  "project_identity": {
+    "name": "Aptimizer",
+    "type": "Civil Engineering & Real Estate Planning Platform (Data-Dense SaaS)",
+    "target_audience": "Civil engineers, structural engineers, architects, real estate developers, urban planners",
+    "tone": "Authoritative, mathematically precise, zero-assumption, high-density, technical blueprint aesthetic",
+    "core_mission": "Transform plot boundaries into fully compliant, code-verified development schemes with zero assumptions and complete auditability across all 22 workspace modules."
+  },
+  "theme": "light",
+  "typography": {
+    "strategy": "Swiss Technical Engineering Blueprint - absolute legibility, high contrast, crisp monospaced numeric data.",
+    "headings": {
+      "family": "Work Sans",
+      "weights": "semibold (600), font-bold (700)",
+      "classes": "font-sans font-semibold tracking-tight text-slate-900"
+    },
+    "body": {
+      "family": "Work Sans",
+      "weights": "regular (400), medium (500)",
+      "classes": "font-sans text-slate-700 leading-relaxed"
+    },
+    "data_numbers": {
+      "family": "JetBrains Mono",
+      "weights": "regular (400), semibold (600)",
+      "classes": "font-mono text-slate-900 tracking-tight"
+    },
+    "labels_and_codes": {
+      "family": "JetBrains Mono",
+      "classes": "font-mono text-xs uppercase tracking-[0.18em] text-blue-700"
+    }
+  },
+  "colors": {
+    "archetype": "Swiss High-Contrast Engineering (Authority, Precision, Blueprint Clarity)",
+    "background": {
+      "default": "#F8FAFC",
+      "surface": "#FFFFFF",
+      "dark_hero": "#020617",
+      "dark_hero_surface": "#0F172A",
+      "blueprint_canvas": "#DCD8CB",
+      "subtle_card_header": "#F8FAFC"
+    },
+    "text": {
+      "primary": "#0F172A",
+      "secondary": "#475569",
+      "muted": "#64748B",
+      "dark_theme_primary": "#F8FAFC",
+      "dark_theme_muted": "#94A3B8"
+    },
+    "brand": {
+      "primary": "#2563EB",
+      "primary_dark": "#1D4ED8",
+      "primary_light": "#DBEAFE",
+      "accent_pink": "#F4C2C2",
+      "accent_pink_hover": "#EBACAC",
+      "accent_pink_text": "#6B2233"
+    },
+    "status": {
+      "success": "#16A34A",
+      "success_bg": "#F0FDF4",
+      "danger": "#DC2626",
+      "danger_bg": "#FEF2F2",
+      "warning": "#D97706",
+      "warning_bg": "#FFFBEB",
+      "info": "#0284C7",
+      "info_bg": "#F0F9FF"
+    },
+    "borders": {
+      "default": "#E2E8F0",
+      "dark": "#1E293B",
+      "highlight": "#BFDBFE"
+    }
+  },
+  "scroll_animation_spec": {
+    "frame_sequence": "/frames/01.webp through 60.webp (1400x788, total 1.9MB)",
+    "technology": "Framer Motion + Canvas 2D requestAnimationFrame scrub render",
+    "stability_optimizations": [
+      "Image preloading into in-memory HTMLImageElement cache map to eliminate flicker",
+      "BoundingClientRect-based scroll progress calculation to replace stale cached useScroll targets",
+      "DPR-aware canvas scale rendering (capped at 2x) with cover fit",
+      "Nearest-decoded-frame fallback logic to prevent blank canvas when frames decode asynchronously",
+      "Lead-in threshold (0.06) holding clean blueprint paper before scrubbing starts",
+      "prefers-reduced-motion fallback to static SVG Blueprint component"
+    ]
+  },
+  "parameter_directory_spec": {
+    "location": "Landing Page Parameter Directory Section",
+    "total_modules": 22,
+    "parameter_types": ["Configured", "Estimated", "Computed", "Derived"],
+    "key_features": [
+      "Real-time search bar filtering across parameter names, codes, units, and formulas",
+      "Filter pills for Parameter Type (Configured, Estimated, Computed, Derived)",
+      "Module group selector (Site, Design, Engineering & BIM, Cost & Procurement, Deliver & ESG)",
+      "Detailed view showing exact formula, unit, IS/NBC clause citation, and tolerance/validation limit",
+      "Distinction badges between configured inputs, computed values, and estimated heuristics"
+    ]
+  },
+  "layouts": {
+    "overall": "Mode B High-Density Engineering Grid for Workspace, Mode A Tetris & Bento Grid for Landing Page.",
+    "spacing": "Tight internal padding (p-3 to p-5) for workspace widgets to maximize data density. Generous section padding (py-20 to py-28) for landing page storytelling.",
+    "cards": "Flat solid surfaces with subtle hairline borders (1px border-slate-200). Semi-solid background for headers (`bg-white/95 backdrop-blur-sm`). No fully transparent headers.",
+    "sidebar": "Clean white sidebar (`bg-white border-r border-slate-200`) or dark slate sidebar (`bg-slate-950`).",
+    "metrics_strip": "Vertical or horizontal metrics strip with JetBrains Mono numbers, status badges (Saved / Saving / Retrying), and role badges."
+  },
+  "components": {
+    "data_tables": "Shadcn UI table primitives with compact padding, numeric right-alignment, and JetBrains Mono monospace digits.",
+    "forms_inputs": "Shadcn UI Form, Input, Select, and Slider components with primary focus rings (`focus-visible:ring-2 focus-visible:ring-blue-600`).",
+    "charts": "Recharts and Shadcn Chart wrappers using structural engineering color schemes (blue, slate, emerald, amber).",
+    "compliance_panel": "Rule-by-rule status list with Pass/Fail/Warning badges, clause numbers, and margin remaining metrics.",
+    "buttons": "ReactiveButton and standard Shadcn Button with active press states and hover highlights."
+  },
+  "visual_enhancers": {
+    "surfaces": "Grid borders with hairline 1px dividers (`gap-px bg-slate-200`) creating structured bento layouts.",
+    "glassmorphism": "Crystal Glass style for sticky headers and modals: `bg-white/95 backdrop-blur-sm border-b border-slate-200`. Never fully transparent.",
+    "textures": "SVG technical blueprint grid overlay for canvas and hero sections."
+  },
+  "motion": {
+    "scroll_scrubbing": "Framer Motion useScroll + Canvas requestAnimationFrame for frame sequence.",
+    "micro_interactions": "Smooth state transitions on buttons and cards using specific CSS properties (transform, opacity, color), avoiding universal `transition: all`.",
+    "page_reveal": "Framer Motion Stagger and Reveal animation wrappers for smooth content entrance."
+  },
+  "accessibility": {
+    "contrast": "Strict WCAG AA and APCA compliant contrast across all light and dark sections.",
+    "reduced_motion": "Complete motion disablement or static blueprint fallback when `prefers-reduced-motion` is active.",
+    "testing": "All interactive elements and key data fields must include kebab-case `data-testid` attributes."
+  },
+  "media": {
+    "icons": "lucide-react",
+    "image_urls": {
+      "hero_poster": {
+        "url": "/frames/poster.jpg",
+        "description": "3D massing and architectural model render poster"
+      },
+      "login_background": {
+        "url": "https://images.pexels.com/photos/4134179/pexels-photo-4134179.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "description": "Architectural blueprints background for authentication"
+      }
+    }
+  },
+  "instructions_to_main_agent": [
+    "Use JavaScript (.jsx / .js) files for all React components.",
+    "Maintain the established Work Sans and JetBrains Mono identity and blue engineering branding.",
+    "Ensure all calculations in the app differentiate configured vs estimated vs computed values.",
+    "Implement the searchable 22-module parameter directory on the landing page with filter pills.",
+    "Keep the scroll animation smooth using preloaded frame images and canvas requestAnimationFrame rendering.",
+    "Add explicit `data-testid` attributes to every new interactive component.",
+    "Do not use complete transparent backgrounds for header, overlays, or dropdown menus."
+  ],
+  "UNIVERSAL GUIDELINES FOR MAIN AGENT": [
+    "Prioritize using pre-existing components from src/components/ui when applicable.",
+    "Create new components that match the style and conventions of existing components.",
+    "Use sonner for toasts.",
+    "Do not center-align the app container (.App { text-align: center; } is banned).",
+    "Never apply universal transition (transition: all).",
+    "Ensure all data cells and table headers are properly aligned.",
+    "Do not use complete transparent background in headers, overlays, or surfaces that have content under them."
+  ]
+}

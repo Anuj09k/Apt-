@@ -132,6 +132,8 @@ export const engineTowerLayout = (siteLayout, projectTowers = []) => {
       units: src.units || [],
       rooms: src.rooms || [],
       commonArea: Number(src.common_area) || 0,
+      shape: src.shape || "curved",
+      penthouses: Number(src.penthouses) || 0,
       fromEngine: true,
     };
   });
@@ -195,6 +197,8 @@ export const spineTowerLayout = (projectTowers = [], poly = [], bounds = null) =
       units: t.units || [],
       rooms: t.rooms || [],
       commonArea: Number(t.common_area) || 0,
+      shape: t.shape || "curved",
+      penthouses: Number(t.penthouses) || 0,
       fromEngine: false,
     };
   });
@@ -382,6 +386,8 @@ export const constrainedTowerLayout = (towers, poly, bounds) => {
       floors, floorHeight: fh, height: floors * fh,
       units: t.units || [], rooms: t.rooms || [],
       commonArea: Number(t.common_area) || 0,
+      shape: t.shape || "curved",
+      penthouses: Number(t.penthouses) || 0,
       order: i, shrunkTo: put.scale < 1 ? put.scale : null,
     });
   });

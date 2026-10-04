@@ -26,9 +26,21 @@ def proj():
 @pytest.mark.parametrize("msg", [
     "hi", "Hello!", "hey", "thanks", "thank you", "cheers", "ok", "got it",
     "ok thanks", "ok got it", "great", "good morning", "bye",
+    "how are you", "how are you doing", "how r u", "how's it going", "what's up",
+    "thank you so much", "see you", "awesome",
 ])
 def test_chitchat_needs_no_context(msg):
     assert S.classify(msg) == S.NONE
+
+
+def test_reply_for_returns_appropriate_text():
+    assert S.reply_for("hi") == S.GREETING
+    assert S.reply_for("how are you") == S.GREETING_HOW_ARE_YOU
+    assert S.reply_for("thanks") == S.THANKS_REPLY
+    assert S.reply_for("bye") == S.BYE_REPLY
+    assert S.reply_for("ok") == S.ACK_REPLY
+    assert "Explain a number" in S.reply_for("what can you do")
+
 
 
 @pytest.mark.parametrize("msg", [
@@ -187,7 +199,7 @@ def test_the_fixed_replies_carry_no_citations():
     """The no-context path skips the model, so nothing verifies its text. It must
     therefore contain nothing that looks like a clause reference."""
     import citations as CI
-    for text in (S.GREETING, S.CAPABILITY):
+    for text in (S.GREETING, S.CAPABILITY, S.GREETING_HOW_ARE_YOU, S.THANKS_REPLY, S.BYE_REPLY, S.ACK_REPLY):
         assert CI.verify(text)["checked"] == 0
 
 

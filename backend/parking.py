@@ -97,6 +97,9 @@ def _band(norm: Dict[str, Any], carpet: float):
     return 0.0, 0.0
 
 
+from residential_defaults import storeys_of
+
+
 def tower_demand(tower: Dict[str, Any], norm: Dict[str, Any],
                  builtup_sqm: float) -> Dict[str, Any]:
     """Car and two-wheeler demand for ONE building, itemised by unit type.
@@ -112,7 +115,7 @@ def tower_demand(tower: Dict[str, Any], norm: Dict[str, Any],
     if norm.get("basis") == "carpet_band":
         for u in (tower.get("units") or []):
             per_floor = int(u.get("count") or 0)
-            n = per_floor * floors
+            n = per_floor * storeys_of(u, floors)
             carpet = float(u.get("carpet_area") or 0)
             c, s = _band(norm, carpet)
             cars += c * n
@@ -123,11 +126,12 @@ def tower_demand(tower: Dict[str, Any], norm: Dict[str, Any],
                           "cars": round(c * n, 2), "scooters": round(s * n, 2),
                           "band": _band_label(norm, carpet)})
     else:
-        per_100 = float(norm.get("ecs_per_100_sqm") or 1.0)
+        per_100 = float(norm["ecs_per_100_sqm"]) if norm.get("ecs_per_100_sqm") is not None else 1.0
         cars = builtup_sqm / 100.0 * per_100
         for u in (tower.get("units") or []):
-            units_total += int(u.get("count") or 0) * floors
-        scooters = units_total * float(norm.get("scooters_per_unit") or 1.0)
+            units_total += int(u.get("count") or 0) * storeys_of(u, floors)
+        scooter_rate = float(norm["scooters_per_unit"]) if norm.get("scooters_per_unit") is not None else 1.0
+        scooters = units_total * scooter_rate
         lines.append({"type": "built-up area basis", "carpet_sqm": None, "units": units_total,
                       "cars_per_unit": None, "scooters_per_unit": norm.get("scooters_per_unit"),
                       "cars": round(cars, 2), "scooters": round(scooters, 2),
@@ -236,8 +240,8 @@ def plan(project: Dict[str, Any], areas: Dict[str, Any]) -> Dict[str, Any]:
     units = sum(r["units"] for r in by_tower) or int(areas.get("total_units") or 0)
 
     # ---- category requirements ---------------------------------------------------
-    visitor_pct = float(p.get("visitor_pct") if p.get("visitor_pct") is not None
-                        else norm.get("visitor_pct") or 10.0)
+    visitor_pct = float(p["visitor_pct"] if p.get("visitor_pct") is not None
+                        else (norm["visitor_pct"] if norm.get("visitor_pct") is not None else 10.0))
     ev_pct = float(p.get("ev_pct") if p.get("ev_pct") is not None else DEFAULT_EV_PCT)
     accessible_pct = p.get("accessible_pct")
     visitor_required = math.ceil(required * visitor_pct / 100.0)

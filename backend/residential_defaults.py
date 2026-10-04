@@ -15,9 +15,24 @@ UNIT_SPECS = {
     "4bhk": {"type": "4bhk", "units_per_floor": 2, "carpet_area": 160.0, "balcony_area": 20.0},
     "5bhk": {"type": "5bhk", "units_per_floor": 1, "carpet_area": 210.0, "balcony_area": 28.0},
 }
+# A full-storey penthouse is not a per-floor density tier: it is one home occupying the top
+# storey. It is deliberately kept out of UNIT_CYCLE and out of the stored residential policy
+# (the project validator accepts only the five BHK tiers there) and carried on the tower
+# itself, with `storeys: 1` so areas, parking and the floor generator count it once.
+PENTHOUSE_SPEC = {
+    "type": "Penthouse", "units_per_floor": 1, "carpet_area": 420.0,
+    "balcony_area": 60.0, "storeys": 1,
+}
+SPEC_BY_KEY = {**UNIT_SPECS, "penthouse": PENTHOUSE_SPEC}
+
 UNIT_CYCLE = list(UNIT_SPECS)
 CAR_SPACE_AREA_SQM = 23.0
 BIKE_SPACE_AREA_SQM = CAR_SPACE_AREA_SQM / 3.0
+
+PENTHOUSE_PARKING = {
+    "reserved_cars_per_unit": 4, "reserved_bikes_per_unit": 0,
+    "optional_car_spaces_per_unit": 0, "flexible_space_use": True,
+}
 
 PARKING_BY_TYPE = {
     "1bhk": {"reserved_cars_per_unit": 0, "reserved_bikes_per_unit": 0,
@@ -31,6 +46,14 @@ PARKING_BY_TYPE = {
     "5bhk": {"reserved_cars_per_unit": 4, "reserved_bikes_per_unit": 0,
              "optional_car_spaces_per_unit": 0, "flexible_space_use": True},
 }
+
+PARKING_STANDARDS = {**PARKING_BY_TYPE, "penthouse": PENTHOUSE_PARKING}
+
+# The default project's one tower carries the whole mix on a single plate: four 1BHK, one
+# 2BHK and one 3BHK per floor. That is the same 384 m2 of carpet per floor the all-1BHK
+# plate held (4x48 + 72 + 120), so the building's structure, FAR and parking do not move --
+# only how the plate is divided into homes.
+DEFAULT_MIXED_PROGRAMME = (("1bhk", 4), ("2bhk", 1), ("3bhk", 1))
 
 
 def new_residential_policy() -> Dict[str, Any]:
@@ -57,26 +80,101 @@ def tower_index(name: Any, fallback: int = 0) -> int:
 
 
 def unit_key(value: Any) -> str:
-    match = re.search(r"([1-5])\s*bhk", str(value or ""), re.I)
+    text = str(value or "")
+    if "penthouse" in text.lower():
+        return "penthouse"
+    match = re.search(r"([1-5])\s*bhk", text, re.I)
     return f"{match.group(1)}bhk" if match else ""
+
+
+def storeys_of(unit: Dict[str, Any], floors: int) -> int:
+    """How many storeys one unit entry actually occupies.
+
+    A tower's programme is written per typical storey, so an entry with no `storeys` key
+    describes every floor. A home that exists on the top storey only -- a full-floor
+    penthouse -- carries `storeys: 1` so every reader counts it once instead of once per
+    floor.
+    """
+    total = max(int(floors or 1), 1)
+    try:
+        value = int(unit.get("storeys") or total)
+    except (TypeError, ValueError):
+        value = total
+    return max(1, min(value, total))
 
 
 def parking_rules(policy: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
     overrides = policy.get("parking_by_type") or {}
     return {
         tier: {**defaults, **(overrides.get(tier) or {})}
-        for tier, defaults in PARKING_BY_TYPE.items()
+        for tier, defaults in PARKING_STANDARDS.items()
     }
 
 
+def default_programme(programme=DEFAULT_MIXED_PROGRAMME) -> list[Dict[str, Any]]:
+    """Build the mixed per-floor programme the project's first tower carries.
+
+    The counts are fixed by the programme -- a mixed plate is laid out by hand, not by the
+    A-E cycle -- and the areas come from the tier specs so the plate matches the rates,
+    parking rules and room programmes every other part of the app reads.
+    """
+    units = []
+    for key, count in programme:
+        spec = SPEC_BY_KEY.get(key)
+        if not spec:
+            continue
+        units.append({
+            "type": spec["type"],
+            "count": max(1, int(count)),
+            "carpet_area": float(spec["carpet_area"]),
+            "balcony_area": float(spec["balcony_area"]),
+        })
+    return units
+
+
+def add_penthouse(tower: Dict[str, Any], policy: Dict[str, Any] | None = None,
+                  count: int = 1, carpet_area: float | None = None,
+                  balcony_area: float | None = None) -> Dict[str, Any]:
+    """Put a full-storey penthouse on a tower's top storey.
+
+    The entry lives in the tower's own unit list so every reader -- areas, parking, the mix
+    summary, the floor generator -- sees it, with `storeys: 1` so only the top floor counts
+    it. Any penthouse already on the tower is replaced, not duplicated.
+    """
+    spec = PENTHOUSE_SPEC
+    entry = {
+        "id": str(uuid.uuid4())[:8],
+        "type": spec["type"],
+        "count": max(1, int(count)),
+        "carpet_area": float(carpet_area if carpet_area is not None else spec["carpet_area"]),
+        "balcony_area": float(balcony_area if balcony_area is not None else spec["balcony_area"]),
+        "storeys": 1,
+        "top_storey_only": True,
+    }
+    tower["units"] = [u for u in (tower.get("units") or [])
+                      if unit_key(u.get("type")) != "penthouse"] + [entry]
+    return update_tower_parking(tower, policy)
+
+
 def configure_tower(tower: Dict[str, Any], index: int, kind: str | None = None,
-                    policy: Dict[str, Any] | None = None) -> Dict[str, Any]:
-    """Set one tower's unit program and custom basement allocation."""
+                    policy: Dict[str, Any] | None = None,
+                    programme: list[Dict[str, Any]] | None = None) -> Dict[str, Any]:
+    """Set one tower's unit programme and custom basement allocation.
+
+    `kind` pins the tower to a single unit type -- the one-type-per-tower strategy the A-E
+    cycle describes. A `programme` (a list of unit entries) is used as given, which is how
+    the default single-tower project carries a whole mix on one plate. With neither, the
+    tower gets the cycle's type for its index.
+    """
     policy = policy or new_residential_policy()
+    if programme:
+        tower["units"] = [dict(unit) for unit in programme]
+        tower["units_per_floor"] = sum(max(0, int(u.get("count") or 0)) for u in tower["units"])
+        return update_tower_parking(tower, policy)
     cycle = policy.get("unit_type_cycle") or UNIT_CYCLE
     selected = kind or cycle[index % len(cycle)]
     selected = unit_key(selected) or selected.lower()
-    spec = UNIT_SPECS.get(selected, UNIT_SPECS[cycle[index % len(cycle)]])
+    spec = SPEC_BY_KEY.get(selected, UNIT_SPECS[cycle[index % len(cycle)]])
     count = max(1, int((policy.get("units_per_floor") or {}).get(selected, spec["units_per_floor"])))
     previous_units = tower.get("units") or []
     existing = next((u for u in previous_units if unit_key(u.get("type")) == selected), {})
@@ -102,7 +200,7 @@ def update_tower_parking(tower: Dict[str, Any], policy: Dict[str, Any] | None = 
         key = unit_key(unit.get("type"))
         if key not in parking_by_type:
             continue
-        dwelling_count = max(0, int(unit.get("count") or 0)) * floors
+        dwelling_count = max(0, int(unit.get("count") or 0)) * storeys_of(unit, floors)
         rule = parking_by_type[key]
         reserved_cars += int(rule.get("reserved_cars_per_unit") or 0) * dwelling_count
         reserved_bikes += int(rule.get("reserved_bikes_per_unit") or 0) * dwelling_count
@@ -141,21 +239,23 @@ def summarize_units(towers: Iterable[Dict[str, Any]]) -> list[Dict[str, Any]]:
             key = unit_key(unit.get("type"))
             if not key:
                 continue
-            totals[key] = totals.get(key, 0) + max(0, int(unit.get("count") or 0)) * floors
+            totals[key] = (totals.get(key, 0)
+                           + max(0, int(unit.get("count") or 0)) * storeys_of(unit, floors))
             templates[key] = unit
     total = sum(totals.values())
     if total <= 0:
         return []
     rows = []
-    for key in UNIT_CYCLE:
+    for key in [*UNIT_CYCLE, "penthouse"]:
         count = totals.get(key, 0)
         if not count:
             continue
         template = templates[key]
+        spec = SPEC_BY_KEY.get(key) or UNIT_SPECS[key]
         rows.append({
             "type": template.get("type") or key,
-            "carpet_area_sqm": float(template.get("carpet_area") or UNIT_SPECS[key]["carpet_area"]),
-            "balcony_sqm": float(template.get("balcony_area") or UNIT_SPECS[key]["balcony_area"]),
+            "carpet_area_sqm": float(template.get("carpet_area") or spec["carpet_area"]),
+            "balcony_sqm": float(template.get("balcony_area") or spec["balcony_area"]),
             "share_pct": round(count * 100.0 / total, 1),
         })
     if rows:

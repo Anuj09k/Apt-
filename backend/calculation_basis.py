@@ -1,4 +1,11 @@
 """Human-readable limits travel with the numbers. No accuracy score is invented."""
+
+
+def configured(mapping, key, default):
+    value = (mapping or {}).get(key)
+    return default if value is None or value == "" else value
+
+
 def calculation_basis(project, quantities):
     plot = project.get("plot") or {}
     warnings = []

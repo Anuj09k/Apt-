@@ -18,6 +18,7 @@ def money_product(*values):
 
 import iscodes
 import layout as layoutlib
+from residential_defaults import storeys_of
 import parking as parkinglib
 import takeoff as takeofflib
 
@@ -61,28 +62,37 @@ def tower_metrics(tower, cfg):
     fh = float(configured(tower, "floor_height", 3.0))
     units = tower.get("units") or []
     units_per_floor = sum(int(u.get("count") or 0) for u in units)
-    carpet_per_floor = sum(float(u.get("carpet_area") or 0) * int(u.get("count") or 0) for u in units)
-    balcony_per_floor = sum(float(u.get("balcony_area") or 0) * int(u.get("count") or 0) for u in units)
+    carpet_per_floor = math.fsum(float(u.get("carpet_area") or 0) * int(u.get("count") or 0) for u in units)
+    balcony_per_floor = math.fsum(float(u.get("balcony_area") or 0) * int(u.get("count") or 0) for u in units)
     wall_factor = float(configured(cfg, "wall_thickness_factor", 0.10))
     loading = float(configured(cfg, "common_area_loading", 0.25))
 
     corridor_area = float(tower.get("corridor_width") or 0) * float(tower.get("corridor_length") or 0)
-    stair_area = sum(float(s.get("width") or 0) * float(s.get("width") or 0) * 2.6 * int(s.get("count") or 0)
-                     for s in (tower.get("staircases") or []))
-    lift_area = sum(int(l.get("count") or 0) * 4.5 for l in (tower.get("lifts") or []))
+    stair_area = math.fsum(float(s.get("width") or 0) * float(s.get("width") or 0) * 2.6 * int(s.get("count") or 0)
+                           for s in (tower.get("staircases") or []))
+    lift_area = math.fsum(int(l.get("count") or 0) * 4.5 for l in (tower.get("lifts") or []))
     service_core_per_floor = math.fsum((corridor_area, stair_area, lift_area))
 
-    carpet = carpet_per_floor * floors
-    builtup_per_floor = (carpet_per_floor + balcony_per_floor) * (1 + wall_factor) + service_core_per_floor
-    builtup = builtup_per_floor * floors
+    # A unit entry describes a typical storey unless it carries `storeys`, so a home that
+    # exists on the top storey only (a full-floor penthouse) is counted once while every
+    # normal apartment is still counted on every floor.
+    units_total = sum(int(u.get("count") or 0) * storeys_of(u, floors) for u in units)
+    carpet = math.fsum(float(u.get("carpet_area") or 0) * int(u.get("count") or 0) * storeys_of(u, floors)
+                       for u in units)
+    balcony = math.fsum(float(u.get("balcony_area") or 0) * int(u.get("count") or 0) * storeys_of(u, floors)
+                        for u in units)
+    builtup_per_floor = math.fsum((carpet_per_floor, balcony_per_floor)) * (1 + wall_factor) + service_core_per_floor
+    # The core runs the full height of the tower; the homes run for the storeys they occupy.
+    builtup = math.fsum((carpet, balcony)) * (1 + wall_factor) + service_core_per_floor * floors
     common_area = float(tower.get("common_area") or 0)
     super_builtup = builtup * (1 + loading)
 
-    occupants = sum(int(u.get("count") or 0) * OCCUPANCY_PER_UNIT.get(str(u.get("type", "custom")).lower(), 4)
-                    for u in units) * floors
+    occupants = sum(int(u.get("count") or 0) * storeys_of(u, floors)
+                    * OCCUPANCY_PER_UNIT.get(str(u.get("type", "custom")).lower(), 4)
+                    for u in units)
 
     rooms = layoutlib.reference_rooms(tower)
-    room_area = sum(float(r.get("w") or 0) * float(r.get("h") or 0) for r in rooms)
+    room_area = math.fsum(float(r.get("w") or 0) * float(r.get("h") or 0) for r in rooms)
 
     return {
         "id": tower.get("id"),
@@ -91,10 +101,10 @@ def tower_metrics(tower, cfg):
         "floor_height": fh,
         "height_m": floors * fh,
         "units_per_floor": units_per_floor,
-        "total_units": units_per_floor * floors,
+        "total_units": units_total,
         "footprint_sqm": float(tower.get("footprint_area") or 0),
         "carpet_sqm": carpet,
-        "balcony_sqm": balcony_per_floor * floors,
+        "balcony_sqm": balcony,
         "builtup_per_floor_sqm": builtup_per_floor,
         "builtup_sqm": builtup,
         "super_builtup_sqm": super_builtup,
@@ -120,11 +130,11 @@ def area_metrics(project):
     society_amenities_sqm = math.fsum(float(a.get("area") or 0) for a in society_amenities)
 
     plot_area = max(float(pm.get("plot_area_sqm") or 0.0), 0.0)
-    carpet = max(sum(t["carpet_sqm"] for t in towers), 0.0)
-    builtup = max(sum(t["builtup_sqm"] for t in towers), 0.0)
-    super_builtup = max(sum(t["super_builtup_sqm"] for t in towers) + society_amenities_sqm, 0.0)
-    footprint = max(sum(t["footprint_sqm"] for t in towers), 0.0)
-    common = max(sum(t["common_area_sqm"] for t in towers) + society_amenities_sqm, 0.0)
+    carpet = max(math.fsum(t["carpet_sqm"] for t in towers), 0.0)
+    builtup = max(math.fsum(t["builtup_sqm"] for t in towers), 0.0)
+    super_builtup = max(math.fsum([*(t["super_builtup_sqm"] for t in towers), society_amenities_sqm]), 0.0)
+    footprint = max(math.fsum(t["footprint_sqm"] for t in towers), 0.0)
+    common = max(math.fsum([*(t["common_area_sqm"] for t in towers), society_amenities_sqm]), 0.0)
     units = max(sum(t["total_units"] for t in towers), 0)
     occupants = max(sum(t["occupants"] for t in towers), 0)
 
@@ -319,7 +329,8 @@ def quantities(project, areas, use_takeoff=True):
         source = "ratio"
         if derived and key in DERIVED_KEYS:
             tk, factor = DERIVED_KEYS[key]
-            qty = float(derived["totals"].get(tk) or 0) * factor
+            totals_src = derived.get("totals_raw") or derived["totals"]
+            qty = float(totals_src.get(tk) or 0) * factor
             source = "take-off"
         rows.append({"key": key, "label": label, "unit": unit, "ratio_key": ratio_key,
                      "ratio": r, "basis": basis, "quantity": qty, "source": source})
@@ -430,18 +441,19 @@ def water_demand(project, areas):
 
     code_lpcd = iscodes.WATER_LPCD
     code_total = code_lpcd["domestic"] + code_lpcd["flushing"] + code_lpcd["external"]
-    lpcd = float(u.get("lpcd") or code_total)
+    raw_lpcd = configured(u, "lpcd", code_total)
+    lpcd = float(raw_lpcd) if float(raw_lpcd) > 0 else float(code_total)
     scale = lpcd / code_total if code_total else 1.0
 
     domestic = persons * code_lpcd["domestic"] * scale
     flushing = persons * code_lpcd["flushing"] * scale
     external = persons * code_lpcd["external"] * scale
-    demand = domestic + flushing + external
+    demand = math.fsum((domestic, flushing, external))
     return {
         "persons": persons, "lpcd": lpcd,
         "domestic_lpd": domestic, "flushing_lpd": flushing, "external_lpd": external,
         "total_lpd": demand,
-        "sewage_lpd": demand * float(u.get("sewage_factor") or iscodes.SEWAGE_FACTOR),
+        "sewage_lpd": demand * float(configured(u, "sewage_factor", iscodes.SEWAGE_FACTOR)),
     }
 
 
@@ -450,20 +462,21 @@ def utilities(project, areas, city=None):
     w = water_demand(project, areas)
     persons, lpcd, demand = w["persons"], w["lpcd"], w["total_lpd"]
     domestic, flushing = w["domestic_lpd"], w["flushing_lpd"]
-    ug_days = float(u.get("ug_tank_days") or 1.0)
-    oh_hours = float(u.get("oh_tank_hours") or 8.0)
+    ug_days = float(configured(u, "ug_tank_days", 1.0))
+    oh_hours = float(configured(u, "oh_tank_hours", 8.0))
     ug = demand * ug_days
     oh = demand * (oh_hours / 24.0)
     stp = w["sewage_lpd"]
-    wtp = demand * float(u.get("wtp_factor") or 1.0)
+    wtp = demand * float(configured(u, "wtp_factor", 1.0))
     roof = areas["ground_footprint_sqm"]
     # Default to the project city's own rainfall rather than a flat 900 mm, so this and
     # the Storm/RWH module (which always used the city table) agree.
     city_rainfall = (city or {}).get("annual_rainfall_mm")
-    rainfall_mm = float(u.get("annual_rainfall_mm") or city_rainfall or 900)
-    runoff = float(u.get("runoff_coefficient") or iscodes.RUNOFF_C["rcc_roof"])
+    default_rainfall = city_rainfall if city_rainfall is not None else 900
+    rainfall_mm = float(configured(u, "annual_rainfall_mm", default_rainfall))
+    runoff = float(configured(u, "runoff_coefficient", iscodes.RUNOFF_C["rcc_roof"]))
     rwh = roof * (rainfall_mm / 1000.0) * runoff * 1000  # litres/year
-    connected_load = areas["total_units"] * float(u.get("kw_per_unit") or 4.0)
+    connected_load = areas["total_units"] * float(configured(u, "kw_per_unit", 4.0))
     return {
         "persons": persons,
         "lpcd": lpcd,
@@ -510,7 +523,8 @@ def compliance(project, areas, park):
         needed = max(1, math.ceil(t["floors"] / 8.0))
         lift_shortfall += max(needed - t["lift_count"], 0)
     ramp = (project.get("parking") or {}).get("ramp") or {}
-    provided_acc = park["accessible_provided"] or park["accessible_required"]
+    acc_prov = park.get("accessible_provided")
+    provided_acc = acc_prov if acc_prov is not None else park.get("accessible_required", 0)
     params = {
         "far": areas["far"],
         "fsi": areas["fsi"],
@@ -521,8 +535,8 @@ def compliance(project, areas, park):
         "lift_shortfall": lift_shortfall,
         "min_exits_per_floor": min([t["exits_per_floor"] for t in towers] or [0]),
         "max_travel_distance_m": max([t["max_travel_distance_m"] for t in towers] or [0]),
-        "ramp_slope_pct": float(ramp.get("slope_pct") or 0),
-        "accessible_parking_pct": round((provided_acc / park["required_slots"] * 100) if park["required_slots"] else 0, 2),
+        "ramp_slope_pct": float(configured(ramp, "slope_pct", 0)),
+        "accessible_parking_pct": (provided_acc / park["required_slots"] * 100.0) if park["required_slots"] else 0.0,
         "parking_deficit": park["deficit"],
     }
     results = []
@@ -780,8 +794,10 @@ def area_derivation(project, areas):
 
         # Unit breakdown
         units = t_raw.get("units") or []
-        carpet_floor = sum(float(u.get("carpet_area") or 0) * int(u.get("count") or 0) for u in units)
-        balcony_floor = sum(float(u.get("balcony_area") or 0) * int(u.get("count") or 0) for u in units)
+        carpet_floor = math.fsum(float(u.get("carpet_area") or 0) * int(u.get("count") or 0) for u in units)
+        balcony_floor = math.fsum(float(u.get("balcony_area") or 0) * int(u.get("count") or 0) for u in units)
+        carpet_tower = math.fsum(float(u.get("carpet_area") or 0) * int(u.get("count") or 0) * storeys_of(u, floors) for u in units)
+        balcony_tower = math.fsum(float(u.get("balcony_area") or 0) * int(u.get("count") or 0) * storeys_of(u, floors) for u in units)
 
         # Service core components
         corridor_w = float(t_raw.get("corridor_width") or 0)
@@ -789,22 +805,23 @@ def area_derivation(project, areas):
         corridor_floor = corridor_w * corridor_l
 
         stairs = t_raw.get("staircases") or []
-        stair_floor = sum(float(s.get("width") or 0) * float(s.get("width") or 0) * 2.6 * int(s.get("count") or 0) for s in stairs)
+        stair_floor = math.fsum(float(s.get("width") or 0) * float(s.get("width") or 0) * 2.6 * int(s.get("count") or 0) for s in stairs)
 
         lifts = t_raw.get("lifts") or []
-        lift_floor = sum(int(l.get("count") or 0) * 4.5 for l in lifts)
+        lift_floor = math.fsum(int(l.get("count") or 0) * 4.5 for l in lifts)
 
-        core_floor = corridor_floor + stair_floor + lift_floor
-        walls_floor = (carpet_floor + balcony_floor) * wall_factor
-        builtup_floor = (carpet_floor + balcony_floor) + walls_floor + core_floor
+        core_floor = math.fsum((corridor_floor, stair_floor, lift_floor))
+        walls_floor = math.fsum((carpet_floor, balcony_floor)) * wall_factor
+        builtup_floor = math.fsum((carpet_floor, balcony_floor)) * (1 + wall_factor) + core_floor
 
-        t_builtup = builtup_floor * floors
+        walls_tower = math.fsum((carpet_tower, balcony_tower)) * wall_factor
+        t_builtup = math.fsum((carpet_tower, balcony_tower)) * (1 + wall_factor) + core_floor * floors
         t_super = t_builtup * (1 + loading)
 
         total_corridor_sqm += corridor_floor * floors
         total_stairs_sqm += stair_floor * floors
         total_lifts_sqm += lift_floor * floors
-        total_walls_sqm += walls_floor * floors
+        total_walls_sqm += walls_tower
 
         tower_breakdowns.append({
             "id": t_id,
@@ -832,8 +849,8 @@ def area_derivation(project, areas):
             "loading_added_sqm": round(t_super - t_builtup, 2),
         })
 
-    towers_builtup_total = sum(t["builtup_sqm"] for t in tower_breakdowns)
-    towers_super_total = sum(t["super_builtup_sqm"] for t in tower_breakdowns)
+    towers_builtup_total = math.fsum(t["builtup_sqm"] for t in tower_breakdowns)
+    towers_super_total = math.fsum(t["super_builtup_sqm"] for t in tower_breakdowns)
     implied_multiplier = round(super_builtup_sqm / builtup_sqm, 4) if builtup_sqm else 1.0
 
     return {

@@ -284,8 +284,12 @@ def get_procurement_calendar(project: Dict[str, Any]) -> Dict[str, Any]:
 
 def calculate_inventory_plan(project: Dict[str, Any]) -> Dict[str, Any]:
     """Calculates Economic Order Quantity (EOQ), reorder levels, and yard capacity."""
+    import engine
+    areas = engine.area_metrics(project)
     towers = project.get("towers") or []
-    builtup = sum(float(t.get("footprint_sqm") or 600.0) * int(t.get("floors") or 1) for t in towers) or 10000.0
+    builtup = float(areas.get("total_builtup_sqm") or 0.0)
+    if builtup <= 0:
+        builtup = sum(float(t.get("footprint_area") or t.get("footprint_sqm") or 600.0) * int(t.get("floors") or 1) for t in towers) or 10000.0
     total_steel_mt = (builtup * 55.0) / 1000.0
 
     inventory_items = [
@@ -361,9 +365,13 @@ def get_marketplace_catalog() -> Dict[str, Any]:
 
 def generate_tender_documents(project: Dict[str, Any]) -> Dict[str, Any]:
     """Synthesizes complete tender packages (NIT, GCC, Item-Rate BOQ)."""
+    import engine
+    areas = engine.area_metrics(project)
     p_name = project.get("name", "Prime Residential Towers")
     towers = project.get("towers") or []
-    builtup = sum(float(t.get("footprint_sqm") or 600.0) * int(t.get("floors") or 1) for t in towers) or 10000.0
+    builtup = float(areas.get("total_builtup_sqm") or 0.0)
+    if builtup <= 0:
+        builtup = sum(float(t.get("footprint_area") or t.get("footprint_sqm") or 600.0) * int(t.get("floors") or 1) for t in towers) or 10000.0
     est_cost = builtup * 48000.0
 
     nit = {

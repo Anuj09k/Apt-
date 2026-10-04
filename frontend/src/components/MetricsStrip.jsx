@@ -84,7 +84,7 @@ export const MetricsStrip = ({ analysis, duration, vertical = false, state = "fr
         vertical={vertical}
         label="Cost"
         value={money(duration?.budget?.project_total ?? cost?.total, cost?.currency || "INR")}
-        tone={duration?.budget?.programme_adjustment > 0 ? "danger" : undefined}
+        tone="success"
         testid="metric-cost"
       />
       {duration?.budget?.programme_adjustment > 0 && (

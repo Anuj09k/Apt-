@@ -1,0 +1,701 @@
+[
+  {
+    "category": "User & Project Management",
+    "page": "4",
+    "features": [
+      "User Registration & Login",
+      "Role-Based Access Control",
+      "User Profiles",
+      "Project Creation",
+      "Project Dashboard",
+      "Project Versioning",
+      "Version Comparison",
+      "Project Sharing",
+      "Project Activity History",
+      "Public Compliance Link",
+      "Admin Console",
+      "Autosave & Recompute"
+    ]
+  },
+  {
+    "category": "Plot Management",
+    "page": "4",
+    "features": [
+      "Manual Plot Entry",
+      "Polygon Plot Creation",
+      "Plot Dimensions",
+      "Plot Orientation",
+      "Plot Boundary Editing",
+      "Plot Area Calculation",
+      "Road Access Definition",
+      "Road-Edge Classification",
+      "Coordinate (Lat/Lng) Entry",
+      "Polygon Repair & Validation"
+    ]
+  },
+  {
+    "category": "Apartment Planning",
+    "page": "4",
+    "features": [
+      "Apartment Type Selection",
+      "Tower Planning",
+      "Floor Planning",
+      "Room Planning",
+      "Corridor Planning",
+      "Staircase Planning",
+      "Lift Planning",
+      "Balcony Planning",
+      "Common Area Planning",
+      "Unit Mix Definition",
+      "Procedural Room Layout Generator",
+      "Whole-Tower Floor Plate Generation",
+      "Layout Validation & Retry"
+    ]
+  },
+  {
+    "category": "Civil Engineering Calculations",
+    "page": "4",
+    "features": [
+      "Plot Area",
+      "Carpet Area",
+      "Built-up Area",
+      "Super Built-up Area",
+      "Ground Coverage",
+      "FAR Calculation",
+      "FSI Calculation",
+      "Open Space Calculation",
+      "Density Calculation",
+      "Area Derivation Audit Trail",
+      "FAR Derivation Breakdown"
+    ]
+  },
+  {
+    "category": "Parking Planning",
+    "page": "4",
+    "features": [
+      "Basement Parking",
+      "Ground Parking",
+      "Visitor Parking",
+      "EV Parking",
+      "Accessible Parking",
+      "Parking Capacity Calculator",
+      "Parking Efficiency Analysis",
+      "Ramp Planning",
+      "Carpet-Band State-Aware Norms",
+      "Per-Tower Demand & Supply",
+      "Shared Site Parking Pool",
+      "ECS Conversion"
+    ]
+  },
+  {
+    "category": "Utility Planning",
+    "page": "5",
+    "features": [
+      "Water Demand",
+      "Underground Tank",
+      "Overhead Tank",
+      "STP Planning",
+      "WTP Planning",
+      "Rainwater Harvesting",
+      "Electrical Room",
+      "Pump Room"
+    ]
+  },
+  {
+    "category": "Quantity Estimation",
+    "page": "5",
+    "features": [
+      "Concrete",
+      "Cement",
+      "Steel",
+      "Bricks/Blocks",
+      "Sand",
+      "Aggregate",
+      "Tiles",
+      "Paint",
+      "Doors",
+      "Windows",
+      "Plumbing",
+      "Electrical",
+      "Waterproofing",
+      "Finishing Materials"
+    ]
+  },
+  {
+    "category": "BOQ",
+    "page": "5",
+    "features": [
+      "Automatic Bill of Quantities",
+      "Material Summary",
+      "Labour Summary",
+      "Equipment Summary",
+      "BOQ PDF Export",
+      "BOQ Excel Export",
+      "Structure-Derived Quantity Take-off",
+      "Column & Beam Section Sizing",
+      "Mix Proportion Derivation",
+      "Take-off Sanity Checks"
+    ]
+  },
+  {
+    "category": "Cost Estimation",
+    "page": "5",
+    "features": [
+      "Material Cost",
+      "Labour Cost",
+      "Equipment Cost",
+      "Construction Cost",
+      "Cost per Flat",
+      "Cost per sq m",
+      "Budget Summary",
+      "Wastage Allowance",
+      "Preliminaries",
+      "Overhead & Profit",
+      "Contingency",
+      "Escalation",
+      "GST"
+    ]
+  },
+  {
+    "category": "Compliance Engine",
+    "page": "5",
+    "features": [
+      "FAR Validation",
+      "FSI Validation",
+      "Stair Width",
+      "Corridor Width",
+      "Lift Compliance",
+      "Fire Exit Checks",
+      "Accessibility Checks",
+      "Setback Validation",
+      "Height vs Road Width Rule",
+      "Open Space vs Height Rule",
+      "Clause-Referenced Results",
+      "Compliance Margin Warnings"
+    ]
+  },
+  {
+    "category": "Reports",
+    "page": "5",
+    "features": [
+      "BOQ Report",
+      "Cost Report",
+      "Quantity Report",
+      "Parking Report",
+      "Compliance Report",
+      "Executive Summary",
+      "PDF Export",
+      "Per-Tower Report Sections",
+      "Excel Workbook Export",
+      "Tower Floor Plans PDF Report",
+      "Floor Plan Image & ZIP Export"
+    ]
+  },
+  {
+    "category": "GIS & Site Intelligence",
+    "page": "6",
+    "features": [
+      "OpenStreetMap Support",
+      "GIS Coordinate Input",
+      "Polygon Drawing",
+      "Plot Boundary Detection",
+      "Existing Building Detection",
+      "Road Detection",
+      "Road Width Detection",
+      "Green Area Detection",
+      "Water Body Detection",
+      "Terrain Analysis",
+      "Elevation Analysis",
+      "Slope Analysis",
+      "Flood Risk Analysis",
+      "Wind Analysis",
+      "Sun Path Analysis",
+      "Solar Position & Sun Events",
+      "Annual Insolation",
+      "Solar Potential",
+      "Transit Proximity Analysis",
+      "Accessibility Analysis",
+      "Site Suitability Score",
+      "Infrastructure Analysis",
+      "Buildability Analysis",
+      "AI Site Analysis",
+      "Overpass Feature Caching"
+    ]
+  },
+  {
+    "category": "Development Controls & Setbacks",
+    "page": "7",
+    "features": [
+      "Per-Edge Inward Setback Application",
+      "Setback Minimums from Plot Area",
+      "Height-Driven Open Space Table",
+      "Height vs Road Width Limit",
+      "Recommended Controls Engine",
+      "Setback Verification & Warnings",
+      "Development Control Overrides",
+      "Yield Recommendation"
+    ]
+  },
+  {
+    "category": "Site Layout Engine",
+    "page": "7",
+    "features": [
+      "Buildable Envelope Generation",
+      "Polygon Repair & Cleaning",
+      "Local Tangent-Plane Projection",
+      "Road Network Reservation",
+      "Perimeter Ring Roads",
+      "Internal Spine & Driveways",
+      "Straight-Line Corridor Geometry",
+      "Largest Inscribed Block Detection",
+      "Amenity Block Placement",
+      "Green & Open Space Reservation",
+      "Greedy Grid Tower Packing",
+      "Footprint & Rotation Sweep",
+      "Inter-Tower Spacing Enforcement",
+      "Tower Count & Height Caps",
+      "Boundary Containment Guarantee",
+      "Shared Fitness Scoring",
+      "Layout Recommendation Endpoint",
+      "Engine Versioning & Signatures",
+      "Genetic Refinement of Placement"
+    ]
+  },
+  {
+    "category": "Vastu & Generative Architecture",
+    "page": "7",
+    "features": [
+      "Vastu Sector Mapping",
+      "Sector-Anchored Unit Packing",
+      "Unit Programme Generation",
+      "Vastu Audit per Unit",
+      "MEP Position Audit",
+      "Sector Report",
+      "Vastu-Aligned Floor Plates",
+      "Architectural Template Generation",
+      "Plan Realism Check",
+      "Room Aspect & Dimension Checks"
+    ]
+  },
+  {
+    "category": "Programme & Scheduling",
+    "page": "7",
+    "features": [
+      "Activity Generation from Quantities",
+      "CPM Forward & Backward Pass",
+      "Critical Path Identification",
+      "Total & Free Float",
+      "Float Verification",
+      "Work Calendar & Holidays",
+      "Duration from Output Rates",
+      "Crew Efficiency Modelling",
+      "Wage Premium Modelling",
+      "Prop Removal Safety Rules",
+      "Schedule Safety Audit",
+      "Scheduled Date Audit",
+      "Task Overrides & Edits",
+      "Target Date Solver",
+      "Cash Flow Curve",
+      "Resource Histogram",
+      "Line of Balance",
+      "Milestones",
+      "Gantt Visualisation"
+    ]
+  },
+  {
+    "category": "Development Finance",
+    "page": "8",
+    "features": [
+      "Saleable Area Derivation",
+      "Revenue Model",
+      "S-Curve Cost Spread",
+      "Monthly Cash Flow",
+      "NPV",
+      "IRR",
+      "Break-even Point",
+      "Preliminaries per Month",
+      "Finance Configuration"
+    ]
+  },
+  {
+    "category": "Data Reliability & Assurance",
+    "page": "8",
+    "features": [
+      "Plot Data Check",
+      "Development Controls Check",
+      "Tower Data Check",
+      "Site Layout Check",
+      "GIS Data Check",
+      "Parking Check",
+      "Engineering Check",
+      "Finance Check",
+      "Programme Check",
+      "Data Freshness Tracking",
+      "Cross-Module Consistency Checks",
+      "Compliance Margin Reporting",
+      "Module Warning Rollup",
+      "Overall Trust Score",
+      "Data Health Report Export"
+    ]
+  },
+  {
+    "category": "IS & NBC Code Intelligence",
+    "page": "8",
+    "features": [
+      "Central Code Constant Registry",
+      "74-Entry Clause Registry",
+      "Clause Text Corpus Ingestion",
+      "Clause Chunking & Indexing",
+      "Semantic Clause Retrieval (RAG)",
+      "Code Search Endpoint",
+      "Code Question Answering",
+      "Citation Extraction",
+      "Citation Verification Against Registry",
+      "Cited Extracts in Answers"
+    ]
+  },
+  {
+    "category": "Engineering Modules (IS/NBC)",
+    "page": "8",
+    "features": [
+      "Structural Load Estimator (IS 875)",
+      "Wind Force Coefficients (IS 875-3)",
+      "Seismic Zone & Base Shear (IS 1893)",
+      "Foundation Advisor (IS 6403/1904)",
+      "Concrete Mix Design (IS 10262)",
+      "Water Infrastructure (IS 1172)",
+      "Storm Water & RWH (IS 3764)",
+      "Parking Compliance (NBC/SP:21)",
+      "Fire Safety Compliance (NBC Part 4)",
+      "Accessibility Compliance (NBC Part 3)",
+      "Green Building Preliminary Rating",
+      "Column Grid Optimizer",
+      "Embodied Carbon",
+      "Plantation Plan"
+    ]
+  },
+  {
+    "category": "3D & Visualisation",
+    "page": "8",
+    "features": [
+      "3D Site Model",
+      "Tower Massing",
+      "Road & Plot Rendering",
+      "Amenity & Clubhouse Rendering",
+      "Central Park & Landscape",
+      "Floor Plate Viewer",
+      "Site Diagrams",
+      "Blueprint View",
+      "Live Metrics Strip",
+      "Command Palette",
+      "Presentation-Grade Furnished 2D Blueprint Engine",
+      "Structural Wall Poch\u00e9 & Dimension Badges"
+    ]
+  },
+  {
+    "category": "AI Planner",
+    "page": "9",
+    "features": [
+      "Automatic Layout Generation",
+      "Smart Tower Placement",
+      "Apartment Mix Optimisation",
+      "Floor Optimisation",
+      "Open Space Optimisation"
+    ]
+  },
+  {
+    "category": "AI Civil Engineer",
+    "page": "9",
+    "features": [
+      "Civil Design Suggestions",
+      "FAR Optimisation",
+      "FSI Optimisation",
+      "Utility Optimisation",
+      "Parking Optimisation"
+    ]
+  },
+  {
+    "category": "AI Structural Advisor",
+    "page": "9",
+    "features": [
+      "Column Grid Suggestions",
+      "Beam Layout Suggestions",
+      "Foundation Recommendations",
+      "Structural Risk Warnings"
+    ]
+  },
+  {
+    "category": "AI Quantity Surveyor",
+    "page": "9",
+    "features": [
+      "Quantity Optimisation",
+      "Waste Reduction",
+      "Steel Cutting Optimisation",
+      "Tile Waste Optimisation",
+      "BOQ Optimisation"
+    ]
+  },
+  {
+    "category": "AI Cost Engineer",
+    "page": "9",
+    "features": [
+      "Cost Prediction",
+      "Budget Optimisation",
+      "Cost Comparison",
+      "Cost Saving Suggestions",
+      "Grade Sweep Analysis"
+    ]
+  },
+  {
+    "category": "AI Sustainability",
+    "page": "9",
+    "features": [
+      "Green Building Score",
+      "Carbon Footprint",
+      "Solar Potential",
+      "Water Efficiency",
+      "Tree Plantation Suggestions"
+    ]
+  },
+  {
+    "category": "AI Business Consultant",
+    "page": "9",
+    "features": [
+      "ROI Analysis",
+      "Profit Forecast",
+      "Project Feasibility",
+      "Break-even Analysis"
+    ]
+  },
+  {
+    "category": "AI Recommendation Engine",
+    "page": "9",
+    "features": [
+      "Design Improvements",
+      "Engineering Suggestions",
+      "Cost Optimisation",
+      "Material Recommendations"
+    ]
+  },
+  {
+    "category": "APT: In-App AI Assistant",
+    "page": "10",
+    "features": [
+      "Project Q&A;",
+      "Civil Engineering Guidance",
+      "Report Explanation",
+      "Scenario Comparison",
+      "Streaming Responses",
+      "Module-Aware Opening Questions",
+      "Project State Context Builder",
+      "Context & Analysis Caching",
+      "Query Classification",
+      "Capability Questions",
+      "Chat Threads & History",
+      "Citation Verification",
+      "Provider Fallback & Retry"
+    ]
+  },
+  {
+    "category": "Scenario Comparison",
+    "page": "10",
+    "features": [
+      "Compare Layouts",
+      "Compare Costs",
+      "Compare Parking",
+      "Compare Sustainability",
+      "Compare ROI"
+    ]
+  },
+  {
+    "category": "Collaboration & Workflow",
+    "page": "11",
+    "features": [
+      "Multi-user Collaboration",
+      "Project Sharing",
+      "Team Roles",
+      "Version Control",
+      "Activity Logs",
+      "Task Assignment",
+      "Approval Workflow",
+      "Comments & Reviews",
+      "Workflow Automation"
+    ]
+  },
+  {
+    "category": "Engineering Decision Support",
+    "page": "11",
+    "features": [
+      "Construction Timeline",
+      "Labour Planning",
+      "Equipment Planning",
+      "Utility Network Planning"
+    ]
+  },
+  {
+    "category": "BIM Readiness",
+    "page": "12",
+    "features": [
+      "IFC Export",
+      "DWG Export",
+      "DXF Export",
+      "Revit Compatibility",
+      "AutoCAD Compatibility"
+    ]
+  },
+  {
+    "category": "Digital Twin Preparation",
+    "page": "12",
+    "features": [
+      "IoT Readiness",
+      "Smart Sensor Integration",
+      "Progress Tracking",
+      "Quality Monitoring",
+      "Safety Monitoring",
+      "Delay Prediction",
+      "Predictive Maintenance",
+      "Facility Management"
+    ]
+  },
+  {
+    "category": "AI Operating System",
+    "page": "13",
+    "features": [
+      "AI Engineering Copilot",
+      "AI Engineering Consultant",
+      "Engineering Knowledge Graph",
+      "Engineering Memory",
+      "Engineering Decision Log",
+      "Explainable AI"
+    ]
+  },
+  {
+    "category": "Intelligent Planning",
+    "page": "13",
+    "features": [
+      "One-Click Project Generation",
+      "AI Layout Generator",
+      "AI Township Planner",
+      "Mixed-Use Development Planning",
+      "Apartment Capacity Prediction",
+      "Land Suitability Analysis",
+      "Smart Building Recommendations"
+    ]
+  },
+  {
+    "category": "GIS & Urban Intelligence",
+    "page": "13",
+    "features": [
+      "City Growth Prediction",
+      "Land Value Prediction",
+      "Infrastructure Growth Prediction",
+      "Climate Analysis",
+      "Disaster Risk Analysis",
+      "Earthquake Analysis",
+      "Flood Analysis",
+      "Wind Analysis",
+      "Noise & Pollution Analysis"
+    ]
+  },
+  {
+    "category": "Smart Procurement",
+    "page": "13",
+    "features": [
+      "Live Material Prices",
+      "Material Price Forecasting",
+      "Supplier Intelligence",
+      "Procurement Calendar",
+      "Inventory Planning"
+    ]
+  },
+  {
+    "category": "Financial Intelligence",
+    "page": "13",
+    "features": [
+      "Cash Flow Planning",
+      "Lifecycle Cost Analysis",
+      "Investment Analysis",
+      "ROI Forecasting",
+      "Profitability Dashboard"
+    ]
+  },
+  {
+    "category": "Sustainability",
+    "page": "13",
+    "features": [
+      "Green Building Planner",
+      "Carbon Emission Calculator",
+      "Solar Energy Planning",
+      "Water Conservation Analysis",
+      "ESG Reporting"
+    ]
+  },
+  {
+    "category": "Construction Intelligence",
+    "page": "13",
+    "features": [
+      "Construction Timeline Optimisation",
+      "Resource Allocation",
+      "Labour Optimisation",
+      "Equipment Scheduling",
+      "Construction Delay Prediction",
+      "Risk Prediction"
+    ]
+  },
+  {
+    "category": "Reports & Decision Support",
+    "page": "13",
+    "features": [
+      "AI Report Writer",
+      "Executive Dashboards",
+      "Interactive Analytics",
+      "Decision Sandbox",
+      "Scenario Simulation",
+      "Engineering Benchmarking"
+    ]
+  },
+  {
+    "category": "Marketplace & Ecosystem",
+    "page": "14",
+    "features": [
+      "Engineering Marketplace",
+      "Plugin Marketplace",
+      "API Marketplace",
+      "Educational Mode",
+      "Government Approval Assistant",
+      "Tender Document Generator"
+    ]
+  },
+  {
+    "category": "Autonomous AI Engineering",
+    "page": "15",
+    "features": [
+      "Conversational Project Design",
+      "Multi-Agent Engineering Teams",
+      "Autonomous Compliance Checking",
+      "Autonomous BOQ & Costing"
+    ]
+  },
+  {
+    "category": "Generative Design",
+    "page": "15",
+    "features": [
+      "AI-Generated 2D Floor Plans",
+      "AI-Generated 3D Building Concepts",
+      "Facade Design Suggestions",
+      "Landscape Design",
+      "Parking Layout Generation"
+    ]
+  },
+  {
+    "category": "Smart City Platform",
+    "page": "15",
+    "features": [
+      "City-Scale Planning",
+      "Traffic Simulation",
+      "Utility Network Optimisation",
+      "Urban Digital Twin",
+      "Infrastructure Demand Forecasting"
+    ]
+  }
+]

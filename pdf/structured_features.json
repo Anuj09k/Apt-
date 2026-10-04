@@ -1,0 +1,1962 @@
+{
+  "4": [
+    {
+      "name": "User & Project Management",
+      "features": [
+        {
+          "name": "User Registration & Login",
+          "status": "built"
+        },
+        {
+          "name": "Role-Based Access Control",
+          "status": "built"
+        },
+        {
+          "name": "User Profiles",
+          "status": "built"
+        },
+        {
+          "name": "Project Creation",
+          "status": "built"
+        },
+        {
+          "name": "Project Dashboard",
+          "status": "built"
+        },
+        {
+          "name": "Project Versioning",
+          "status": "built"
+        },
+        {
+          "name": "Version Comparison",
+          "status": "built"
+        },
+        {
+          "name": "Project Sharing",
+          "status": "built"
+        },
+        {
+          "name": "Project Activity History",
+          "status": "built"
+        },
+        {
+          "name": "Public Compliance Link",
+          "status": "built"
+        },
+        {
+          "name": "Admin Console",
+          "status": "built"
+        },
+        {
+          "name": "Autosave & Recompute",
+          "status": "built"
+        }
+      ]
+    },
+    {
+      "name": "Plot Management",
+      "features": [
+        {
+          "name": "Manual Plot Entry",
+          "status": "built"
+        },
+        {
+          "name": "Polygon Plot Creation",
+          "status": "built"
+        },
+        {
+          "name": "Plot Dimensions",
+          "status": "built"
+        },
+        {
+          "name": "Plot Orientation",
+          "status": "built"
+        },
+        {
+          "name": "Plot Boundary Editing",
+          "status": "built"
+        },
+        {
+          "name": "Plot Area Calculation",
+          "status": "built"
+        },
+        {
+          "name": "Road Access Definition",
+          "status": "built"
+        },
+        {
+          "name": "Road-Edge Classification",
+          "status": "built"
+        },
+        {
+          "name": "Coordinate (Lat/Lng) Entry",
+          "status": "built"
+        },
+        {
+          "name": "Polygon Repair & Validation",
+          "status": "built"
+        }
+      ]
+    },
+    {
+      "name": "Apartment Planning",
+      "features": [
+        {
+          "name": "Apartment Type Selection",
+          "status": "built"
+        },
+        {
+          "name": "Tower Planning",
+          "status": "built"
+        },
+        {
+          "name": "Floor Planning",
+          "status": "built"
+        },
+        {
+          "name": "Room Planning",
+          "status": "built"
+        },
+        {
+          "name": "Corridor Planning",
+          "status": "built"
+        },
+        {
+          "name": "Staircase Planning",
+          "status": "built"
+        },
+        {
+          "name": "Lift Planning",
+          "status": "built"
+        },
+        {
+          "name": "Balcony Planning",
+          "status": "built"
+        },
+        {
+          "name": "Common Area Planning",
+          "status": "built"
+        },
+        {
+          "name": "Unit Mix Definition",
+          "status": "built"
+        },
+        {
+          "name": "Procedural Room Layout Generator",
+          "status": "built"
+        },
+        {
+          "name": "Whole-Tower Floor Plate Generation",
+          "status": "built"
+        },
+        {
+          "name": "Layout Validation & Retry",
+          "status": "built"
+        }
+      ]
+    },
+    {
+      "name": "Civil Engineering Calculations",
+      "features": [
+        {
+          "name": "Plot Area",
+          "status": "built"
+        },
+        {
+          "name": "Carpet Area",
+          "status": "built"
+        },
+        {
+          "name": "Built-up Area",
+          "status": "built"
+        },
+        {
+          "name": "Super Built-up Area",
+          "status": "built"
+        },
+        {
+          "name": "Ground Coverage",
+          "status": "built"
+        },
+        {
+          "name": "FAR Calculation",
+          "status": "built"
+        },
+        {
+          "name": "FSI Calculation",
+          "status": "built"
+        },
+        {
+          "name": "Open Space Calculation",
+          "status": "built"
+        },
+        {
+          "name": "Density Calculation",
+          "status": "built"
+        },
+        {
+          "name": "Area Derivation Audit Trail",
+          "status": "built"
+        },
+        {
+          "name": "FAR Derivation Breakdown",
+          "status": "built"
+        }
+      ]
+    },
+    {
+      "name": "Parking Planning",
+      "features": [
+        {
+          "name": "Basement Parking",
+          "status": "built"
+        },
+        {
+          "name": "Ground Parking",
+          "status": "built"
+        },
+        {
+          "name": "Visitor Parking",
+          "status": "built"
+        },
+        {
+          "name": "EV Parking",
+          "status": "built"
+        },
+        {
+          "name": "Accessible Parking",
+          "status": "built"
+        },
+        {
+          "name": "Parking Capacity Calculator",
+          "status": "built"
+        },
+        {
+          "name": "Parking Efficiency Analysis",
+          "status": "built"
+        },
+        {
+          "name": "Ramp Planning",
+          "status": "built"
+        },
+        {
+          "name": "Carpet-Band State-Aware Norms",
+          "status": "built"
+        },
+        {
+          "name": "Per-Tower Demand & Supply",
+          "status": "built"
+        },
+        {
+          "name": "Shared Site Parking Pool",
+          "status": "built"
+        },
+        {
+          "name": "ECS Conversion",
+          "status": "built"
+        }
+      ]
+    }
+  ],
+  "5": [
+    {
+      "name": "Utility Planning",
+      "features": [
+        {
+          "name": "Water Demand",
+          "status": "built"
+        },
+        {
+          "name": "Underground Tank",
+          "status": "built"
+        },
+        {
+          "name": "Overhead Tank",
+          "status": "built"
+        },
+        {
+          "name": "STP Planning",
+          "status": "built"
+        },
+        {
+          "name": "WTP Planning",
+          "status": "built"
+        },
+        {
+          "name": "Rainwater Harvesting",
+          "status": "built"
+        },
+        {
+          "name": "Electrical Room",
+          "status": "built"
+        },
+        {
+          "name": "Pump Room",
+          "status": "built"
+        }
+      ]
+    },
+    {
+      "name": "Quantity Estimation",
+      "features": [
+        {
+          "name": "Concrete",
+          "status": "built"
+        },
+        {
+          "name": "Cement",
+          "status": "built"
+        },
+        {
+          "name": "Steel",
+          "status": "built"
+        },
+        {
+          "name": "Bricks/Blocks",
+          "status": "built"
+        },
+        {
+          "name": "Sand",
+          "status": "built"
+        },
+        {
+          "name": "Aggregate",
+          "status": "built"
+        },
+        {
+          "name": "Tiles",
+          "status": "built"
+        },
+        {
+          "name": "Paint",
+          "status": "built"
+        },
+        {
+          "name": "Doors",
+          "status": "built"
+        },
+        {
+          "name": "Windows",
+          "status": "built"
+        },
+        {
+          "name": "Plumbing",
+          "status": "built"
+        },
+        {
+          "name": "Electrical",
+          "status": "built"
+        },
+        {
+          "name": "Waterproofing",
+          "status": "built"
+        },
+        {
+          "name": "Finishing Materials",
+          "status": "built"
+        }
+      ]
+    },
+    {
+      "name": "BOQ",
+      "features": [
+        {
+          "name": "Automatic Bill of Quantities",
+          "status": "built"
+        },
+        {
+          "name": "Material Summary",
+          "status": "built"
+        },
+        {
+          "name": "Labour Summary",
+          "status": "built"
+        },
+        {
+          "name": "Equipment Summary",
+          "status": "built"
+        },
+        {
+          "name": "BOQ PDF Export",
+          "status": "built"
+        },
+        {
+          "name": "BOQ Excel Export",
+          "status": "built"
+        },
+        {
+          "name": "Structure-Derived Quantity Take-off",
+          "status": "built"
+        },
+        {
+          "name": "Column & Beam Section Sizing",
+          "status": "built"
+        },
+        {
+          "name": "Mix Proportion Derivation",
+          "status": "built"
+        },
+        {
+          "name": "Take-off Sanity Checks",
+          "status": "built"
+        }
+      ]
+    },
+    {
+      "name": "Cost Estimation",
+      "features": [
+        {
+          "name": "Material Cost",
+          "status": "built"
+        },
+        {
+          "name": "Labour Cost",
+          "status": "built"
+        },
+        {
+          "name": "Equipment Cost",
+          "status": "built"
+        },
+        {
+          "name": "Construction Cost",
+          "status": "built"
+        },
+        {
+          "name": "Cost per Flat",
+          "status": "built"
+        },
+        {
+          "name": "Cost per sq m",
+          "status": "built"
+        },
+        {
+          "name": "Budget Summary",
+          "status": "built"
+        },
+        {
+          "name": "Wastage Allowance",
+          "status": "built"
+        },
+        {
+          "name": "Preliminaries",
+          "status": "built"
+        },
+        {
+          "name": "Overhead & Profit",
+          "status": "built"
+        },
+        {
+          "name": "Contingency",
+          "status": "built"
+        },
+        {
+          "name": "Escalation",
+          "status": "built"
+        },
+        {
+          "name": "GST",
+          "status": "built"
+        }
+      ]
+    },
+    {
+      "name": "Compliance Engine",
+      "features": [
+        {
+          "name": "FAR Validation",
+          "status": "built"
+        },
+        {
+          "name": "FSI Validation",
+          "status": "built"
+        },
+        {
+          "name": "Stair Width",
+          "status": "built"
+        },
+        {
+          "name": "Corridor Width",
+          "status": "built"
+        },
+        {
+          "name": "Lift Compliance",
+          "status": "built"
+        },
+        {
+          "name": "Fire Exit Checks",
+          "status": "built"
+        },
+        {
+          "name": "Accessibility Checks",
+          "status": "built"
+        },
+        {
+          "name": "Setback Validation",
+          "status": "built"
+        },
+        {
+          "name": "Height vs Road Width Rule",
+          "status": "built"
+        },
+        {
+          "name": "Open Space vs Height Rule",
+          "status": "built"
+        },
+        {
+          "name": "Clause-Referenced Results",
+          "status": "built"
+        },
+        {
+          "name": "Compliance Margin Warnings",
+          "status": "built"
+        }
+      ]
+    },
+    {
+      "name": "Reports",
+      "features": [
+        {
+          "name": "BOQ Report",
+          "status": "built"
+        },
+        {
+          "name": "Cost Report",
+          "status": "built"
+        },
+        {
+          "name": "Quantity Report",
+          "status": "built"
+        },
+        {
+          "name": "Parking Report",
+          "status": "built"
+        },
+        {
+          "name": "Compliance Report",
+          "status": "built"
+        },
+        {
+          "name": "Executive Summary",
+          "status": "built"
+        },
+        {
+          "name": "PDF Export",
+          "status": "built"
+        },
+        {
+          "name": "Per-Tower Report Sections",
+          "status": "built"
+        },
+        {
+          "name": "Excel Workbook Export",
+          "status": "built"
+        },
+        {
+          "name": "Tower Floor Plans PDF Report",
+          "status": "built"
+        },
+        {
+          "name": "Floor Plan Image & ZIP Export",
+          "status": "built"
+        }
+      ]
+    }
+  ],
+  "6": [
+    {
+      "name": "GIS & Site Intelligence",
+      "features": [
+        {
+          "name": "OpenStreetMap Support",
+          "status": "built"
+        },
+        {
+          "name": "GIS Coordinate Input",
+          "status": "built"
+        },
+        {
+          "name": "Polygon Drawing",
+          "status": "built"
+        },
+        {
+          "name": "Plot Boundary Detection",
+          "status": "built"
+        },
+        {
+          "name": "Existing Building Detection",
+          "status": "built"
+        },
+        {
+          "name": "Road Detection",
+          "status": "built"
+        },
+        {
+          "name": "Road Width Detection",
+          "status": "built"
+        },
+        {
+          "name": "Green Area Detection",
+          "status": "built"
+        },
+        {
+          "name": "Water Body Detection",
+          "status": "built"
+        },
+        {
+          "name": "Terrain Analysis",
+          "status": "built"
+        },
+        {
+          "name": "Elevation Analysis",
+          "status": "built"
+        },
+        {
+          "name": "Slope Analysis",
+          "status": "built"
+        },
+        {
+          "name": "Flood Risk Analysis",
+          "status": "built"
+        },
+        {
+          "name": "Wind Analysis",
+          "status": "built"
+        },
+        {
+          "name": "Sun Path Analysis",
+          "status": "built"
+        },
+        {
+          "name": "Solar Position & Sun Events",
+          "status": "built"
+        },
+        {
+          "name": "Annual Insolation",
+          "status": "built"
+        },
+        {
+          "name": "Solar Potential",
+          "status": "built"
+        },
+        {
+          "name": "Transit Proximity Analysis",
+          "status": "built"
+        },
+        {
+          "name": "Accessibility Analysis",
+          "status": "built"
+        },
+        {
+          "name": "Site Suitability Score",
+          "status": "built"
+        },
+        {
+          "name": "Infrastructure Analysis",
+          "status": "built"
+        },
+        {
+          "name": "Buildability Analysis",
+          "status": "built"
+        },
+        {
+          "name": "AI Site Analysis",
+          "status": "built"
+        },
+        {
+          "name": "Overpass Feature Caching",
+          "status": "built"
+        },
+        {
+          "name": "Google Maps Integration",
+          "status": "planned"
+        },
+        {
+          "name": "Satellite Imagery Basemap",
+          "status": "partial"
+        }
+      ]
+    }
+  ],
+  "7": [
+    {
+      "name": "Development Controls & Setbacks",
+      "features": [
+        {
+          "name": "Per-Edge Inward Setback Application",
+          "status": "built"
+        },
+        {
+          "name": "Setback Minimums from Plot Area",
+          "status": "built"
+        },
+        {
+          "name": "Height-Driven Open Space Table",
+          "status": "built"
+        },
+        {
+          "name": "Height vs Road Width Limit",
+          "status": "built"
+        },
+        {
+          "name": "Recommended Controls Engine",
+          "status": "built"
+        },
+        {
+          "name": "Setback Verification & Warnings",
+          "status": "built"
+        },
+        {
+          "name": "Development Control Overrides",
+          "status": "built"
+        },
+        {
+          "name": "Yield Recommendation",
+          "status": "built"
+        }
+      ]
+    },
+    {
+      "name": "Site Layout Engine",
+      "features": [
+        {
+          "name": "Buildable Envelope Generation",
+          "status": "built"
+        },
+        {
+          "name": "Polygon Repair & Cleaning",
+          "status": "built"
+        },
+        {
+          "name": "Local Tangent-Plane Projection",
+          "status": "built"
+        },
+        {
+          "name": "Road Network Reservation",
+          "status": "built"
+        },
+        {
+          "name": "Perimeter Ring Roads",
+          "status": "built"
+        },
+        {
+          "name": "Internal Spine & Driveways",
+          "status": "built"
+        },
+        {
+          "name": "Straight-Line Corridor Geometry",
+          "status": "built"
+        },
+        {
+          "name": "Largest Inscribed Block Detection",
+          "status": "built"
+        },
+        {
+          "name": "Amenity Block Placement",
+          "status": "built"
+        },
+        {
+          "name": "Green & Open Space Reservation",
+          "status": "built"
+        },
+        {
+          "name": "Greedy Grid Tower Packing",
+          "status": "built"
+        },
+        {
+          "name": "Footprint & Rotation Sweep",
+          "status": "built"
+        },
+        {
+          "name": "Inter-Tower Spacing Enforcement",
+          "status": "built"
+        },
+        {
+          "name": "Tower Count & Height Caps",
+          "status": "built"
+        },
+        {
+          "name": "Boundary Containment Guarantee",
+          "status": "built"
+        },
+        {
+          "name": "Shared Fitness Scoring",
+          "status": "built"
+        },
+        {
+          "name": "Layout Recommendation Endpoint",
+          "status": "built"
+        },
+        {
+          "name": "Engine Versioning & Signatures",
+          "status": "built"
+        },
+        {
+          "name": "Genetic Refinement of Placement",
+          "status": "built"
+        }
+      ]
+    },
+    {
+      "name": "Vastu & Generative Architecture",
+      "features": [
+        {
+          "name": "Vastu Sector Mapping",
+          "status": "built"
+        },
+        {
+          "name": "Sector-Anchored Unit Packing",
+          "status": "built"
+        },
+        {
+          "name": "Unit Programme Generation",
+          "status": "built"
+        },
+        {
+          "name": "Vastu Audit per Unit",
+          "status": "built"
+        },
+        {
+          "name": "MEP Position Audit",
+          "status": "built"
+        },
+        {
+          "name": "Sector Report",
+          "status": "built"
+        },
+        {
+          "name": "Vastu-Aligned Floor Plates",
+          "status": "built"
+        },
+        {
+          "name": "Architectural Template Generation",
+          "status": "built"
+        },
+        {
+          "name": "Plan Realism Check",
+          "status": "built"
+        },
+        {
+          "name": "Room Aspect & Dimension Checks",
+          "status": "built"
+        }
+      ]
+    },
+    {
+      "name": "Programme & Scheduling",
+      "features": [
+        {
+          "name": "Activity Generation from Quantities",
+          "status": "built"
+        },
+        {
+          "name": "CPM Forward & Backward Pass",
+          "status": "built"
+        },
+        {
+          "name": "Critical Path Identification",
+          "status": "built"
+        },
+        {
+          "name": "Total & Free Float",
+          "status": "built"
+        },
+        {
+          "name": "Float Verification",
+          "status": "built"
+        },
+        {
+          "name": "Work Calendar & Holidays",
+          "status": "built"
+        },
+        {
+          "name": "Duration from Output Rates",
+          "status": "built"
+        },
+        {
+          "name": "Crew Efficiency Modelling",
+          "status": "built"
+        },
+        {
+          "name": "Wage Premium Modelling",
+          "status": "built"
+        },
+        {
+          "name": "Prop Removal Safety Rules",
+          "status": "built"
+        },
+        {
+          "name": "Schedule Safety Audit",
+          "status": "built"
+        },
+        {
+          "name": "Scheduled Date Audit",
+          "status": "built"
+        },
+        {
+          "name": "Task Overrides & Edits",
+          "status": "built"
+        },
+        {
+          "name": "Target Date Solver",
+          "status": "built"
+        },
+        {
+          "name": "Cash Flow Curve",
+          "status": "built"
+        },
+        {
+          "name": "Resource Histogram",
+          "status": "built"
+        },
+        {
+          "name": "Line of Balance",
+          "status": "built"
+        },
+        {
+          "name": "Milestones",
+          "status": "built"
+        },
+        {
+          "name": "Gantt Visualisation",
+          "status": "built"
+        }
+      ]
+    }
+  ],
+  "8": [
+    {
+      "name": "Development Finance",
+      "features": [
+        {
+          "name": "Saleable Area Derivation",
+          "status": "built"
+        },
+        {
+          "name": "Revenue Model",
+          "status": "built"
+        },
+        {
+          "name": "S-Curve Cost Spread",
+          "status": "built"
+        },
+        {
+          "name": "Monthly Cash Flow",
+          "status": "built"
+        },
+        {
+          "name": "NPV",
+          "status": "built"
+        },
+        {
+          "name": "IRR",
+          "status": "built"
+        },
+        {
+          "name": "Break-even Point",
+          "status": "built"
+        },
+        {
+          "name": "Preliminaries per Month",
+          "status": "built"
+        },
+        {
+          "name": "Finance Configuration",
+          "status": "built"
+        }
+      ]
+    },
+    {
+      "name": "Data Reliability & Assurance",
+      "features": [
+        {
+          "name": "Plot Data Check",
+          "status": "built"
+        },
+        {
+          "name": "Development Controls Check",
+          "status": "built"
+        },
+        {
+          "name": "Tower Data Check",
+          "status": "built"
+        },
+        {
+          "name": "Site Layout Check",
+          "status": "built"
+        },
+        {
+          "name": "GIS Data Check",
+          "status": "built"
+        },
+        {
+          "name": "Parking Check",
+          "status": "built"
+        },
+        {
+          "name": "Engineering Check",
+          "status": "built"
+        },
+        {
+          "name": "Finance Check",
+          "status": "built"
+        },
+        {
+          "name": "Programme Check",
+          "status": "built"
+        },
+        {
+          "name": "Data Freshness Tracking",
+          "status": "built"
+        },
+        {
+          "name": "Cross-Module Consistency Checks",
+          "status": "built"
+        },
+        {
+          "name": "Compliance Margin Reporting",
+          "status": "built"
+        },
+        {
+          "name": "Module Warning Rollup",
+          "status": "built"
+        },
+        {
+          "name": "Overall Trust Score",
+          "status": "built"
+        },
+        {
+          "name": "Data Health Report Export",
+          "status": "built"
+        }
+      ]
+    },
+    {
+      "name": "IS & NBC Code Intelligence",
+      "features": [
+        {
+          "name": "Central Code Constant Registry",
+          "status": "built"
+        },
+        {
+          "name": "74-Entry Clause Registry",
+          "status": "built"
+        },
+        {
+          "name": "Clause Text Corpus Ingestion",
+          "status": "built"
+        },
+        {
+          "name": "Clause Chunking & Indexing",
+          "status": "built"
+        },
+        {
+          "name": "Semantic Clause Retrieval (RAG)",
+          "status": "built"
+        },
+        {
+          "name": "Code Search Endpoint",
+          "status": "built"
+        },
+        {
+          "name": "Code Question Answering",
+          "status": "built"
+        },
+        {
+          "name": "Citation Extraction",
+          "status": "built"
+        },
+        {
+          "name": "Citation Verification Against Registry",
+          "status": "built"
+        },
+        {
+          "name": "Cited Extracts in Answers",
+          "status": "built"
+        }
+      ]
+    },
+    {
+      "name": "Engineering Modules (IS/NBC)",
+      "features": [
+        {
+          "name": "Structural Load Estimator (IS 875)",
+          "status": "built"
+        },
+        {
+          "name": "Wind Force Coefficients (IS 875-3)",
+          "status": "built"
+        },
+        {
+          "name": "Seismic Zone & Base Shear (IS 1893)",
+          "status": "built"
+        },
+        {
+          "name": "Foundation Advisor (IS 6403/1904)",
+          "status": "built"
+        },
+        {
+          "name": "Concrete Mix Design (IS 10262)",
+          "status": "built"
+        },
+        {
+          "name": "Water Infrastructure (IS 1172)",
+          "status": "built"
+        },
+        {
+          "name": "Storm Water & RWH (IS 3764)",
+          "status": "built"
+        },
+        {
+          "name": "Parking Compliance (NBC/SP:21)",
+          "status": "built"
+        },
+        {
+          "name": "Fire Safety Compliance (NBC Part 4)",
+          "status": "built"
+        },
+        {
+          "name": "Accessibility Compliance (NBC Part 3)",
+          "status": "built"
+        },
+        {
+          "name": "Green Building Preliminary Rating",
+          "status": "built"
+        },
+        {
+          "name": "Column Grid Optimizer",
+          "status": "built"
+        },
+        {
+          "name": "Embodied Carbon",
+          "status": "built"
+        },
+        {
+          "name": "Plantation Plan",
+          "status": "built"
+        }
+      ]
+    },
+    {
+      "name": "3D & Visualisation",
+      "features": [
+        {
+          "name": "3D Site Model",
+          "status": "built"
+        },
+        {
+          "name": "Tower Massing",
+          "status": "built"
+        },
+        {
+          "name": "Road & Plot Rendering",
+          "status": "built"
+        },
+        {
+          "name": "Amenity & Clubhouse Rendering",
+          "status": "built"
+        },
+        {
+          "name": "Central Park & Landscape",
+          "status": "built"
+        },
+        {
+          "name": "Floor Plate Viewer",
+          "status": "built"
+        },
+        {
+          "name": "Site Diagrams",
+          "status": "built"
+        },
+        {
+          "name": "Blueprint View",
+          "status": "built"
+        },
+        {
+          "name": "Live Metrics Strip",
+          "status": "built"
+        },
+        {
+          "name": "Command Palette",
+          "status": "built"
+        },
+        {
+          "name": "Presentation-Grade Furnished 2D Blueprint Engine",
+          "status": "built"
+        },
+        {
+          "name": "Structural Wall Poch\u00e9 & Dimension Badges",
+          "status": "built"
+        }
+      ]
+    }
+  ],
+  "9": [
+    {
+      "name": "AI Planner",
+      "features": [
+        {
+          "name": "Automatic Layout Generation",
+          "status": "built"
+        },
+        {
+          "name": "Smart Tower Placement",
+          "status": "built"
+        },
+        {
+          "name": "Apartment Mix Optimisation",
+          "status": "built"
+        },
+        {
+          "name": "Floor Optimisation",
+          "status": "built"
+        },
+        {
+          "name": "Open Space Optimisation",
+          "status": "built"
+        }
+      ]
+    },
+    {
+      "name": "AI Civil Engineer",
+      "features": [
+        {
+          "name": "Civil Design Suggestions",
+          "status": "built"
+        },
+        {
+          "name": "FAR Optimisation",
+          "status": "built"
+        },
+        {
+          "name": "FSI Optimisation",
+          "status": "built"
+        },
+        {
+          "name": "Utility Optimisation",
+          "status": "built"
+        },
+        {
+          "name": "Parking Optimisation",
+          "status": "built"
+        }
+      ]
+    },
+    {
+      "name": "AI Structural Advisor",
+      "features": [
+        {
+          "name": "Column Grid Suggestions",
+          "status": "built"
+        },
+        {
+          "name": "Beam Layout Suggestions",
+          "status": "built"
+        },
+        {
+          "name": "Foundation Recommendations",
+          "status": "built"
+        },
+        {
+          "name": "Structural Risk Warnings",
+          "status": "built"
+        }
+      ]
+    },
+    {
+      "name": "AI Quantity Surveyor",
+      "features": [
+        {
+          "name": "Quantity Optimisation",
+          "status": "built"
+        },
+        {
+          "name": "Waste Reduction",
+          "status": "built"
+        },
+        {
+          "name": "Steel Cutting Optimisation",
+          "status": "built"
+        },
+        {
+          "name": "Tile Waste Optimisation",
+          "status": "built"
+        },
+        {
+          "name": "BOQ Optimisation",
+          "status": "built"
+        }
+      ]
+    },
+    {
+      "name": "AI Cost Engineer",
+      "features": [
+        {
+          "name": "Cost Prediction",
+          "status": "built"
+        },
+        {
+          "name": "Budget Optimisation",
+          "status": "built"
+        },
+        {
+          "name": "Cost Comparison",
+          "status": "built"
+        },
+        {
+          "name": "Cost Saving Suggestions",
+          "status": "built"
+        },
+        {
+          "name": "Grade Sweep Analysis",
+          "status": "built"
+        }
+      ]
+    },
+    {
+      "name": "AI Sustainability",
+      "features": [
+        {
+          "name": "Green Building Score",
+          "status": "built"
+        },
+        {
+          "name": "Carbon Footprint",
+          "status": "built"
+        },
+        {
+          "name": "Solar Potential",
+          "status": "built"
+        },
+        {
+          "name": "Water Efficiency",
+          "status": "built"
+        },
+        {
+          "name": "Tree Plantation Suggestions",
+          "status": "built"
+        }
+      ]
+    },
+    {
+      "name": "AI Business Consultant",
+      "features": [
+        {
+          "name": "ROI Analysis",
+          "status": "built"
+        },
+        {
+          "name": "Profit Forecast",
+          "status": "built"
+        },
+        {
+          "name": "Project Feasibility",
+          "status": "built"
+        },
+        {
+          "name": "Break-even Analysis",
+          "status": "built"
+        }
+      ]
+    },
+    {
+      "name": "AI Recommendation Engine",
+      "features": [
+        {
+          "name": "Design Improvements",
+          "status": "built"
+        },
+        {
+          "name": "Engineering Suggestions",
+          "status": "built"
+        },
+        {
+          "name": "Cost Optimisation",
+          "status": "built"
+        },
+        {
+          "name": "Material Recommendations",
+          "status": "built"
+        }
+      ]
+    }
+  ],
+  "10": [
+    {
+      "name": "APT: In-App AI Assistant",
+      "features": [
+        {
+          "name": "Project Q&A;",
+          "status": "built"
+        },
+        {
+          "name": "Civil Engineering Guidance",
+          "status": "built"
+        },
+        {
+          "name": "Report Explanation",
+          "status": "built"
+        },
+        {
+          "name": "Scenario Comparison",
+          "status": "built"
+        },
+        {
+          "name": "Streaming Responses",
+          "status": "built"
+        },
+        {
+          "name": "Module-Aware Opening Questions",
+          "status": "built"
+        },
+        {
+          "name": "Project State Context Builder",
+          "status": "built"
+        },
+        {
+          "name": "Context & Analysis Caching",
+          "status": "built"
+        },
+        {
+          "name": "Query Classification",
+          "status": "built"
+        },
+        {
+          "name": "Capability Questions",
+          "status": "built"
+        },
+        {
+          "name": "Chat Threads & History",
+          "status": "built"
+        },
+        {
+          "name": "Citation Verification",
+          "status": "built"
+        },
+        {
+          "name": "Provider Fallback & Retry",
+          "status": "built"
+        }
+      ]
+    },
+    {
+      "name": "Scenario Comparison",
+      "features": [
+        {
+          "name": "Compare Layouts",
+          "status": "built"
+        },
+        {
+          "name": "Compare Costs",
+          "status": "built"
+        },
+        {
+          "name": "Compare Parking",
+          "status": "built"
+        },
+        {
+          "name": "Compare Sustainability",
+          "status": "built"
+        },
+        {
+          "name": "Compare ROI",
+          "status": "built"
+        }
+      ]
+    }
+  ],
+  "11": [
+    {
+      "name": "Collaboration & Workflow",
+      "features": [
+        {
+          "name": "Multi-user Collaboration",
+          "status": "built"
+        },
+        {
+          "name": "Project Sharing",
+          "status": "built"
+        },
+        {
+          "name": "Team Roles",
+          "status": "built"
+        },
+        {
+          "name": "Version Control",
+          "status": "built"
+        },
+        {
+          "name": "Activity Logs",
+          "status": "built"
+        },
+        {
+          "name": "Task Assignment",
+          "status": "built"
+        },
+        {
+          "name": "Approval Workflow",
+          "status": "built"
+        },
+        {
+          "name": "Comments & Reviews",
+          "status": "built"
+        },
+        {
+          "name": "Workflow Automation",
+          "status": "built"
+        }
+      ]
+    },
+    {
+      "name": "Engineering Decision Support",
+      "features": [
+        {
+          "name": "Construction Timeline",
+          "status": "built"
+        },
+        {
+          "name": "Labour Planning",
+          "status": "built"
+        },
+        {
+          "name": "Equipment Planning",
+          "status": "built"
+        },
+        {
+          "name": "Utility Network Planning",
+          "status": "built"
+        }
+      ]
+    }
+  ],
+  "12": [
+    {
+      "name": "BIM Readiness",
+      "features": [
+        {
+          "name": "IFC Export",
+          "status": "built"
+        },
+        {
+          "name": "DWG Export",
+          "status": "built"
+        },
+        {
+          "name": "DXF Export",
+          "status": "built"
+        },
+        {
+          "name": "Revit Compatibility",
+          "status": "built"
+        },
+        {
+          "name": "AutoCAD Compatibility",
+          "status": "built"
+        }
+      ]
+    },
+    {
+      "name": "Digital Twin Preparation",
+      "features": [
+        {
+          "name": "IoT Readiness",
+          "status": "built"
+        },
+        {
+          "name": "Smart Sensor Integration",
+          "status": "built"
+        },
+        {
+          "name": "Progress Tracking",
+          "status": "built"
+        },
+        {
+          "name": "Quality Monitoring",
+          "status": "built"
+        },
+        {
+          "name": "Safety Monitoring",
+          "status": "built"
+        },
+        {
+          "name": "Delay Prediction",
+          "status": "built"
+        },
+        {
+          "name": "Predictive Maintenance",
+          "status": "built"
+        },
+        {
+          "name": "Facility Management",
+          "status": "built"
+        }
+      ]
+    }
+  ],
+  "13": [
+    {
+      "name": "AI Operating System",
+      "features": [
+        {
+          "name": "AI Engineering Copilot",
+          "status": "built"
+        },
+        {
+          "name": "AI Engineering Consultant",
+          "status": "built"
+        },
+        {
+          "name": "Engineering Knowledge Graph",
+          "status": "built"
+        },
+        {
+          "name": "Engineering Memory",
+          "status": "built"
+        },
+        {
+          "name": "Engineering Decision Log",
+          "status": "built"
+        },
+        {
+          "name": "Explainable AI",
+          "status": "built"
+        }
+      ]
+    },
+    {
+      "name": "Intelligent Planning",
+      "features": [
+        {
+          "name": "One-Click Project Generation",
+          "status": "built"
+        },
+        {
+          "name": "AI Layout Generator",
+          "status": "built"
+        },
+        {
+          "name": "AI Township Planner",
+          "status": "built"
+        },
+        {
+          "name": "Mixed-Use Development Planning",
+          "status": "built"
+        },
+        {
+          "name": "Apartment Capacity Prediction",
+          "status": "built"
+        },
+        {
+          "name": "Land Suitability Analysis",
+          "status": "built"
+        },
+        {
+          "name": "Smart Building Recommendations",
+          "status": "built"
+        }
+      ]
+    },
+    {
+      "name": "GIS & Urban Intelligence",
+      "features": [
+        {
+          "name": "City Growth Prediction",
+          "status": "built"
+        },
+        {
+          "name": "Land Value Prediction",
+          "status": "built"
+        },
+        {
+          "name": "Infrastructure Growth Prediction",
+          "status": "built"
+        },
+        {
+          "name": "Climate Analysis",
+          "status": "built"
+        },
+        {
+          "name": "Disaster Risk Analysis",
+          "status": "built"
+        },
+        {
+          "name": "Earthquake Analysis",
+          "status": "built"
+        },
+        {
+          "name": "Flood Analysis",
+          "status": "built"
+        },
+        {
+          "name": "Wind Analysis",
+          "status": "built"
+        },
+        {
+          "name": "Noise & Pollution Analysis",
+          "status": "built"
+        }
+      ]
+    },
+    {
+      "name": "Smart Procurement",
+      "features": [
+        {
+          "name": "Live Material Prices",
+          "status": "built"
+        },
+        {
+          "name": "Material Price Forecasting",
+          "status": "built"
+        },
+        {
+          "name": "Supplier Intelligence",
+          "status": "built"
+        },
+        {
+          "name": "Procurement Calendar",
+          "status": "built"
+        },
+        {
+          "name": "Inventory Planning",
+          "status": "built"
+        }
+      ]
+    },
+    {
+      "name": "Financial Intelligence",
+      "features": [
+        {
+          "name": "Cash Flow Planning",
+          "status": "built"
+        },
+        {
+          "name": "Lifecycle Cost Analysis",
+          "status": "built"
+        },
+        {
+          "name": "Investment Analysis",
+          "status": "built"
+        },
+        {
+          "name": "ROI Forecasting",
+          "status": "built"
+        },
+        {
+          "name": "Profitability Dashboard",
+          "status": "built"
+        }
+      ]
+    },
+    {
+      "name": "Sustainability",
+      "features": [
+        {
+          "name": "Green Building Planner",
+          "status": "built"
+        },
+        {
+          "name": "Carbon Emission Calculator",
+          "status": "built"
+        },
+        {
+          "name": "Solar Energy Planning",
+          "status": "built"
+        },
+        {
+          "name": "Water Conservation Analysis",
+          "status": "built"
+        },
+        {
+          "name": "ESG Reporting",
+          "status": "built"
+        }
+      ]
+    },
+    {
+      "name": "Construction Intelligence",
+      "features": [
+        {
+          "name": "Construction Timeline Optimisation",
+          "status": "built"
+        },
+        {
+          "name": "Resource Allocation",
+          "status": "built"
+        },
+        {
+          "name": "Labour Optimisation",
+          "status": "built"
+        },
+        {
+          "name": "Equipment Scheduling",
+          "status": "built"
+        },
+        {
+          "name": "Construction Delay Prediction",
+          "status": "built"
+        },
+        {
+          "name": "Risk Prediction",
+          "status": "built"
+        }
+      ]
+    },
+    {
+      "name": "Reports & Decision Support",
+      "features": [
+        {
+          "name": "AI Report Writer",
+          "status": "built"
+        },
+        {
+          "name": "Executive Dashboards",
+          "status": "built"
+        },
+        {
+          "name": "Interactive Analytics",
+          "status": "built"
+        },
+        {
+          "name": "Decision Sandbox",
+          "status": "built"
+        },
+        {
+          "name": "Scenario Simulation",
+          "status": "built"
+        },
+        {
+          "name": "Engineering Benchmarking",
+          "status": "built"
+        }
+      ]
+    }
+  ],
+  "14": [
+    {
+      "name": "Marketplace & Ecosystem",
+      "features": [
+        {
+          "name": "Engineering Marketplace",
+          "status": "built"
+        },
+        {
+          "name": "Plugin Marketplace",
+          "status": "built"
+        },
+        {
+          "name": "API Marketplace",
+          "status": "built"
+        },
+        {
+          "name": "Educational Mode",
+          "status": "built"
+        },
+        {
+          "name": "Government Approval Assistant",
+          "status": "built"
+        },
+        {
+          "name": "Tender Document Generator",
+          "status": "built"
+        }
+      ]
+    }
+  ],
+  "15": [
+    {
+      "name": "Autonomous AI Engineering",
+      "features": [
+        {
+          "name": "Conversational Project Design",
+          "status": "built"
+        },
+        {
+          "name": "Multi-Agent Engineering Teams",
+          "status": "built"
+        },
+        {
+          "name": "Autonomous Compliance Checking",
+          "status": "built"
+        },
+        {
+          "name": "Autonomous BOQ & Costing",
+          "status": "built"
+        },
+        {
+          "name": "AI Negotiation with Suppliers",
+          "status": "planned"
+        }
+      ]
+    },
+    {
+      "name": "Generative Design",
+      "features": [
+        {
+          "name": "AI-Generated 2D Floor Plans",
+          "status": "built"
+        },
+        {
+          "name": "AI-Generated 3D Building Concepts",
+          "status": "built"
+        },
+        {
+          "name": "Facade Design Suggestions",
+          "status": "built"
+        },
+        {
+          "name": "Landscape Design",
+          "status": "built"
+        },
+        {
+          "name": "Parking Layout Generation",
+          "status": "built"
+        }
+      ]
+    },
+    {
+      "name": "Smart City Platform",
+      "features": [
+        {
+          "name": "City-Scale Planning",
+          "status": "built"
+        },
+        {
+          "name": "Traffic Simulation",
+          "status": "built"
+        },
+        {
+          "name": "Utility Network Optimisation",
+          "status": "built"
+        },
+        {
+          "name": "Urban Digital Twin",
+          "status": "built"
+        },
+        {
+          "name": "Infrastructure Demand Forecasting",
+          "status": "built"
+        }
+      ]
+    },
+    {
+      "name": "XR & Robotics",
+      "features": [
+        {
+          "name": "AR Site Visualisation",
+          "status": "planned"
+        },
+        {
+          "name": "VR Project Walkthroughs",
+          "status": "planned"
+        },
+        {
+          "name": "Drone Survey Integration",
+          "status": "planned"
+        },
+        {
+          "name": "Robotics-Assisted Construction Planning",
+          "status": "planned"
+        }
+      ]
+    }
+  ]
+}

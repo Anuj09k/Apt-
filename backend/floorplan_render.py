@@ -511,12 +511,26 @@ def render_floorplan_image(
                 ax.plot([rx + rw, rx + rw], [ry + rh * 0.18, ry + rh * 0.82], color="#0284C7", linewidth=3.0, zorder=6)
                 ax.plot([rx + rw - 0.08, rx + rw - 0.08], [ry + rh * 0.18, ry + rh * 0.82], color="#38BDF8", linewidth=1.0, zorder=6)
 
-        # Doors and door swing arcs
+        # Doors and door swing arcs (Mindful and realistic placement on verified shared walls)
         target_name = r.get("door_to")
         main_entry = r.get("main_entrance") is True or r.get("service_access") is True
-        door_edge = None
+        door_info = None
+
         if main_entry:
             door_edge = r.get("entry_edge") or "S"
+            door_len = min(1.05, max(0.90, rw * 0.35 if door_edge in ("N", "S") else rh * 0.35))
+            if door_edge == "S":
+                hx, hy = rx + 0.35, ry + rh
+                door_info = ("S", hx, hy, door_len)
+            elif door_edge == "N":
+                hx, hy = rx + 0.35, ry
+                door_info = ("N", hx, hy, door_len)
+            elif door_edge == "E":
+                hx, hy = rx + rw, ry + 0.35
+                door_info = ("E", hx, hy, door_len)
+            elif door_edge == "W":
+                hx, hy = rx, ry + 0.35
+                door_info = ("W", hx, hy, door_len)
         elif target_name:
             target = next((
                 c for c in rooms
@@ -533,49 +547,86 @@ def render_floorplan_image(
                 tw = float(target.get("w", 3))
                 th = float(target.get("h", 3))
                 eps = 0.35
-                if abs((rx + rw) - tx) < eps:
-                    door_edge = "E"
-                elif abs(rx - (tx + tw)) < eps:
-                    door_edge = "W"
-                elif abs((ry + rh) - ty) < eps:
-                    door_edge = "S"
-                elif abs(ry - (ty + th)) < eps:
-                    door_edge = "N"
 
-        if door_edge:
-            door_len = min(0.95, rw * 0.45 if door_edge in ("N", "S") else rh * 0.45)
-            if door_edge == "S":
-                dx, dy = rx + rw * 0.5, ry + rh
-                ax.plot([dx, dx + door_len], [dy, dy], color="#FFFFFF", linewidth=3.0, zorder=6)
-                arc = Arc((dx, dy), door_len * 2, door_len * 2, angle=0, theta1=180, theta2=270, color="#475569", linewidth=1.0, linestyle="--", zorder=6)
+                x_overlap_start = max(rx, tx)
+                x_overlap_end = min(rx + rw, tx + tw)
+                x_overlap = x_overlap_end - x_overlap_start
+
+                y_overlap_start = max(ry, ty)
+                y_overlap_end = min(ry + rh, ty + th)
+                y_overlap = y_overlap_end - y_overlap_start
+
+                if x_overlap >= 0.75:
+                    door_len = min(0.90, max(0.75, x_overlap * 0.7))
+                    # Check South of r (touches target's North)
+                    if abs((ry + rh) - ty) < eps:
+                        hx = x_overlap_start + 0.25
+                        hy = ry + rh
+                        door_info = ("S", hx, hy, door_len)
+                    # Check North of r (touches target's South)
+                    elif abs(ry - (ty + th)) < eps:
+                        hx = x_overlap_start + 0.25
+                        hy = ry
+                        door_info = ("N", hx, hy, door_len)
+                if not door_info and y_overlap >= 0.75:
+                    door_len = min(0.90, max(0.75, y_overlap * 0.7))
+                    # Check East of r (touches target's West)
+                    if abs((rx + rw) - tx) < eps:
+                        hx = rx + rw
+                        hy = y_overlap_start + 0.25
+                        door_info = ("E", hx, hy, door_len)
+                    # Check West of r (touches target's East)
+                    elif abs(rx - (tx + tw)) < eps:
+                        hx = rx
+                        hy = y_overlap_start + 0.25
+                        door_info = ("W", hx, hy, door_len)
+
+        if door_info:
+            edge, dx, dy, dlen = door_info
+            if edge == "S":
+                # Opening along horizontal south wall
+                ax.plot([dx, dx + dlen], [dy, dy], color="#FFFFFF", linewidth=3.2, zorder=6)
+                # Door leaf swings into room r (North, -Y direction)
+                ax.plot([dx, dx], [dy, dy - dlen], color="#1E293B", linewidth=1.5, zorder=6)
+                # 90° arc connecting leaf to closed position
+                arc = Arc((dx, dy), dlen * 2, dlen * 2, angle=0, theta1=270, theta2=360, color="#475569", linewidth=1.0, linestyle="--", zorder=6)
                 ax.add_patch(arc)
-                ax.plot([dx, dx], [dy, dy - door_len], color="#1E293B", linewidth=1.5, zorder=6)
-            elif door_edge == "N":
-                dx, dy = rx + rw * 0.5, ry
-                ax.plot([dx, dx + door_len], [dy, dy], color="#FFFFFF", linewidth=3.0, zorder=6)
-                arc = Arc((dx, dy), door_len * 2, door_len * 2, angle=0, theta1=0, theta2=90, color="#475569", linewidth=1.0, linestyle="--", zorder=6)
+            elif edge == "N":
+                # Opening along horizontal north wall
+                ax.plot([dx, dx + dlen], [dy, dy], color="#FFFFFF", linewidth=3.2, zorder=6)
+                # Door leaf swings into room r (South, +Y direction)
+                ax.plot([dx, dx], [dy, dy + dlen], color="#1E293B", linewidth=1.5, zorder=6)
+                # 90° arc connecting closed position to leaf
+                arc = Arc((dx, dy), dlen * 2, dlen * 2, angle=0, theta1=0, theta2=90, color="#475569", linewidth=1.0, linestyle="--", zorder=6)
                 ax.add_patch(arc)
-                ax.plot([dx, dx], [dy, dy + door_len], color="#1E293B", linewidth=1.5, zorder=6)
-            elif door_edge == "E":
-                dx, dy = rx + rw, ry + rh * 0.5
-                ax.plot([dx, dx], [dy, dy + door_len], color="#FFFFFF", linewidth=3.0, zorder=6)
-                arc = Arc((dx, dy), door_len * 2, door_len * 2, angle=0, theta1=90, theta2=180, color="#475569", linewidth=1.0, linestyle="--", zorder=6)
+            elif edge == "E":
+                # Opening along vertical east wall
+                ax.plot([dx, dx], [dy, dy + dlen], color="#FFFFFF", linewidth=3.2, zorder=6)
+                # Door leaf swings into room r (West, -X direction)
+                ax.plot([dx - dlen, dx], [dy, dy], color="#1E293B", linewidth=1.5, zorder=6)
+                # 90° arc connecting closed position to leaf
+                arc = Arc((dx, dy), dlen * 2, dlen * 2, angle=0, theta1=90, theta2=180, color="#475569", linewidth=1.0, linestyle="--", zorder=6)
                 ax.add_patch(arc)
-                ax.plot([dx - door_len, dx], [dy, dy], color="#1E293B", linewidth=1.5, zorder=6)
-            elif door_edge == "W":
-                dx, dy = rx, ry + rh * 0.5
-                ax.plot([dx, dx], [dy, dy + door_len], color="#FFFFFF", linewidth=3.0, zorder=6)
-                arc = Arc((dx, dy), door_len * 2, door_len * 2, angle=0, theta1=270, theta2=360, color="#475569", linewidth=1.0, linestyle="--", zorder=6)
+            elif edge == "W":
+                # Opening along vertical west wall
+                ax.plot([dx, dx], [dy, dy + dlen], color="#FFFFFF", linewidth=3.2, zorder=6)
+                # Door leaf swings into room r (East, +X direction)
+                ax.plot([dx, dx + dlen], [dy, dy], color="#1E293B", linewidth=1.5, zorder=6)
+                # 90° arc connecting leaf to closed position
+                arc = Arc((dx, dy), dlen * 2, dlen * 2, angle=0, theta1=0, theta2=90, color="#475569", linewidth=1.0, linestyle="--", zorder=6)
                 ax.add_patch(arc)
-                ax.plot([dx + door_len, dx], [dy, dy], color="#1E293B", linewidth=1.5, zorder=6)
 
         # Translucent Architectural Room Name & Area Badge
         cx = rx + rw / 2.0
-        cy = ry + rh / 2.0
+        # For bedrooms, shift badge towards bottom/circulation area away from bed
+        if rtype == "bedroom" and rh >= 3.4:
+            cy = ry + rh * 0.72
+        else:
+            cy = ry + rh / 2.0
         min_dim = min(rw, rh)
 
         if min_dim >= 2.0:
-            badge_rw = min(max(rw * 0.65, 2.2), rw - 0.4)
+            badge_rw = min(max(rw * 0.65, 2.2), rw - 0.3, 4.5)
             badge_rh = 0.95
             badge = FancyBboxPatch(
                 (cx - badge_rw / 2.0, cy - badge_rh / 2.0), badge_rw, badge_rh,
@@ -586,9 +637,9 @@ def render_floorplan_image(
             ax.add_patch(badge)
             ax.text(cx, cy - 0.18, rname.upper(), ha="center", va="center", fontsize=7.2, fontweight="bold", color="#0F172A", family="sans-serif", zorder=8)
             ax.text(cx, cy + 0.18, f"{rw:.2f}m × {rh:.2f}m  ·  {area_sqm:.1f} m²", ha="center", va="center", fontsize=5.8, color="#475569", family="sans-serif", zorder=8)
-        elif min_dim >= 1.3:
-            badge_rw = min(rw - 0.2, 1.8)
-            badge_rh = 0.6
+        elif min_dim >= 1.2:
+            badge_rw = min(rw - 0.15, 2.2)
+            badge_rh = 0.62
             badge = FancyBboxPatch(
                 (cx - badge_rw / 2.0, cy - badge_rh / 2.0), badge_rw, badge_rh,
                 boxstyle="round,pad=0.03,rounding_size=0.08",
@@ -596,11 +647,12 @@ def render_floorplan_image(
                 linewidth=0.6, alpha=0.9, zorder=7
             )
             ax.add_patch(badge)
-            ax.text(cx, cy - 0.1, rname.upper(), ha="center", va="center", fontsize=5.8, fontweight="bold", color="#0F172A", family="sans-serif", zorder=8)
-            ax.text(cx, cy + 0.12, f"{area_sqm:.1f} m²", ha="center", va="center", fontsize=5.0, color="#64748B", family="sans-serif", zorder=8)
+            short_rname = rname.replace("Bathroom", "Bath").replace("Bedroom", "Bed").replace("Ensuite", "Ens.")
+            ax.text(cx, cy - 0.1, short_rname.upper(), ha="center", va="center", fontsize=5.4, fontweight="bold", color="#0F172A", family="sans-serif", zorder=8)
+            ax.text(cx, cy + 0.12, f"{area_sqm:.1f} m²", ha="center", va="center", fontsize=4.8, color="#64748B", family="sans-serif", zorder=8)
         else:
             short_name = rname[:6] + ".." if len(rname) > 7 else rname
-            ax.text(cx, cy, short_name.upper(), ha="center", va="center", fontsize=5.0, color="#0F172A", family="sans-serif", zorder=8)
+            ax.text(cx, cy, short_name.upper(), ha="center", va="center", fontsize=4.8, color="#0F172A", family="sans-serif", zorder=8)
 
     # -------------------------------------------------------------
     # Architectural Compass / North Arrow (Top Left)

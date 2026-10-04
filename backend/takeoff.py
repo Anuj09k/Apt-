@@ -65,7 +65,8 @@ def column_required_area(load_kn: float, fck: float, fy: float, steel_pct: float
 
 def beam_section(span_m: float, support: str = "simply supported") -> tuple:
     """(width, depth) in mm from the span/depth ratio for the support condition."""
-    divisor = 12.0 if support == "simply supported" else 15.0
+    norm_support = str(support or "simply supported").replace("_", " ").strip().lower()
+    divisor = 12.0 if norm_support == "simply supported" else 15.0
     d = max(math.ceil(span_m * 1000 / divisor / 25) * 25, 300)
     w = max(round(d / 2 / 25) * 25, 230)
     return float(w), float(d)
@@ -156,21 +157,33 @@ def beam_layout(bay_x: float, bay_y: float, bays_x: int, bays_y: int,
 def mix_proportions(grade: int, exposure_key: str, agg_mm: int) -> Dict[str, float]:
     """IS 10262:2019 proportioning -- kg of cement, sand and aggregate per m3."""
     exposure = C.EXPOSURE.get(exposure_key, C.EXPOSURE["moderate"])
-    wc = exposure["max_wc"]
-    water = C.MIX_WATER.get(agg_mm, 186)
+    wc = float(exposure["max_wc"])
+    water = float(C.MIX_WATER.get(agg_mm, 186))
+    cement_raw = max(water / wc, float(exposure["min_cement"]))
     cement = max(round(water / wc, 1), exposure["min_cement"])
-    if cement > water / wc:
-        wc = round(water / cement, 3)
-    ca_vol = round(C.MIX_CA_VOLUME.get(agg_mm, 0.62) + 0.01 * ((0.50 - wc) / 0.05), 3)
+    if cement_raw > water / wc:
+        wc_raw = water / cement_raw
+        wc = round(wc_raw, 3)
+    else:
+        wc_raw = wc
+    ca_vol_raw = C.MIX_CA_VOLUME.get(agg_mm, 0.62) + 0.01 * ((0.50 - wc_raw) / 0.05)
+    fa_vol_raw = 1.0 - ca_vol_raw
+    ca_vol = round(ca_vol_raw, 3)
     fa_vol = round(1 - ca_vol, 3)
     air = 0.02 if agg_mm == 10 else 0.01
+    vol_agg_raw = 1.0 - air - (cement_raw / (C.SG["cement"] * 1000.0)) - (water / 1000.0)
     vol_agg = 1 - air - (cement / (C.SG["cement"] * 1000)) - (water / 1000.0)
+    coarse_raw = vol_agg_raw * ca_vol_raw * C.SG["coarse"] * 1000.0
+    fine_raw = vol_agg_raw * fa_vol_raw * C.SG["fine"] * 1000.0
     return {
         "ca_volume_fraction": ca_vol,
         "fa_volume_fraction": fa_vol,
         "cement_kg": cement,
         "coarse_kg": round(vol_agg * ca_vol * C.SG["coarse"] * 1000, 1),
         "fine_kg": round(vol_agg * fa_vol * C.SG["fine"] * 1000, 1),
+        "cement_kg_raw": cement_raw,
+        "coarse_kg_raw": coarse_raw,
+        "fine_kg_raw": fine_raw,
         "water_l": float(water),
         "wc_ratio": wc,
         "target_strength": round(grade + 1.65 * C.MIX_STD_DEV.get(grade, 5.0), 2),
@@ -210,7 +223,7 @@ def structural_takeoff(project: Dict[str, Any], areas: Dict[str, Any]) -> Dict[s
     """
     if "towers" not in areas and isinstance(areas.get("areas"), dict):
         areas = areas["areas"]
-    e = {**{"grid_bay_x_m": 5.0, "grid_bay_y_m": 5.0, "slab_thickness_mm": 150,
+    e = {**{"grid_bay_x_m": 5.0, "grid_bay_y_m": 5.0, "slab_thickness_mm": 125,
             "beam_span_m": 5.0, "beam_support": "simply supported", "concrete_grade": 25,
             "steel_grade": 415, "column_steel_pct": 1.0, "exposure_condition": "moderate",
             "aggregate_size_mm": 20, "finishes_load_kn_sqm": 1.5},
@@ -262,7 +275,7 @@ def structural_takeoff(project: Dict[str, Any], areas: Dict[str, Any]) -> Dict[s
         col_c = cb * cd * clear_h * n_col * floors
         beam_c = g["beam_length_m"] * beam_w * max(beam_d - slab_t, 0.05) * floors
         slab_c = foot * slab_t * floors
-        core_c = (col_c + beam_c + slab_c) * CORE_CONCRETE_SHARE
+        core_c = math.fsum((col_c, beam_c, slab_c)) * CORE_CONCRETE_SHARE
 
         # Footings: service load on one column, spread at the soil's safe bearing capacity.
         col_service = service_per_sqm * trib * floors
@@ -285,9 +298,20 @@ def structural_takeoff(project: Dict[str, Any], areas: Dict[str, Any]) -> Dict[s
         fw_beam = g["beam_length_m"] * (2 * max(beam_d - slab_t, 0.05) + beam_w) * floors
         fw_col = 2 * (cb + cd) * clear_h * n_col * floors
 
-        concrete = col_c + beam_c + slab_c + core_c + found_c + pcc_c
-        steel = col_steel + beam_steel + slab_steel + core_steel + found_steel
-        formwork = fw_slab + fw_beam + fw_col
+        concrete = math.fsum((col_c, beam_c, slab_c, core_c, found_c, pcc_c))
+        steel = math.fsum((col_steel, beam_steel, slab_steel, core_steel, found_steel))
+        formwork = math.fsum((fw_slab, fw_beam, fw_col))
+
+        c_parts = {
+            "columns": round(col_c, 2),
+            "beams": round(beam_c, 2),
+            "slabs": round(slab_c, 2),
+            "cores_and_stairs": round(core_c, 2),
+            "footings": round(found_c, 2),
+            "pcc": round(pcc_c, 2),
+        }
+        concrete_sum = round(math.fsum(c_parts.values()), 2)
+        c_parts["total_m3"] = concrete_sum
 
         rows.append({
             "id": t.get("id"), "name": t.get("name"), "floors": floors,
@@ -297,23 +321,23 @@ def structural_takeoff(project: Dict[str, Any], areas: Dict[str, Any]) -> Dict[s
             "beam_section_mm": f"{int(beam_w_mm)} x {int(beam_d_mm)}",
             "slab_thickness_mm": round(slab_t * 1000),
             "footing_size_m": round(f_side, 2), "sbc_kn_sqm": sbc,
-            "concrete": {"columns": round(col_c, 2), "beams": round(beam_c, 2),
-                         "slabs": round(slab_c, 2), "cores_and_stairs": round(core_c, 2),
-                         "footings": round(found_c, 2), "pcc": round(pcc_c, 2),
-                         "total_m3": round(concrete, 2)},
+            "concrete": c_parts,
             "steel": {"columns": round(col_steel), "beams": round(beam_steel),
                       "slabs": round(slab_steel), "cores_and_stairs": round(core_steel),
                       "footings": round(found_steel), "total_kg": round(steel)},
             "formwork_sqm": round(formwork, 1),
             "ductile_detailing": ductile,
         })
-        tot["concrete_m3"] += concrete
+        tot["concrete_m3"] += concrete_sum
         tot["steel_kg"] += steel
         tot["formwork_sqm"] += formwork
 
     mix = mix_proportions(int(fck), e["exposure_condition"], int(e["aggregate_size_mm"]))
     vol = tot["concrete_m3"]
     builtup = float(areas.get("builtup_area_sqm") or 0)
+    cement_kg_raw = mix.get("cement_kg_raw", mix["cement_kg"]) * vol
+    fine_kg_raw = mix.get("fine_kg_raw", mix["fine_kg"]) * vol
+    coarse_kg_raw = mix.get("coarse_kg_raw", mix["coarse_kg"]) * vol
 
     return {
         "ok": True,
@@ -328,13 +352,25 @@ def structural_takeoff(project: Dict[str, Any], areas: Dict[str, Any]) -> Dict[s
             "concrete_m3": round(vol, 2),
             "steel_kg": round(tot["steel_kg"]),
             "formwork_sqm": round(tot["formwork_sqm"], 1),
-            "cement_kg": round(mix["cement_kg"] * vol),
-            "cement_bags": round(mix["cement_kg"] * vol / 50.0),
-            "sand_kg": round(mix["fine_kg"] * vol),
-            "sand_m3": round(mix["fine_kg"] * vol / 1600.0, 2),      # bulk density ~1600 kg/m3
-            "aggregate_kg": round(mix["coarse_kg"] * vol),
-            "aggregate_m3": round(mix["coarse_kg"] * vol / 1500.0, 2),
+            "cement_kg": round(cement_kg_raw),
+            "cement_bags": round(cement_kg_raw / 50.0),
+            "sand_kg": round(fine_kg_raw),
+            "sand_m3": round(fine_kg_raw / 1600.0, 2),      # bulk density ~1600 kg/m3
+            "aggregate_kg": round(coarse_kg_raw),
+            "aggregate_m3": round(coarse_kg_raw / 1500.0, 2),
             "water_l": round(mix["water_l"] * vol),
+        },
+        "totals_raw": {
+            "concrete_m3": vol,
+            "steel_kg": tot["steel_kg"],
+            "formwork_sqm": tot["formwork_sqm"],
+            "cement_kg": cement_kg_raw,
+            "cement_bags": cement_kg_raw / 50.0,
+            "sand_kg": fine_kg_raw,
+            "sand_m3": fine_kg_raw / 1600.0,
+            "aggregate_kg": coarse_kg_raw,
+            "aggregate_m3": coarse_kg_raw / 1500.0,
+            "water_l": mix["water_l"] * vol,
         },
         "mix_per_cum": mix,
         "warnings": _sanity(vol, tot["steel_kg"], builtup),

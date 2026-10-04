@@ -1,0 +1,511 @@
+=== User & Project Management (12) ===
+  - User Registration & Login
+  - Role-Based Access Control
+  - User Profiles
+  - Project Creation
+  - Project Dashboard
+  - Project Versioning
+  - Version Comparison
+  - Project Sharing
+  - Project Activity History
+  - Public Compliance Link
+  - Admin Console
+  - Autosave & Recompute
+
+=== Plot Management (10) ===
+  - Manual Plot Entry
+  - Polygon Plot Creation
+  - Plot Dimensions
+  - Plot Orientation
+  - Plot Boundary Editing
+  - Plot Area Calculation
+  - Road Access Definition
+  - Road-Edge Classification
+  - Coordinate (Lat/Lng) Entry
+  - Polygon Repair & Validation
+
+=== Apartment Planning (13) ===
+  - Apartment Type Selection
+  - Tower Planning
+  - Floor Planning
+  - Room Planning
+  - Corridor Planning
+  - Staircase Planning
+  - Lift Planning
+  - Balcony Planning
+  - Common Area Planning
+  - Unit Mix Definition
+  - Procedural Room Layout Generator
+  - Whole-Tower Floor Plate Generation
+  - Layout Validation & Retry
+
+=== Civil Engineering Calculations (11) ===
+  - Plot Area
+  - Carpet Area
+  - Built-up Area
+  - Super Built-up Area
+  - Ground Coverage
+  - FAR Calculation
+  - FSI Calculation
+  - Open Space Calculation
+  - Density Calculation
+  - Area Derivation Audit Trail
+  - FAR Derivation Breakdown
+
+=== Parking Planning (12) ===
+  - Basement Parking
+  - Ground Parking
+  - Visitor Parking
+  - EV Parking
+  - Accessible Parking
+  - Parking Capacity Calculator
+  - Parking Efficiency Analysis
+  - Ramp Planning
+  - Carpet-Band State-Aware Norms
+  - Per-Tower Demand & Supply
+  - Shared Site Parking Pool
+  - ECS Conversion
+
+=== Utility Planning (8) ===
+  - Water Demand
+  - Underground Tank
+  - Overhead Tank
+  - STP Planning
+  - WTP Planning
+  - Rainwater Harvesting
+  - Electrical Room
+  - Pump Room
+
+=== Quantity Estimation (14) ===
+  - Concrete
+  - Cement
+  - Steel
+  - Bricks/Blocks
+  - Sand
+  - Aggregate
+  - Tiles
+  - Paint
+  - Doors
+  - Windows
+  - Plumbing
+  - Electrical
+  - Waterproofing
+  - Finishing Materials
+
+=== BOQ (10) ===
+  - Automatic Bill of Quantities
+  - Material Summary
+  - Labour Summary
+  - Equipment Summary
+  - BOQ PDF Export
+  - BOQ Excel Export
+  - Structure-Derived Quantity Take-off
+  - Column & Beam Section Sizing
+  - Mix Proportion Derivation
+  - Take-off Sanity Checks
+
+=== Cost Estimation (13) ===
+  - Material Cost
+  - Labour Cost
+  - Equipment Cost
+  - Construction Cost
+  - Cost per Flat
+  - Cost per sq m
+  - Budget Summary
+  - Wastage Allowance
+  - Preliminaries
+  - Overhead & Profit
+  - Contingency
+  - Escalation
+  - GST
+
+=== Compliance Engine (12) ===
+  - FAR Validation
+  - FSI Validation
+  - Stair Width
+  - Corridor Width
+  - Lift Compliance
+  - Fire Exit Checks
+  - Accessibility Checks
+  - Setback Validation
+  - Height vs Road Width Rule
+  - Open Space vs Height Rule
+  - Clause-Referenced Results
+  - Compliance Margin Warnings
+
+=== Reports (11) ===
+  - BOQ Report
+  - Cost Report
+  - Quantity Report
+  - Parking Report
+  - Compliance Report
+  - Executive Summary
+  - PDF Export
+  - Per-Tower Report Sections
+  - Excel Workbook Export
+  - Tower Floor Plans PDF Report
+  - Floor Plan Image & ZIP Export
+
+=== GIS & Site Intelligence (25) ===
+  - OpenStreetMap Support
+  - GIS Coordinate Input
+  - Polygon Drawing
+  - Plot Boundary Detection
+  - Existing Building Detection
+  - Road Detection
+  - Road Width Detection
+  - Green Area Detection
+  - Water Body Detection
+  - Terrain Analysis
+  - Elevation Analysis
+  - Slope Analysis
+  - Flood Risk Analysis
+  - Wind Analysis
+  - Sun Path Analysis
+  - Solar Position & Sun Events
+  - Annual Insolation
+  - Solar Potential
+  - Transit Proximity Analysis
+  - Accessibility Analysis
+  - Site Suitability Score
+  - Infrastructure Analysis
+  - Buildability Analysis
+  - AI Site Analysis
+  - Overpass Feature Caching
+
+=== Development Controls & Setbacks (8) ===
+  - Per-Edge Inward Setback Application
+  - Setback Minimums from Plot Area
+  - Height-Driven Open Space Table
+  - Height vs Road Width Limit
+  - Recommended Controls Engine
+  - Setback Verification & Warnings
+  - Development Control Overrides
+  - Yield Recommendation
+
+=== Site Layout Engine (19) ===
+  - Buildable Envelope Generation
+  - Polygon Repair & Cleaning
+  - Local Tangent-Plane Projection
+  - Road Network Reservation
+  - Perimeter Ring Roads
+  - Internal Spine & Driveways
+  - Straight-Line Corridor Geometry
+  - Largest Inscribed Block Detection
+  - Amenity Block Placement
+  - Green & Open Space Reservation
+  - Greedy Grid Tower Packing
+  - Footprint & Rotation Sweep
+  - Inter-Tower Spacing Enforcement
+  - Tower Count & Height Caps
+  - Boundary Containment Guarantee
+  - Shared Fitness Scoring
+  - Layout Recommendation Endpoint
+  - Engine Versioning & Signatures
+  - Genetic Refinement of Placement
+
+=== Vastu & Generative Architecture (10) ===
+  - Vastu Sector Mapping
+  - Sector-Anchored Unit Packing
+  - Unit Programme Generation
+  - Vastu Audit per Unit
+  - MEP Position Audit
+  - Sector Report
+  - Vastu-Aligned Floor Plates
+  - Architectural Template Generation
+  - Plan Realism Check
+  - Room Aspect & Dimension Checks
+
+=== Programme & Scheduling (19) ===
+  - Activity Generation from Quantities
+  - CPM Forward & Backward Pass
+  - Critical Path Identification
+  - Total & Free Float
+  - Float Verification
+  - Work Calendar & Holidays
+  - Duration from Output Rates
+  - Crew Efficiency Modelling
+  - Wage Premium Modelling
+  - Prop Removal Safety Rules
+  - Schedule Safety Audit
+  - Scheduled Date Audit
+  - Task Overrides & Edits
+  - Target Date Solver
+  - Cash Flow Curve
+  - Resource Histogram
+  - Line of Balance
+  - Milestones
+  - Gantt Visualisation
+
+=== Development Finance (9) ===
+  - Saleable Area Derivation
+  - Revenue Model
+  - S-Curve Cost Spread
+  - Monthly Cash Flow
+  - NPV
+  - IRR
+  - Break-even Point
+  - Preliminaries per Month
+  - Finance Configuration
+
+=== Data Reliability & Assurance (15) ===
+  - Plot Data Check
+  - Development Controls Check
+  - Tower Data Check
+  - Site Layout Check
+  - GIS Data Check
+  - Parking Check
+  - Engineering Check
+  - Finance Check
+  - Programme Check
+  - Data Freshness Tracking
+  - Cross-Module Consistency Checks
+  - Compliance Margin Reporting
+  - Module Warning Rollup
+  - Overall Trust Score
+  - Data Health Report Export
+
+=== IS & NBC Code Intelligence (10) ===
+  - Central Code Constant Registry
+  - 74-Entry Clause Registry
+  - Clause Text Corpus Ingestion
+  - Clause Chunking & Indexing
+  - Semantic Clause Retrieval (RAG)
+  - Code Search Endpoint
+  - Code Question Answering
+  - Citation Extraction
+  - Citation Verification Against Registry
+  - Cited Extracts in Answers
+
+=== Engineering Modules (IS/NBC) (14) ===
+  - Structural Load Estimator (IS 875)
+  - Wind Force Coefficients (IS 875-3)
+  - Seismic Zone & Base Shear (IS 1893)
+  - Foundation Advisor (IS 6403/1904)
+  - Concrete Mix Design (IS 10262)
+  - Water Infrastructure (IS 1172)
+  - Storm Water & RWH (IS 3764)
+  - Parking Compliance (NBC/SP:21)
+  - Fire Safety Compliance (NBC Part 4)
+  - Accessibility Compliance (NBC Part 3)
+  - Green Building Preliminary Rating
+  - Column Grid Optimizer
+  - Embodied Carbon
+  - Plantation Plan
+
+=== 3D & Visualisation (12) ===
+  - 3D Site Model
+  - Tower Massing
+  - Road & Plot Rendering
+  - Amenity & Clubhouse Rendering
+  - Central Park & Landscape
+  - Floor Plate Viewer
+  - Site Diagrams
+  - Blueprint View
+  - Live Metrics Strip
+  - Command Palette
+  - Presentation-Grade Furnished 2D Blueprint Engine
+  - Structural Wall Poché & Dimension Badges
+
+=== AI Planner (5) ===
+  - Automatic Layout Generation
+  - Smart Tower Placement
+  - Apartment Mix Optimisation
+  - Floor Optimisation
+  - Open Space Optimisation
+
+=== AI Civil Engineer (5) ===
+  - Civil Design Suggestions
+  - FAR Optimisation
+  - FSI Optimisation
+  - Utility Optimisation
+  - Parking Optimisation
+
+=== AI Structural Advisor (4) ===
+  - Column Grid Suggestions
+  - Beam Layout Suggestions
+  - Foundation Recommendations
+  - Structural Risk Warnings
+
+=== AI Quantity Surveyor (5) ===
+  - Quantity Optimisation
+  - Waste Reduction
+  - Steel Cutting Optimisation
+  - Tile Waste Optimisation
+  - BOQ Optimisation
+
+=== AI Cost Engineer (5) ===
+  - Cost Prediction
+  - Budget Optimisation
+  - Cost Comparison
+  - Cost Saving Suggestions
+  - Grade Sweep Analysis
+
+=== AI Sustainability (5) ===
+  - Green Building Score
+  - Carbon Footprint
+  - Solar Potential
+  - Water Efficiency
+  - Tree Plantation Suggestions
+
+=== AI Business Consultant (4) ===
+  - ROI Analysis
+  - Profit Forecast
+  - Project Feasibility
+  - Break-even Analysis
+
+=== AI Recommendation Engine (4) ===
+  - Design Improvements
+  - Engineering Suggestions
+  - Cost Optimisation
+  - Material Recommendations
+
+=== APT: In-App AI Assistant (13) ===
+  - Project Q&A;
+  - Civil Engineering Guidance
+  - Report Explanation
+  - Scenario Comparison
+  - Streaming Responses
+  - Module-Aware Opening Questions
+  - Project State Context Builder
+  - Context & Analysis Caching
+  - Query Classification
+  - Capability Questions
+  - Chat Threads & History
+  - Citation Verification
+  - Provider Fallback & Retry
+
+=== Scenario Comparison (5) ===
+  - Compare Layouts
+  - Compare Costs
+  - Compare Parking
+  - Compare Sustainability
+  - Compare ROI
+
+=== Collaboration & Workflow (9) ===
+  - Multi-user Collaboration
+  - Project Sharing
+  - Team Roles
+  - Version Control
+  - Activity Logs
+  - Task Assignment
+  - Approval Workflow
+  - Comments & Reviews
+  - Workflow Automation
+
+=== Engineering Decision Support (4) ===
+  - Construction Timeline
+  - Labour Planning
+  - Equipment Planning
+  - Utility Network Planning
+
+=== BIM Readiness (5) ===
+  - IFC Export
+  - DWG Export
+  - DXF Export
+  - Revit Compatibility
+  - AutoCAD Compatibility
+
+=== Digital Twin Preparation (8) ===
+  - IoT Readiness
+  - Smart Sensor Integration
+  - Progress Tracking
+  - Quality Monitoring
+  - Safety Monitoring
+  - Delay Prediction
+  - Predictive Maintenance
+  - Facility Management
+
+=== AI Operating System (6) ===
+  - AI Engineering Copilot
+  - AI Engineering Consultant
+  - Engineering Knowledge Graph
+  - Engineering Memory
+  - Engineering Decision Log
+  - Explainable AI
+
+=== Intelligent Planning (7) ===
+  - One-Click Project Generation
+  - AI Layout Generator
+  - AI Township Planner
+  - Mixed-Use Development Planning
+  - Apartment Capacity Prediction
+  - Land Suitability Analysis
+  - Smart Building Recommendations
+
+=== GIS & Urban Intelligence (9) ===
+  - City Growth Prediction
+  - Land Value Prediction
+  - Infrastructure Growth Prediction
+  - Climate Analysis
+  - Disaster Risk Analysis
+  - Earthquake Analysis
+  - Flood Analysis
+  - Wind Analysis
+  - Noise & Pollution Analysis
+
+=== Smart Procurement (5) ===
+  - Live Material Prices
+  - Material Price Forecasting
+  - Supplier Intelligence
+  - Procurement Calendar
+  - Inventory Planning
+
+=== Financial Intelligence (5) ===
+  - Cash Flow Planning
+  - Lifecycle Cost Analysis
+  - Investment Analysis
+  - ROI Forecasting
+  - Profitability Dashboard
+
+=== Sustainability (5) ===
+  - Green Building Planner
+  - Carbon Emission Calculator
+  - Solar Energy Planning
+  - Water Conservation Analysis
+  - ESG Reporting
+
+=== Construction Intelligence (6) ===
+  - Construction Timeline Optimisation
+  - Resource Allocation
+  - Labour Optimisation
+  - Equipment Scheduling
+  - Construction Delay Prediction
+  - Risk Prediction
+
+=== Reports & Decision Support (6) ===
+  - AI Report Writer
+  - Executive Dashboards
+  - Interactive Analytics
+  - Decision Sandbox
+  - Scenario Simulation
+  - Engineering Benchmarking
+
+=== Marketplace & Ecosystem (6) ===
+  - Engineering Marketplace
+  - Plugin Marketplace
+  - API Marketplace
+  - Educational Mode
+  - Government Approval Assistant
+  - Tender Document Generator
+
+=== Autonomous AI Engineering (4) ===
+  - Conversational Project Design
+  - Multi-Agent Engineering Teams
+  - Autonomous Compliance Checking
+  - Autonomous BOQ & Costing
+
+=== Generative Design (5) ===
+  - AI-Generated 2D Floor Plans
+  - AI-Generated 3D Building Concepts
+  - Facade Design Suggestions
+  - Landscape Design
+  - Parking Layout Generation
+
+=== Smart City Platform (5) ===
+  - City-Scale Planning
+  - Traffic Simulation
+  - Utility Network Optimisation
+  - Urban Digital Twin
+  - Infrastructure Demand Forecasting
+

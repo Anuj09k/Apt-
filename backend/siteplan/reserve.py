@@ -214,6 +214,12 @@ def _rect(cx: float, cy: float, w: float, d: float, angle_deg: float) -> Polygon
     return translate(rotate(r, angle_deg, origin=(0, 0)), cx, cy)
 
 
+# An amenity further than this from the circulation network has no way in: a clubhouse in
+# the middle of the packable land serves nobody. Road access is therefore a constraint on
+# placement, not one more preference to trade off against spread or centrality.
+AMENITY_ROAD_REACH_M = 2.0
+
+
 def _place_one(region: BaseGeometry, roads: BaseGeometry, placed: Sequence[Polygon],
                w: float, d: float, target_sep: float,
                cfg: SiteLayoutConfig,
@@ -221,7 +227,10 @@ def _place_one(region: BaseGeometry, roads: BaseGeometry, placed: Sequence[Polyg
     """Best position for one w x d block inside `region`.
 
     Interior positions are scored for centrality, road access, low fragmentation,
-    separation from other amenities, and proximity to the shared green.
+    separation from other amenities, and proximity to the shared green. Positions further
+    than `AMENITY_ROAD_REACH_M` from the road network are tried only as a fallback, after
+    every road-served position has been rejected -- dispersion must never win by exiling a
+    block into the middle of the land.
     """
     step = max(3.0, min(w, d) / 2.0)
     candidates = _interior_candidates(region, step)
@@ -234,39 +243,46 @@ def _place_one(region: BaseGeometry, roads: BaseGeometry, placed: Sequence[Polyg
     have_roads = roads is not None and not roads.is_empty
 
     best: Optional[Polygon] = None
-    best_score = float("-inf")
-    for cx, cy, angle, target_x, target_y, centrality_radius in candidates:
-        for ww, dd in ((w, d), (d, w)):
-            rect = _rect(cx, cy, ww, dd, angle)
-            if not region.contains(rect):
-                continue
+    passes = (True, False) if have_roads else (False,)
+    for require_road in passes:
+        best = None
+        best_score = float("-inf")
+        for cx, cy, angle, target_x, target_y, centrality_radius in candidates:
+            for ww, dd in ((w, d), (d, w)):
+                rect = _rect(cx, cy, ww, dd, angle)
+                if not region.contains(rect):
+                    continue
+                if have_roads and require_road and rect.distance(roads) > AMENITY_ROAD_REACH_M:
+                    continue
 
-            parts = polygons_of(region.difference(rect.buffer(a.clearance)))
-            compactness = (parts[0].area / region_area) if parts else 0.0
+                parts = polygons_of(region.difference(rect.buffer(a.clearance)))
+                compactness = (parts[0].area / region_area) if parts else 0.0
 
-            if placed:
-                nearest = min(rect.distance(p) for p in placed)
-                spread = min(nearest / sep_scale, 1.0)
-            else:
-                spread = 1.0
+                if placed:
+                    nearest = min(rect.distance(p) for p in placed)
+                    spread = min(nearest / sep_scale, 1.0)
+                else:
+                    spread = 1.0
 
-            if have_roads:
-                road = 1.0 - min(rect.distance(roads) / sep_scale, 1.0)
-            else:
-                road = 1.0
+                if have_roads:
+                    road = 1.0 - min(rect.distance(roads) / sep_scale, 1.0)
+                else:
+                    road = 1.0
 
-            centre = rect.centroid
-            centrality = 1.0 - min(math.hypot(centre.x - target_x, centre.y - target_y)
-                                   / centrality_radius, 1.0)
-            green_access = (1.0 - min(rect.distance(green) / sep_scale, 1.0)
-                            if green is not None and not green.is_empty else 0.0)
-            score = (a.compactness_weight * compactness
-                     + a.spread_weight * spread
-                     + a.road_weight * road
-                     + a.centrality_weight * centrality
-                     + a.green_weight * green_access)
-            if score > best_score:
-                best_score, best = score, rect
+                centre = rect.centroid
+                centrality = 1.0 - min(math.hypot(centre.x - target_x, centre.y - target_y)
+                                       / centrality_radius, 1.0)
+                green_access = (1.0 - min(rect.distance(green) / sep_scale, 1.0)
+                                if green is not None and not green.is_empty else 0.0)
+                score = (a.compactness_weight * compactness
+                         + a.spread_weight * spread
+                         + a.road_weight * road
+                         + a.centrality_weight * centrality
+                         + a.green_weight * green_access)
+                if score > best_score:
+                    best_score, best = score, rect
+        if best is not None:
+            return best
     return best
 
 
