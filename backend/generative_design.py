@@ -106,9 +106,15 @@ def facade_options_ui(options: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     return out
 
 
+PERMEABILITY = {"Softscape": 0.9, "Water Feature / Eco-Drainage": 1.0, "Permeable Paving": 0.6,
+                "Active Recreation": 0.5, "Community Gathering": 0.2}
+
+
 def generate_landscape_zones(open_space_sqm: float) -> Dict[str, Any]:
     """Generates procedural landscape allocation for central parks and communal open space."""
-    area = max(float(open_space_sqm or 2500.0), 1000.0)
+    # The project's actual open space. It used to be floored at 1,000 m², which laid out a
+    # park larger than the site on small plots.
+    area = max(float(open_space_sqm or 0.0), 0.0)
     
     zones = [
         {
@@ -166,7 +172,8 @@ def generate_landscape_zones(open_space_sqm: float) -> Dict[str, Any]:
     return {
         "total_open_space_sqm": area,
         "softscape_pct": softscape_pct,
-        "permeability_index": 0.82,
+        # Area-weighted share of each surface that lets rain soak in.
+        "permeability_index": round(sum(z["share_pct"] / 100.0 * PERMEABILITY.get(z["type"], 0.5) for z in zones), 2),
         "zones": zones
     }
 

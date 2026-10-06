@@ -35,6 +35,8 @@ def city_scale_plan(project: Dict[str, Any], params: Optional[Dict[str, Any]] = 
     _, plot_area_sqm, unit_count, _ = _site_summary(project, default_plot_sqm=25000.0, default_units=192)
     city_tier = params.get("city_tier") or "Tier-1 Metro"
     master_plan_zone = params.get("master_plan_zone") or "R-2 (Medium-to-High Density Residential)"
+    permissible_dph = float(params.get("permissible_density_units_per_hectare") or 250)
+    proposed_dph = round(unit_count / max(0.01, plot_area_sqm / 10000.0), 1)
 
     land_use = [
         {"category": "Residential Footprints", "area_sqm": round(plot_area_sqm * 0.32, 1), "pct": 32.0},
@@ -51,14 +53,15 @@ def city_scale_plan(project: Dict[str, Any], params: Optional[Dict[str, Any]] = 
         "total_study_area_sqm": plot_area_sqm,
         "land_use_distribution": land_use,
         "density_guidelines": {
-            "permissible_density_units_per_hectare": 250,
-            "proposed_density_units_per_hectare": round(unit_count / max(0.01, plot_area_sqm / 10000.0), 1),
-            "compliance_status": "Within Master Plan Threshold",
+            "permissible_density_units_per_hectare": permissible_dph,
+            "proposed_density_units_per_hectare": proposed_dph,
+            "compliance_status": ("Within master plan density" if proposed_dph <= permissible_dph
+                                  else f"Exceeds the {permissible_dph:g} units/ha master plan density"),
         },
         "urban_fabric_metrics": {
-            "permeability_index": 0.68,
+            "permeability_index": None,
             "green_canopy_target_pct": 33.0,
-            "solar_corridor_adequacy": "Good (min 15m inter-tower separation)",
+            "solar_corridor_adequacy": "Not assessed - check tower separation on the site layout",
         }
     }
 
@@ -66,7 +69,7 @@ def city_scale_plan(project: Dict[str, Any], params: Optional[Dict[str, Any]] = 
 # --------------------------------------------------------------------------- 2. Traffic Simulation
 
 def simulate_traffic(project: Dict[str, Any], params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-    """Simulates trip generation, road Level of Service (LOS), and emergency vehicle turning radii."""
+    """Peak-hour trip generation and road level of service (a static estimate, not a micro-simulation)."""
     params = params or {}
     _, _, unit_count, road_width_m = _site_summary(project, default_plot_sqm=10000.0, default_units=240)
 
@@ -80,7 +83,10 @@ def simulate_traffic(project: Dict[str, Any], params: Optional[Dict[str, Any]] =
     # 2-lane divided: ~1800 PCU/hr; 4-lane: ~3600 PCU/hr
     lanes = 2 if road_width_m < 24.0 else 4
     capacity_pcu_per_hr = 1800 if lanes == 2 else 3600
-    volume_capacity_ratio = round(peak_pm_trips / capacity_pcu_per_hr, 2)
+    # The road already carries traffic; without a count only the project's own trips are
+    # tested, which flatters the result, so it is said in the output.
+    background = float(params.get("background_pcu_per_hr") or 0.0)
+    volume_capacity_ratio = round((peak_pm_trips + background) / capacity_pcu_per_hr, 2)
 
     # Level of Service (LOS) criteria (IRC:106)
     if volume_capacity_ratio <= 0.35:
@@ -96,13 +102,26 @@ def simulate_traffic(project: Dict[str, Any], params: Optional[Dict[str, Any]] =
     else:
         los = "F (Forced or Breakdown Flow)"
 
-    # Emergency turning radius check (fire tender requirement: min 9.0m turning radius, 6.0m clear roadway)
+    # Fire tender access (NBC 2016 Part 4: 6 m clear width, 9 m turning radius). The plan
+    # holds no measured internal road geometry, so this is a requirement to verify, never a
+    # pass the app cannot see.
+    provided_radius = params.get("provided_turning_radius_m")
+    provided_width = params.get("clear_access_width_m")
+    if provided_radius is None or provided_width is None:
+        fire_status = "NOT VERIFIED - measure the internal road on the site layout"
+    elif float(provided_radius) >= 9.0 and float(provided_width) >= 6.0:
+        fire_status = "PASS (NBC 2016 Part 4: 6 m clear, 9 m turning radius)"
+    else:
+        fire_status = "FAIL (NBC 2016 Part 4 needs 6 m clear width and a 9 m turning radius)"
     fire_tender_check = {
         "required_turning_radius_m": 9.0,
-        "provided_turning_radius_m": 10.5,
-        "clear_access_width_m": 6.0,
-        "status": "PASS (Compliant with NBC 2016 Part 4 Cl. 4.6)",
+        "provided_turning_radius_m": provided_radius,
+        "clear_access_width_m": provided_width,
+        "required_clear_width_m": 6.0,
+        "status": fire_status,
     }
+    # BPR link delay over a 200 m approach at 30 km/h free flow (24 s).
+    delay_s = round(24.0 * 0.15 * volume_capacity_ratio ** 4, 1)
 
     return {
         "ok": True,
@@ -116,8 +135,11 @@ def simulate_traffic(project: Dict[str, Any], params: Optional[Dict[str, Any]] =
         "level_of_service": {
             "volume_capacity_ratio": volume_capacity_ratio,
             "grade": los,
-            "traffic_delay_seconds_per_vehicle": round(12.0 + volume_capacity_ratio * 18.0, 1),
-            "queue_length_metres": round(volume_capacity_ratio * 45.0, 1),
+            "traffic_delay_seconds_per_vehicle": delay_s,
+            "queue_length_metres": None,
+            "background_pcu_per_hr": background,
+            "note": ("" if background else "No background traffic count entered: only the project's own trips "
+                     "are tested, so the real level of service will be worse."),
         },
         "emergency_vehicle_clearance": fire_tender_check,
         "recommendations": [
@@ -130,66 +152,59 @@ def simulate_traffic(project: Dict[str, Any], params: Optional[Dict[str, Any]] =
 # --------------------------------------------------------------------------- 3. Utility Network Optimisation
 
 def optimize_utility_network(project: Dict[str, Any]) -> Dict[str, Any]:
-    """Optimizes stormwater drainage, looped water supply, gravity sewerage, and electrical grid."""
-    _, plot_area_sqm, unit_count, _ = _site_summary(project, default_plot_sqm=10000.0, default_units=200)
-    towers = project.get("towers") or []
+    """Site utilities summarised from the Utilities module and the external network design.
 
-    # 1. Stormwater drainage (Rational formula Q = C * I * A / 360)
-    # C = 0.75 (weighted runoff coeff), I = 50 mm/hr (10-yr storm intensity)
-    runoff_m3_per_hr = round((0.75 * 50.0 * (plot_area_sqm / 10000.0) * 10.0), 1)
-    drain_diameter_mm = 450 if runoff_m3_per_hr < 500 else 600
-
-    stormwater = {
-        "peak_discharge_m3_per_hr": runoff_m3_per_hr,
-        "drain_profile": f"Reinforced concrete box culvert {drain_diameter_mm}mm dia",
-        "minimum_slope": "1 in 350 (gravity flow)",
-        "rwh_recharge_pits": max(2, int(plot_area_sqm // 1500)),
-        "annual_harvesting_potential_kl": round((plot_area_sqm * 0.85 * 0.85), 0),
-    }
-
-    # 2. Looped Water Distribution Network
-    daily_demand_kl = round(unit_count * 5 * 135 / 1000.0, 1)
-    water_network = {
-        "daily_water_demand_kl": daily_demand_kl,
-        "distribution_loop": "Closed ring main around perimeter",
-        "pipe_material": "Ductile Iron (DI K9) / HDPE PE100",
-        "primary_main_diameter_mm": 150,
-        "secondary_branch_diameter_mm": 100,
-        "residual_pressure_head_m": 18.0,  # > 12m minimum
-        "storage_breakdown": {
-            "raw_water_underground_kl": round(daily_demand_kl * 1.5, 1),
-            "treated_water_overhead_kl": round(daily_demand_kl * 0.75, 1),
-            "fire_reserve_dedicated_kl": 200.0,
-        }
-    }
-
-    # 3. Gravity Sewerage Network
-    sewage_gen_kl = round(daily_demand_kl * 0.85, 1)
-    sewer_network = {
-        "daily_sewage_generation_kl": sewage_gen_kl,
-        "stp_technology": "Sequential Batch Reactor (SBR) with tertiary ozonation",
-        "treated_effluent_reuse_kl": round(sewage_gen_kl * 0.70, 1),
-        "pipe_diameter_mm": 200,
-        "self_cleansing_velocity_m_s": 0.8,  # > 0.6 m/s
-        "invert_drop_total_m": round(plot_area_sqm ** 0.5 * 0.004, 2),
-    }
-
-    # 4. Electrical Grid & Substation
-    connected_load_kva = round(unit_count * 6.5 + (plot_area_sqm * 0.015), 0)
-    electrical_grid = {
-        "connected_load_kva": connected_load_kva,
-        "transformer_capacity": f"2 x {int(math.ceil(connected_load_kva / 2 / 250) * 250)} kVA Dry Type (11kV / 415V)",
-        "dg_backup_capacity_kva": round(connected_load_kva * 0.75, 0),
-        "cable_trench_depth_m": 1.2,
-        "solar_pv_rooftop_kwp": round(len(towers) * 25.0, 1),
-    }
-
+    This used to size everything a third time with its own constants (5 persons a home,
+    a fixed 200 mm sewer, 200 kL of fire storage), so three pages gave three answers.
+    """
+    import utility_network
+    try:
+        a = engine.analyse(project)
+    except Exception as exc:
+        return {"ok": False, "error": f"Project data incomplete: {exc}"}
+    u = a["utilities"]
+    net = utility_network.plan_utility_network(project, a)["summary"]
+    demand_kl = round(float(u.get("water_demand_lpd") or 0) / 1000.0, 1)
+    stp_kld = float(u.get("stp_capacity_kld") or 0)
+    connected_kw = float(u.get("connected_load_kw") or net.get("connected_load_kw") or 0)
     return {
         "ok": True,
-        "stormwater": stormwater,
-        "water_supply": water_network,
-        "sewerage": sewer_network,
-        "electrical": electrical_grid,
+        "data_source": "Utilities module + external network design",
+        "stormwater": {
+            "peak_discharge_m3_per_hr": round(float(net["peak_storm_runoff_lps"]) * 3.6, 1),
+            "drain_profile": f"Precast RCC box drain {net['storm_drain_size_mm']} mm (W x D)",
+            "minimum_slope": "1 in 300",
+            "rwh_recharge_pits": None,
+            "annual_harvesting_potential_kl": round(float(u.get("rwh_annual_litres") or 0) / 1000.0, 0),
+        },
+        "water_supply": {
+            "daily_water_demand_kl": demand_kl,
+            "distribution_loop": "Closed ring main around perimeter",
+            "pipe_material": "Ductile Iron (DI K9) / HDPE PE100",
+            "primary_main_diameter_mm": net["water_ring_dia_mm"],
+            "secondary_branch_diameter_mm": None,
+            "residual_pressure_head_m": 10.0,
+            "storage_breakdown": {
+                "raw_water_underground_kl": round(float(u.get("ug_tank_cum") or 0), 1),
+                "treated_water_overhead_kl": round(float(u.get("oh_tank_cum") or 0), 1),
+                "fire_reserve_dedicated_kl": None,
+            },
+        },
+        "sewerage": {
+            "daily_sewage_generation_kl": stp_kld,
+            "stp_technology": "Per Engineering > Water Infrastructure recommendation",
+            "treated_effluent_reuse_kl": round(stp_kld * 0.8, 1),
+            "pipe_diameter_mm": net["sewer_pipe_dia_mm"],
+            "self_cleansing_velocity_m_s": net.get("sewer_velocity_mps"),
+            "invert_drop_total_m": None,
+        },
+        "electrical": {
+            "connected_load_kva": round(connected_kw / 0.85, 0),
+            "transformer_capacity": f"{net['transformer_kva']} kVA (11 kV / 415 V)",
+            "dg_backup_capacity_kva": net["dg_backup_kva"],
+            "cable_trench_depth_m": 1.0,
+            "solar_pv_rooftop_kwp": None,
+        },
     }
 
 
@@ -200,28 +215,33 @@ def urban_digital_twin(project: Dict[str, Any]) -> Dict[str, Any]:
     _, plot_area_sqm, _, _ = _site_summary(project, default_plot_sqm=10000.0, default_units=200)
     towers = project.get("towers") or []
 
-    # Urban Heat Island (UHI) mitigation score based on albedo and vegetation
-    # High albedo roofs + landscaped central park + permeable pavers
-    uhi_reduction_celsius = 2.4
-    uhi_score = 84.0
-
+    import hashlib
+    try:
+        open_sqm = float(engine.area_metrics(project).get("open_space_sqm") or 0)
+    except Exception:
+        open_sqm = 0.0
+    key = str(project.get("_id") or project.get("name") or "proj")
     return {
         "ok": True,
-        "twin_id": f"TWIN-{hash(str(project.get('_id', 'proj'))) & 0xFFFF:04X}",
+        "data_source": "indicative",
+        "note": ("Microclimate values are indicative defaults, not a simulation of this site. "
+                 "Use the GIS module's sun-path and wind analysis for site figures."),
+        # hash() is salted per process, so the old id changed on every restart.
+        "twin_id": "TWIN-" + hashlib.sha1(key.encode("utf-8")).hexdigest()[:4].upper(),
         "spatial_resolution": "0.5m georeferenced mesh",
         "microclimate_simulation": {
             "annual_sun_exposure_hours": 2680,
             "shadow_corridor_impact": "Low (Tower separation exceeds 1.5x height envelope)",
             "mean_wind_tunnel_velocity_m_s": 3.2,
             "cross_ventilation_efficiency_pct": 78.5,
-            "urban_heat_island_score": uhi_score,
-            "estimated_local_cooling_effect": f"-{uhi_reduction_celsius}°C vs surrounding urban core",
+            "urban_heat_island_score": None,
+            "estimated_local_cooling_effect": "Not modelled",
         },
         "gis_boundary_layers": [
             {"layer": "Plot Cadastral Boundary", "entities": 1, "status": "Active"},
             {"layer": "Tower 3D Masses", "entities": len(towers), "status": "Active"},
-            {"layer": "Tree Canopy & Green Buffers", "entities": max(15, int(plot_area_sqm // 300)), "status": "Active"},
-            {"layer": "Underground Utility Corridors", "entities": 4, "status": "Active"},
+            {"layer": "Tree Canopy & Green Buffers", "entities": int(open_sqm // 80), "status": "Planned (1 tree / 80 m² open space)"},
+            {"layer": "Underground Utility Corridors", "entities": 4, "status": "Planned (water, sewer, storm, power)"},
         ]
     }
 
@@ -229,39 +249,53 @@ def urban_digital_twin(project: Dict[str, Any]) -> Dict[str, Any]:
 # --------------------------------------------------------------------------- 5. Infrastructure Demand Forecasting
 
 def forecast_infrastructure_demand(project: Dict[str, Any]) -> Dict[str, Any]:
-    """Generates multi-year civic infrastructure demand forecasts."""
-    _, _, unit_count, _ = _site_summary(project, default_plot_sqm=10000.0, default_units=200)
-    population = unit_count * 5
+    """Civic infrastructure demand of the scheme over time, from its own occupancy.
 
-    years = [2026, 2028, 2030, 2035, 2040]
+    Facility distances are only reported when the GIS module has measured them; the old
+    output stated a fire station at 3.2 km and a sewer main within 150 m for every site.
+    """
+    from datetime import date
+    try:
+        a = engine.analyse(project)
+    except Exception as exc:
+        return {"ok": False, "error": f"Project data incomplete: {exc}"}
+    ar, u, park = a["areas"], a["utilities"], a["parking"]
+    population = int(ar.get("occupants") or 0)
+    units = int(ar.get("total_units") or 0)
+    lpcd = float(u.get("lpcd") or 135.0)
+    base_kw = float(u.get("connected_load_kw") or 0)
+    ev_slots = int(park.get("ev_required") or 0)
+    year0 = date.today().year
     forecast_data = []
-
-    # Demand projections with efficiency improvements over time
-    for y in years:
-        water_per_capita = 135 if y == 2026 else 130 if y <= 2030 else 120
-        total_water_mld = round((population * water_per_capita) / 1e6, 3)
-        power_mva = round((unit_count * (6.5 if y == 2026 else 7.2 if y <= 2030 else 8.5)) / 1000.0, 2)
-        waste_tpd = round((population * 0.45) / 1000.0, 2)  # 450 g/capita/day
-
+    for offset in (0, 2, 4, 9, 14):
+        y = year0 + offset
+        # Assumptions, stated: per-capita water held at the design norm; electrical demand
+        # +2 %/yr; EV charging adoption ramps 10 %/yr of EV bays at 3.3 kW each.
+        adoption = min(1.0, 0.10 * (offset + 1))
         forecast_data.append({
             "year": y,
             "projected_population": population,
-            "water_demand_mld": total_water_mld,
-            "power_demand_mva": power_mva,
-            "solid_waste_tpd": waste_tpd,
-            "recycled_water_available_mld": round(total_water_mld * 0.70, 3),
-            "ev_charging_load_kw": (y - 2025) * 25,
+            "water_demand_mld": round(population * lpcd / 1e6, 4),
+            "power_demand_mva": round(base_kw * 0.7 * (1.02 ** offset) / 0.85 / 1000.0, 3),
+            "solid_waste_tpd": round(population * 0.45 / 1000.0, 2),
+            "recycled_water_available_mld": round(float(u.get("stp_capacity_kld") or 0) * 0.8 / 1000.0, 4),
+            "ev_charging_load_kw": round(ev_slots * adoption * 3.3, 1),
         })
-
+    gis = project.get("gis") or {}
+    transit = ((gis.get("features") or {}).get("transit") or [])
+    nearest_transit = min((t.get("distance_m") for t in transit if t.get("distance_m") is not None), default=None)
     return {
         "ok": True,
         "design_population": population,
-        "dwelling_units": unit_count,
+        "dwelling_units": units,
+        "assumptions": "Water at the design lpcd; power +2%/yr at 0.7 diversity; EV adoption +10%/yr at 3.3 kW per bay; waste 450 g/person/day.",
         "forecast_timeline": forecast_data,
         "civic_services_adequacy": {
-            "nearest_fire_station_km": 3.2,
-            "nearest_primary_health_centre_km": 1.5,
+            "nearest_fire_station_km": None,
+            "nearest_primary_health_centre_km": None,
+            "nearest_transit_km": round(nearest_transit / 1000.0, 2) if nearest_transit is not None else None,
             "primary_school_capacity_needed": round(population * 0.12),
-            "municipal_sewer_connection": "Gravity trunk main available within 150m",
-        }
+            "municipal_sewer_connection": "Not assessed - confirm with the local body",
+            "note": "Fire station and health centre distances are not measured by the GIS module (it maps roads, transit, green and water).",
+        },
     }

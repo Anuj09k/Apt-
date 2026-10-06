@@ -175,7 +175,7 @@ const URBAN_TAB_GROUPS = [
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <Metric label="Current Plot Value" value={inr(urbanData?.estimated_current_plot_value_inr)} />
             <Metric label="Base Land Rate" value={`₹${num(urbanData?.base_land_rate_inr_sqm)}/m²`} />
-            <Metric label="Projected 5-Yr CAGR" value={`${urbanData?.five_year_cagr_pct}%`} />
+            <Metric label="Projected 5-Yr CAGR" value={urbanData?.five_year_cagr_pct == null ? "Enter land cost" : `${urbanData.five_year_cagr_pct}% (assumed)`} />
             <Metric label="Infrastructure Capacity" value="ADEQUATE (94%)" />
           </div>
 
@@ -219,9 +219,9 @@ const URBAN_TAB_GROUPS = [
       {activeTab === "climate" && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Metric label="Composite Resilience Score" value={`${climateData?.composite_resilience_score}/100`} />
-            <Metric label="Rating" value={climateData?.resilience_rating} />
-            <Metric label="Annual Solar Irradiation" value={`${climateData?.annual_solar_irradiation_kwh_m2} kWh/m²`} />
+            <Metric label="Composite Resilience Score" value={climateData?.composite_resilience_score == null ? "—" : `${climateData.composite_resilience_score}/100`} />
+            <Metric label="Rating" value={climateData?.resilience_rating || "—"} />
+            <Metric label="Annual Solar Irradiation" value={climateData?.annual_solar_irradiation_kwh_m2 == null ? "See GIS sun path" : `${climateData.annual_solar_irradiation_kwh_m2} kWh/m²`} />
           </div>
 
           <Section title="Multi-Hazard Disaster Risk & Mitigation Analysis" desc="Comprehensive vulnerability assessment across seismic, flood, wind, and heat extremes">
@@ -279,11 +279,11 @@ const URBAN_TAB_GROUPS = [
                 <div className="grid grid-cols-2 gap-3 text-center">
                   <div className="rounded bg-white border border-slate-200 p-2.5 shadow-2xs">
                     <span className="text-slate-500 block text-[10px] font-medium">Ambient PM 2.5</span>
-                    <strong className="text-amber-800 text-lg font-bold font-mono">{noiseData?.air_quality_analysis?.ambient_pm25_ug_m3} µg/m³</strong>
+                    <strong className="text-amber-800 text-lg font-bold font-mono">{noiseData?.air_quality_analysis?.ambient_pm25_ug_m3 ?? "No station data"}{noiseData?.air_quality_analysis?.ambient_pm25_ug_m3 != null ? " µg/m³" : ""}</strong>
                   </div>
                   <div className="rounded bg-white border border-slate-200 p-2.5 shadow-2xs">
                     <span className="text-slate-500 block text-[10px] font-medium">Ambient PM 10</span>
-                    <strong className="text-amber-800 text-lg font-bold font-mono">{noiseData?.air_quality_analysis?.ambient_pm10_ug_m3} µg/m³</strong>
+                    <strong className="text-amber-800 text-lg font-bold font-mono">{noiseData?.air_quality_analysis?.ambient_pm10_ug_m3 ?? "No station data"}{noiseData?.air_quality_analysis?.ambient_pm10_ug_m3 != null ? " µg/m³" : ""}</strong>
                   </div>
                 </div>
                 <div>
@@ -321,8 +321,8 @@ const URBAN_TAB_GROUPS = [
             </div>
             <div className="flex items-center gap-4 text-xs text-slate-700">
               <span>Points: <strong className="text-slate-900 font-bold">{greenData?.total_points_achieved}</strong> / {greenData?.max_possible_points}</span>
-              <span>Energy Savings: <strong className="text-emerald-700 font-bold">{greenData?.estimated_energy_savings_pct}%</strong></span>
-              <span>Water Reduction: <strong className="text-teal-700 font-bold">{greenData?.estimated_potable_water_reduction_pct}%</strong></span>
+              <span>Energy Savings: <strong className="text-emerald-700 font-bold">{greenData?.estimated_energy_savings_pct ?? "—"}{greenData?.estimated_energy_savings_pct != null ? "%" : ""}</strong></span>
+              <span>Water Reduction: <strong className="text-teal-700 font-bold">{greenData?.estimated_potable_water_reduction_pct ?? "—"}{greenData?.estimated_potable_water_reduction_pct != null ? "%" : ""}</strong></span>
             </div>
           </div>
 
@@ -360,7 +360,7 @@ const URBAN_TAB_GROUPS = [
             <Metric label="Total Carbon Footprint" value={`${num(esgData?.carbon_accounting_tco2e?.total_footprint_tco2e)} tCO₂e`} />
             <Metric label="Carbon Intensity" value={`${esgData?.carbon_accounting_tco2e?.carbon_intensity_tco2e_per_m2} tCO₂e/m²`} />
             <Metric label="Worker Welfare" value="100% Compliant" />
-            <Metric label="ESG Rating" value={esgData?.esg_composite_rating || "AAA"} />
+            <Metric label="ESG Rating" value={esgData?.esg_composite_rating || "Not rated"} />
           </div>
 
           <Section title="Scope 1, 2, and 3 Greenhouse Gas Accounting" desc="Embodied and operational carbon breakdown conforming to GRI & BRSR standards">
@@ -441,11 +441,11 @@ const URBAN_TAB_GROUPS = [
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="rounded-lg bg-slate-50 border border-slate-200 p-3">
                 <span className="text-slate-500 block text-[11px] font-medium">Developer IRR</span>
-                <strong className="text-emerald-700 text-xl font-bold font-mono">{execKpis?.kpis?.project_internal_rate_of_return_irr_pct}%</strong>
+                <strong className="text-emerald-700 text-xl font-bold font-mono">{execKpis?.kpis?.project_internal_rate_of_return_irr_pct ?? "—"}{execKpis?.kpis?.project_internal_rate_of_return_irr_pct != null ? "%" : ""}</strong>
               </div>
               <div className="rounded-lg bg-slate-50 border border-slate-200 p-3">
                 <span className="text-slate-500 block text-[11px] font-medium">Equity Multiple</span>
-                <strong className="text-blue-700 text-xl font-bold font-mono">{execKpis?.kpis?.equity_multiple}x</strong>
+                <strong className="text-blue-700 text-xl font-bold font-mono">{execKpis?.kpis?.equity_multiple ?? "—"}{execKpis?.kpis?.equity_multiple != null ? "x" : ""}</strong>
               </div>
               <div className="rounded-lg bg-slate-50 border border-slate-200 p-3">
                 <span className="text-slate-500 block text-[11px] font-medium">Gross Development Value</span>
@@ -460,11 +460,11 @@ const URBAN_TAB_GROUPS = [
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2 text-slate-700">
               <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
                 <span className="text-slate-500 block text-[10px] font-medium">Statutory Clearance</span>
-                <span className="font-semibold text-emerald-700">{execKpis?.kpis?.statutory_clearance_index_pct}% Complete</span>
+                <span className="font-semibold text-emerald-700">{execKpis?.kpis?.statutory_clearance_index_pct ?? "—"}% of compliance rules pass</span>
               </div>
               <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
                 <span className="text-slate-500 block text-[10px] font-medium">Structural Safety Factor</span>
-                <span className="font-semibold text-blue-700">{execKpis?.kpis?.structural_safety_factor} (NBC Compliant)</span>
+                <span className="font-semibold text-blue-700">{execKpis?.kpis?.structural_safety_factor ?? "See Engineering module"}</span>
               </div>
               <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
                 <span className="text-slate-500 block text-[10px] font-medium">Green Building Target</span>
@@ -478,7 +478,7 @@ const URBAN_TAB_GROUPS = [
       {/* TAB 8: EQUIPMENT & DELAY RISK */}
       {activeTab === "equipment" && (
         <div className="space-y-6">
-          <Section title="Heavy Construction Equipment Fleet" desc="Machinery allocation and real-time site utilization">
+          <Section title="Heavy Construction Equipment Fleet" desc="Machinery from the BOQ (equipment-days) and delay risk from the programme simulation">
             <div className="overflow-x-auto rounded-lg border border-slate-200">
               <Table>
                 <TableHeader className="bg-slate-50 border-b border-slate-200">
@@ -521,7 +521,7 @@ const URBAN_TAB_GROUPS = [
             </div>
             <div className="mt-3 flex items-center justify-between text-xs text-slate-600 border-t border-slate-200 pt-3">
               <span>Total Recommended Float Buffer: <strong className="text-amber-800 font-bold font-mono">{equipmentData?.recommended_float_buffer_days} Days</strong></span>
-              <span>Schedule Confidence Index: <strong className="text-emerald-700 font-bold font-mono">{equipmentData?.schedule_confidence_index_pct}%</strong></span>
+              <span>Schedule Confidence Index: <strong className="text-emerald-700 font-bold font-mono">{equipmentData?.schedule_confidence_index_pct ?? "—"}{equipmentData?.schedule_confidence_index_pct != null ? "% on-time probability" : ""}</strong></span>
             </div>
           </Section>
         </div>

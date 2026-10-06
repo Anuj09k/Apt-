@@ -92,11 +92,11 @@ export default function SmartCityModule({ project, projectId }) {
               <span className="font-bold text-slate-900 flex items-center gap-1.5">
                 <Flame className="h-4 w-4 text-orange-600" /> Emergency Fire Tender Maneuverability
               </span>
-              <span className="text-emerald-700 font-bold">{traffic.emergency_vehicle_clearance?.status}</span>
+              <span className={`font-bold ${traffic.emergency_vehicle_clearance?.status?.startsWith("PASS") ? "text-emerald-700" : "text-amber-700"}`}>{traffic.emergency_vehicle_clearance?.status}</span>
             </div>
             <div className="mt-2 grid grid-cols-1 md:grid-cols-3 gap-3 text-slate-700">
               <div>Required Radius: <strong className="text-slate-900">{traffic.emergency_vehicle_clearance?.required_turning_radius_m}m</strong></div>
-              <div>Provided Radius: <strong className="text-slate-900">{traffic.emergency_vehicle_clearance?.provided_turning_radius_m}m</strong></div>
+              <div>Provided Radius: <strong className="text-slate-900">{traffic.emergency_vehicle_clearance?.provided_turning_radius_m ?? "not measured"}{traffic.emergency_vehicle_clearance?.provided_turning_radius_m != null ? "m" : ""}</strong></div>
               <div>Clear Roadway: <strong className="text-slate-900">{traffic.emergency_vehicle_clearance?.clear_access_width_m}m</strong></div>
             </div>
           </div>
@@ -132,7 +132,7 @@ export default function SmartCityModule({ project, projectId }) {
                 <li>Daily Demand: <strong className="text-slate-900">{utilities.water_supply?.daily_water_demand_kl} KLD</strong></li>
                 <li>Primary Main: <strong className="text-slate-900">{utilities.water_supply?.primary_main_diameter_mm}mm DI K9</strong></li>
                 <li>Pressure Head: <strong className="text-slate-900">{utilities.water_supply?.residual_pressure_head_m}m residual</strong></li>
-                <li>Fire Reserve: <strong className="text-slate-900">{utilities.water_supply?.storage_breakdown?.fire_reserve_dedicated_kl} KL</strong></li>
+                <li>Fire Reserve: <strong className="text-slate-900">{utilities.water_supply?.storage_breakdown?.fire_reserve_dedicated_kl ?? "see Engineering > Fire"}{utilities.water_supply?.storage_breakdown?.fire_reserve_dedicated_kl != null ? " KL" : ""}</strong></li>
               </ul>
             </div>
 
@@ -158,7 +158,7 @@ export default function SmartCityModule({ project, projectId }) {
                 <li>Connected Load: <strong className="text-slate-900">{num(utilities.electrical?.connected_load_kva)} kVA</strong></li>
                 <li>Transformer: <strong className="text-slate-900">{utilities.electrical?.transformer_capacity}</strong></li>
                 <li>DG Backup: <strong className="text-slate-900">{num(utilities.electrical?.dg_backup_capacity_kva)} kVA</strong></li>
-                <li>Solar PV: <strong className="text-slate-900">{utilities.electrical?.solar_pv_rooftop_kwp} kWp</strong></li>
+                <li>Solar PV: <strong className="text-slate-900">{utilities.electrical?.solar_pv_rooftop_kwp ?? "see Sustainability"}{utilities.electrical?.solar_pv_rooftop_kwp != null ? " kWp" : ""}</strong></li>
               </ul>
             </div>
           </div>
@@ -178,7 +178,7 @@ export default function SmartCityModule({ project, projectId }) {
                   <Sun className="h-4 w-4 text-amber-600" /> Microclimate & Heat Island Score
                 </span>
                 <span className="font-bold text-teal-700">
-                  UHI Score: {digitalTwin.microclimate_simulation?.urban_heat_island_score}/100
+                  UHI Score: {digitalTwin.microclimate_simulation?.urban_heat_island_score ?? "not modelled"}
                 </span>
               </div>
               <ul className="mt-3 space-y-2 text-slate-700">

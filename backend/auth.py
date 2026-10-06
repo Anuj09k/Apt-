@@ -21,8 +21,26 @@ def verify_password(plain: str, hashed: str) -> bool:
         return False
 
 
+DEV_ENVS = {"development", "dev", "local", "test"}
+_DEV_SECRET = "aptimizer-local-dev-jwt-secret-key-2026"
+
+
 def _secret() -> str:
-    return os.environ.get("JWT_SECRET") or "aptimizer-local-dev-jwt-secret-key-2026"
+    """The signing key. The built-in fallback is public (it is in this file), so it is only
+    ever used when ENV says this is a developer machine; anywhere else a missing
+    JWT_SECRET is a hard error rather than a server that signs forgeable tokens."""
+    secret = os.environ.get("JWT_SECRET")
+    if secret:
+        return secret
+    if (os.environ.get("ENV") or "").strip().lower() in DEV_ENVS:
+        return _DEV_SECRET
+    raise RuntimeError("JWT_SECRET is not set. Set it (e.g. `openssl rand -hex 32`) or set "
+                       "ENV=development for a local machine.")
+
+
+def check_secret() -> None:
+    """Called at startup so a misconfigured deployment fails on boot, not on first login."""
+    _secret()
 
 
 def create_access_token(user_id: str, email: str) -> str:

@@ -101,7 +101,7 @@ export default function AiOperatingSystemModule({ project, projectId }) {
               AI Civil Engineering Operating System
             </h1>
             <p className="text-sm text-slate-600 max-w-3xl">
-              Semantic engineering knowledge graph, persistent design memory, cryptographic decision auditing, and real-time what-if sandbox.
+              Semantic engineering knowledge graph, persistent design memory, hash-chained decision log, and engine-backed what-if sandbox.
             </p>
           </div>
           <Button variant="outline" size="sm" onClick={loadAllData} disabled={loading} className="gap-2 border-slate-300 text-slate-700 hover:bg-slate-50 hover:text-slate-900 font-medium">
@@ -142,10 +142,10 @@ export default function AiOperatingSystemModule({ project, projectId }) {
       {activeTab === "graph" && (
         <div className="space-y-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Metric label="Graph Nodes" value={graphData?.metrics?.total_nodes || 14} />
-            <Metric label="Semantic Links" value={graphData?.metrics?.total_relationships || 12} />
-            <Metric label="Governing Standards" value={graphData?.metrics?.governing_standards_count || 5} />
-            <Metric label="Graph Density" value={graphData?.metrics?.graph_density || "0.066"} />
+            <Metric label="Graph Nodes" value={graphData?.metrics?.total_nodes ?? "—"} />
+            <Metric label="Semantic Links" value={graphData?.metrics?.total_relationships ?? "—"} />
+            <Metric label="Governing Standards" value={graphData?.metrics?.governing_standards_count ?? "—"} />
+            <Metric label="Graph Density" value={graphData?.metrics?.graph_density ?? "—"} />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -192,13 +192,16 @@ export default function AiOperatingSystemModule({ project, projectId }) {
       {activeTab === "memory" && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Metric label="Episodes Logged" value={memoryData?.total_episodes || 4} />
-            <Metric label="Average Confidence" value={`${(memoryData?.memory_summary?.avg_confidence * 100 || 95).toFixed(0)}%`} />
-            <Metric label="Dominant Domain" value={memoryData?.memory_summary?.dominant_domain || "Structural"} />
+            <Metric label="Episodes Logged" value={memoryData?.total_episodes ?? 0} />
+            <Metric label="Source" value="Project activity log" />
+            <Metric label="Dominant Domain" value={memoryData?.memory_summary?.dominant_domain || "—"} />
           </div>
 
-          <Section title="Episodic Engineering Memory" desc="Contextual decisions, engineering trade-offs, and rationale logged over revisions">
+          <Section title="Episodic Engineering Memory" desc="What changed on this project, when and by whom - read from its activity log">
             <div className="space-y-4">
+              {memoryData?.episodes?.length === 0 && (
+                <div className="py-6 text-center text-xs text-muted-foreground">No recorded activity on this project yet.</div>
+              )}
               {memoryData?.episodes?.map((ep) => (
                 <div key={ep.id} className="rounded-lg border border-slate-200 bg-slate-50/70 p-4 text-xs space-y-2 shadow-xs">
                   <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-2">
@@ -209,7 +212,7 @@ export default function AiOperatingSystemModule({ project, projectId }) {
                     </div>
                     <div className="flex items-center gap-3 text-slate-600 text-[11px]">
                       <span>Author: <strong className="text-slate-900">{ep.author}</strong></span>
-                      <span>Confidence: <strong className="text-emerald-700">{Math.round(ep.confidence_score * 100)}%</strong></span>
+                      <span>{ep.timestamp ? new Date(ep.timestamp).toLocaleString() : ""}</span>
                     </div>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1 text-slate-800">
@@ -236,16 +239,16 @@ export default function AiOperatingSystemModule({ project, projectId }) {
             <div className="flex items-center gap-3">
               <CheckCircle2 className="h-5 w-5 text-emerald-700" />
               <div>
-                <div className="font-semibold text-emerald-950 text-sm">Cryptographically Verified Decision Log</div>
-                <div className="font-mono text-emerald-800 text-[11px]">{decisionLog?.audit_hash}</div>
+                <div className="font-semibold text-emerald-950 text-sm">Hash-Chained Decision Log</div>
+                <div className="font-mono text-emerald-800 text-[11px]">{decisionLog?.audit_hash || "No entries yet"}</div>
               </div>
             </div>
             <span className="rounded bg-emerald-100 border border-emerald-200 px-2.5 py-1 font-semibold text-emerald-900 text-xs">
-              {decisionLog?.all_approved ? "ALL 4 APPROVED" : "PENDING REVIEW"}
+              {`${decisionLog?.total_decisions ?? 0} recorded entries`}
             </span>
           </div>
 
-          <Section title="Immutable Engineering Decisions" desc="Audit trail of statutory, structural, MEP, and procurement commitments">
+          <Section title="Recorded Decisions" desc="Each entry's hash covers the one before it, so any later edit to the history breaks the chain">
             <div className="overflow-x-auto rounded-lg border border-slate-200">
               <Table>
                 <TableHeader className="bg-slate-50 border-b border-slate-200">
@@ -253,9 +256,9 @@ export default function AiOperatingSystemModule({ project, projectId }) {
                     <TableHead className="w-28 text-slate-700 font-semibold">Ref ID</TableHead>
                     <TableHead className="w-36 text-slate-700 font-semibold">Category</TableHead>
                     <TableHead className="text-slate-700 font-semibold">Decision</TableHead>
-                    <TableHead className="text-slate-700 font-semibold">Code Justification</TableHead>
-                    <TableHead className="w-40 text-slate-700 font-semibold">Agent Sign-Off</TableHead>
-                    <TableHead className="w-20 text-right text-slate-700 font-semibold">Conf.</TableHead>
+                    <TableHead className="text-slate-700 font-semibold">Detail</TableHead>
+                    <TableHead className="w-40 text-slate-700 font-semibold">By</TableHead>
+                    <TableHead className="w-28 text-right text-slate-700 font-semibold">Entry Hash</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -266,7 +269,7 @@ export default function AiOperatingSystemModule({ project, projectId }) {
                       <TableCell className="font-semibold text-slate-900">{dec.decision}</TableCell>
                       <TableCell className="text-slate-700">{dec.justification}</TableCell>
                       <TableCell className="text-slate-600">{dec.agent_signoff}</TableCell>
-                      <TableCell className="text-right font-semibold text-emerald-700 font-mono">{dec.confidence_pct}%</TableCell>
+                      <TableCell className="text-right font-mono text-[10px] text-slate-600">{dec.entry_hash}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -383,11 +386,11 @@ export default function AiOperatingSystemModule({ project, projectId }) {
       {activeTab === "benchmarks" && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Metric label="Efficiency Score" value={`${benchmarks?.overall_efficiency_score || 94.5}%`} />
-            <Metric label="Metrics Evaluated" value={benchmarks?.total_metrics_evaluated || 4} />
+            <Metric label="Efficiency Score" value={benchmarks?.overall_efficiency_score == null ? "—" : `${benchmarks.overall_efficiency_score}%`} />
+            <Metric label="Metrics Evaluated" value={benchmarks?.total_metrics_evaluated ?? 0} />
           </div>
 
-          <Section title="Comparative Benchmarking against CPWD Norms" desc="National civil engineering standards vs. current project consumption">
+          <Section title="Benchmarking against Typical Ranges" desc={benchmarks?.summary || "This project's take-off, circulation and cost against typical Indian residential ranges"}>
             <div className="overflow-x-auto rounded-lg border border-slate-200">
               <Table>
                 <TableHeader className="bg-slate-50 border-b border-slate-200">
@@ -395,9 +398,9 @@ export default function AiOperatingSystemModule({ project, projectId }) {
                     <TableHead className="text-slate-700 font-semibold">Engineering Metric</TableHead>
                     <TableHead className="text-slate-700 font-semibold">Unit</TableHead>
                     <TableHead className="text-right text-slate-700 font-semibold">Project Value</TableHead>
-                    <TableHead className="text-right text-slate-700 font-semibold">CPWD Norm</TableHead>
-                    <TableHead className="text-right text-slate-700 font-semibold">Industry P75</TableHead>
-                    <TableHead className="text-center text-slate-700 font-semibold">Variance</TableHead>
+                    <TableHead className="text-right text-slate-700 font-semibold">Typical Low</TableHead>
+                    <TableHead className="text-right text-slate-700 font-semibold">Typical High</TableHead>
+                    <TableHead className="text-center text-slate-700 font-semibold">Outside Range</TableHead>
                     <TableHead className="text-center text-slate-700 font-semibold">Status</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -407,13 +410,16 @@ export default function AiOperatingSystemModule({ project, projectId }) {
                       <TableCell className="font-semibold text-slate-900">{b.metric}</TableCell>
                       <TableCell className="text-slate-600 font-mono">{b.unit}</TableCell>
                       <TableCell className="text-right font-bold font-mono text-blue-700">{b.project_value}</TableCell>
-                      <TableCell className="text-right text-slate-700 font-mono">{b.cpwd_benchmark}</TableCell>
-                      <TableCell className="text-right text-slate-600 font-mono">{b.industry_p75}</TableCell>
-                      <TableCell className={`text-center font-semibold font-mono ${b.variance_pct <= 0 ? "text-emerald-700" : "text-amber-800"}`}>
-                        {b.variance_pct > 0 ? `+${b.variance_pct}%` : `${b.variance_pct}%`}
+                      <TableCell className="text-right text-slate-700 font-mono">{b.cpwd_benchmark ?? "—"}</TableCell>
+                      <TableCell className="text-right text-slate-600 font-mono">{b.industry_p75 ?? "—"}</TableCell>
+                      <TableCell className={`text-center font-semibold font-mono ${!b.variance_pct ? "text-emerald-700" : "text-amber-800"}`}>
+                        {b.variance_pct == null ? "—" : b.variance_pct > 0 ? `+${b.variance_pct}%` : `${b.variance_pct}%`}
                       </TableCell>
                       <TableCell className="text-center">
-                        <span className="rounded bg-emerald-100 border border-emerald-200 px-2 py-0.5 text-[10px] font-semibold text-emerald-800">
+                        <span className={`rounded border px-2 py-0.5 text-[10px] font-semibold ${
+                          b.status === "WITHIN RANGE" || b.status === "BELOW BENCHMARK"
+                            ? "bg-emerald-100 border-emerald-200 text-emerald-800"
+                            : "bg-amber-100 border-amber-200 text-amber-800"}`}>
                           {b.status}
                         </span>
                       </TableCell>

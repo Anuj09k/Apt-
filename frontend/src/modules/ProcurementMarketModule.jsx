@@ -101,7 +101,7 @@ const TAB_GROUPS = [
   {
     category: "Prices & Market",
     tabs: [
-      { id: "prices", label: "Live Prices", icon: TrendingUp },
+      { id: "prices", label: "Reference Prices", icon: TrendingUp },
       { id: "forecast", label: "Price Forecasting", icon: Calendar },
       { id: "marketplace", label: "Marketplace & APIs", icon: Package },
     ],
@@ -141,7 +141,7 @@ const TAB_GROUPS = [
               Smart Procurement & Ecosystem Platform
             </h1>
             <p className="text-sm text-slate-600 max-w-3xl">
-              Real-time material prices, price forecasting, JIT procurement calendars, vendor scorecards, tender documentation, and municipal approval dossiers.
+              Reference material prices, price trend model, programme-driven procurement calendar, vendor register, tender documentation, and approval dossiers.
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -206,7 +206,7 @@ const TAB_GROUPS = [
                   <TableRow>
                     <TableHead className="text-slate-700 font-semibold">Material Specification</TableHead>
                     <TableHead className="text-slate-700 font-semibold">Billing Unit</TableHead>
-                    <TableHead className="text-right text-slate-700 font-semibold">Live Rate (INR)</TableHead>
+                    <TableHead className="text-right text-slate-700 font-semibold">Reference Rate (INR)</TableHead>
                     <TableHead className="text-center text-slate-700 font-semibold">30-Day Trend</TableHead>
                     <TableHead className="text-center text-slate-700 font-semibold">Volatility</TableHead>
                   </TableRow>
@@ -265,7 +265,7 @@ const TAB_GROUPS = [
                       <TableCell className="text-right font-bold font-mono text-slate-900">₹{num(fc.projected_price)}</TableCell>
                       <TableCell className="text-right text-slate-600 font-mono">₹{num(fc.lower_bound)}</TableCell>
                       <TableCell className="text-right text-slate-600 font-mono">₹{num(fc.upper_bound)}</TableCell>
-                      <TableCell className="text-right font-semibold font-mono text-emerald-700">{fc.confidence_pct}%</TableCell>
+                      <TableCell className="text-right font-semibold font-mono text-slate-500">{fc.confidence_pct == null ? "model" : `${fc.confidence_pct}%`}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -281,7 +281,7 @@ const TAB_GROUPS = [
       {/* TAB 3: SUPPLIER INTELLIGENCE */}
       {activeTab === "suppliers" && (
         <div className="space-y-6">
-          <Section title="Pre-Qualified Vendor Scorecards" desc="Tier-1 verified manufacturers with delivery ratings and commercial credit terms">
+          <Section title="Vendor Register" desc={suppliersData?.note || "Ratings and delivery performance from the project's own purchase records"}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {suppliersData?.suppliers?.map((sup) => (
                 <div key={sup.id} className="rounded-xl border border-slate-200 bg-slate-50/70 p-4 text-xs space-y-3 shadow-xs">
@@ -297,15 +297,15 @@ const TAB_GROUPS = [
                   <div className="grid grid-cols-3 gap-2 text-center">
                     <div className="rounded bg-white border border-slate-200 p-2 shadow-2xs">
                       <span className="text-slate-500 block text-[10px] font-medium">Rating</span>
-                      <strong className="text-amber-700 text-sm">★ {sup.rating}</strong>
+                      <strong className="text-amber-700 text-sm">{sup.rating == null ? "—" : `★ ${sup.rating}`}</strong>
                     </div>
                     <div className="rounded bg-white border border-slate-200 p-2 shadow-2xs">
                       <span className="text-slate-500 block text-[10px] font-medium">On-Time Delivery</span>
-                      <strong className="text-emerald-700 text-sm">{sup.delivery_on_time_pct}%</strong>
+                      <strong className="text-emerald-700 text-sm">{sup.delivery_on_time_pct == null ? "—" : `${sup.delivery_on_time_pct}%`}</strong>
                     </div>
                     <div className="rounded bg-white border border-slate-200 p-2 shadow-2xs">
                       <span className="text-slate-500 block text-[10px] font-medium">Credit Terms</span>
-                      <strong className="text-slate-900 text-sm">{sup.credit_terms_days} Days</strong>
+                      <strong className="text-slate-900 text-sm">{sup.credit_terms_days == null ? "—" : `${sup.credit_terms_days} Days`}</strong>
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-1.5 pt-1">
@@ -325,7 +325,7 @@ const TAB_GROUPS = [
       {/* TAB 4: JIT CALENDAR */}
       {activeTab === "calendar" && (
         <div className="space-y-6">
-          <Section title="JIT Procurement Milestones" desc="Material delivery schedules synchronized with CPM slab pour and structural activities">
+          <Section title="Procurement Calendar" desc="Call-off orders set back from this project's programme by each supplier lead time">
             <div className="overflow-x-auto rounded-lg border border-slate-200">
               <Table>
                 <TableHeader className="bg-slate-50 border-b border-slate-200">
@@ -489,7 +489,7 @@ const TAB_GROUPS = [
       {/* TAB 8: MARKETPLACE & APIS */}
       {activeTab === "marketplace" && (
         <div className="space-y-6">
-          <Section title="Engineering Plugin Marketplace" desc="Certified third-party connectors for STAAD, ETABS, Revit, and Primavera">
+          <Section title="Engineering Plugin Marketplace" desc="Exports available today, and integrations that are planned">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {marketplace?.plugins?.map((plg) => (
                 <div key={plg.id} className="rounded-xl border border-slate-200 bg-white p-4 text-xs space-y-2 shadow-xs">
@@ -498,7 +498,7 @@ const TAB_GROUPS = [
                     <span className="rounded bg-blue-100 border border-blue-200 px-2 py-0.5 text-[10px] text-blue-800 font-medium">{plg.category}</span>
                   </div>
                   <div className="flex items-center justify-between text-slate-600 text-[11px]">
-                    <span>Rating: <strong className="text-amber-700">★ {plg.rating}</strong> ({plg.installs} installs)</span>
+                    <span>{plg.category}</span>
                     <span className="font-semibold text-emerald-700">{plg.price}</span>
                   </div>
                 </div>

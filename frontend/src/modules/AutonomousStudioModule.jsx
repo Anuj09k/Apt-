@@ -316,8 +316,10 @@ export default function AutonomousStudioModule({ project, projectId, onRefresh }
                 <div className="text-2xl font-black text-indigo-800">{agentReview.overall_engineering_score} / 100</div>
               </div>
               <div className="text-right text-xs text-slate-600">
-                <div>Certificate: <strong className="font-mono text-slate-900">{agentReview.sign_off_certificate?.certificate_hash}</strong></div>
-                <div className="text-emerald-700 font-semibold">✓ Multi-Agent Consensus Certified</div>
+                <div>Review ID: <strong className="font-mono text-slate-900">{agentReview.sign_off_certificate?.certificate_hash}</strong></div>
+                <div className={`font-semibold ${agentReview.team_consensus === "NO BLOCKING ISSUES" ? "text-emerald-700" : "text-amber-700"}`}>
+                  {agentReview.sign_off_certificate?.verdict}
+                </div>
               </div>
             </div>
 
@@ -394,7 +396,7 @@ export default function AutonomousStudioModule({ project, projectId, onRefresh }
                         <div className="text-[10px] text-slate-500">{c.clause}</div>
                       </TableCell>
                       <TableCell className="text-slate-700">{c.permissible} {c.unit}</TableCell>
-                      <TableCell className="text-slate-700">{c.achieved} {c.unit}</TableCell>
+                      <TableCell className="text-slate-700">{c.achieved ?? "not set"} {c.achieved != null ? c.unit : ""}</TableCell>
                       <TableCell>
                         <span
                           className={`rounded px-1.5 py-0.5 text-[10px] font-bold uppercase ${

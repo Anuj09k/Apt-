@@ -85,7 +85,12 @@ def tower_metrics(tower, cfg):
     # The core runs the full height of the tower; the homes run for the storeys they occupy.
     builtup = math.fsum((carpet, balcony)) * (1 + wall_factor) + service_core_per_floor * floors
     common_area = float(tower.get("common_area") or 0)
-    super_builtup = builtup * (1 + loading)
+    # Super built-up is each home's built-up area plus its share of the common areas, and
+    # the loading IS that share (core, lobbies, society amenities). It is applied to the
+    # homes only: applying it to a built-up that already contains the core, then adding the
+    # amenities on top, sold the common areas twice and put saleable area above what is built.
+    apartment_builtup = math.fsum((carpet, balcony)) * (1 + wall_factor)
+    super_builtup = apartment_builtup * (1 + loading)
 
     occupants = sum(int(u.get("count") or 0) * storeys_of(u, floors)
                     * OCCUPANCY_PER_UNIT.get(str(u.get("type", "custom")).lower(), 4)
@@ -107,6 +112,7 @@ def tower_metrics(tower, cfg):
         "balcony_sqm": balcony,
         "builtup_per_floor_sqm": builtup_per_floor,
         "builtup_sqm": builtup,
+        "apartment_builtup_sqm": apartment_builtup,
         "super_builtup_sqm": super_builtup,
         "service_core_per_floor_sqm": service_core_per_floor,
         "common_area_sqm": common_area,
@@ -132,7 +138,10 @@ def area_metrics(project):
     plot_area = max(float(pm.get("plot_area_sqm") or 0.0), 0.0)
     carpet = max(math.fsum(t["carpet_sqm"] for t in towers), 0.0)
     builtup = max(math.fsum(t["builtup_sqm"] for t in towers), 0.0)
-    super_builtup = max(math.fsum([*(t["super_builtup_sqm"] for t in towers), society_amenities_sqm]), 0.0)
+    super_builtup = max(math.fsum(t["super_builtup_sqm"] for t in towers), 0.0)
+    # Everything physically built that the loading distributes. Saleable area above it means
+    # the loading is selling area that does not exist.
+    constructed = builtup + society_amenities_sqm
     footprint = max(math.fsum(t["footprint_sqm"] for t in towers), 0.0)
     common = max(math.fsum([*(t["common_area_sqm"] for t in towers), society_amenities_sqm]), 0.0)
     units = max(sum(t["total_units"] for t in towers), 0)
@@ -151,6 +160,8 @@ def area_metrics(project):
         "carpet_area_sqm": carpet,
         "builtup_area_sqm": builtup,
         "super_builtup_area_sqm": super_builtup,
+        "constructed_area_sqm": constructed,
+        "super_builtup_exceeds_constructed": super_builtup > constructed + 0.01,
         "common_area_sqm": common,
         "society_amenities_sqm": society_amenities_sqm,
         "ground_footprint_sqm": footprint,
@@ -245,15 +256,17 @@ DEFAULT_RATIOS = {
     "electrical_points_per_unit": 35.0,
     "waterproofing_sqm_per_sqm": 0.25,
     "finishing_sqm_per_sqm": 1.10,
+    "formwork_sqm_per_sqm": 1.75,
 }
 
 MATERIAL_META = {
-    "concrete": ("Concrete (M25)", "m3", "concrete_m3_per_sqm", "area"),
+    "concrete": ("Concrete - batching, admixture, curing & pumping", "m3", "concrete_m3_per_sqm", "area"),
     "cement": ("Cement (OPC 53)", "bags", "cement_bags_per_sqm", "area"),
     "steel": ("Reinforcement Steel", "kg", "steel_kg_per_sqm", "area"),
     "bricks": ("Bricks / Blocks", "nos", "bricks_nos_per_sqm", "area"),
     "sand": ("Sand", "m3", "sand_m3_per_sqm", "area"),
     "aggregate": ("Coarse Aggregate", "m3", "aggregate_m3_per_sqm", "area"),
+    "formwork": ("Formwork / Shuttering (hire & consumables)", "m2", "formwork_sqm_per_sqm", "area"),
     "tiles": ("Floor & Wall Tiles", "m2", "tiles_sqm_per_sqm", "area"),
     "paint": ("Paint (2 coats)", "m2", "paint_sqm_per_sqm", "area"),
     "waterproofing": ("Waterproofing", "m2", "waterproofing_sqm_per_sqm", "area"),
@@ -264,8 +277,11 @@ MATERIAL_META = {
     "electrical_points": ("Electrical Points", "nos", "electrical_points_per_unit", "unit"),
 }
 
+# Concrete is billed as its constituents (cement, sand and aggregate, each on its own line)
+# plus what they do not cover. It used to carry a full ready-mix price of 6,500/m3 on top of
+# the constituents, which paid for the cement, sand and aggregate twice.
 DEFAULT_RATES = {
-    "concrete": 6500, "cement": 420, "steel": 72, "bricks": 9, "sand": 2200,
+    "concrete": 500, "formwork": 350, "cement": 420, "steel": 72, "bricks": 9, "sand": 2200,
     "aggregate": 1800, "tiles": 950, "paint": 180, "waterproofing": 550,
     "finishing": 1200, "doors": 9500, "windows": 7500,
     "plumbing_fixtures": 4500, "electrical_points": 850,
@@ -276,11 +292,16 @@ LABOUR_TRADES = [
     ("carpenter", "Carpenter / Shuttering", "concrete", 2.5, 1200),
     ("bar_bender", "Bar Bender", "steel", 350.0, 1150),
     ("concretor", "Concretor / Helper", "concrete", 3.0, 900),
+    ("plasterer", "Mason (plastering)", "paint", 10.0, 1100),
     ("tiler", "Tiler", "tiles", 12.0, 1100),
     ("painter", "Painter", "paint", 35.0, 950),
     ("plumber", "Plumber", "plumbing_fixtures", 2.0, 1200),
     ("electrician", "Electrician", "electrical_points", 8.0, 1200),
 ]
+
+HELPER_RATIO = {"mason": 1.5, "plasterer": 1.0, "carpenter": 1.0, "bar_bender": 1.0,
+                "tiler": 1.0, "painter": 0.5, "plumber": 0.5, "electrician": 0.5}
+HELPER_WAGE = 650
 
 EQUIPMENT = [
     ("mixer", "Concrete Mixer / Batching", "concrete", 12.0, 3500),
@@ -300,7 +321,28 @@ DERIVED_KEYS = {
     "cement": ("cement_bags", 1.0),
     "sand": ("sand_m3", 1.0),
     "aggregate": ("aggregate_m3", 1.0),
+    "formwork": ("formwork_sqm", 1.0),
 }
+
+# Cement-sand mortar the take-off's mix design does not see: brick joints and plaster.
+# CM 1:6 for both; 500 modular bricks per m3 of brickwork with 0.30 m3 dry mortar in it;
+# 12 mm plaster over the painted area, x1.27 wet-to-dry volume.
+MORTAR = {"bricks_per_m3": 500.0, "masonry_dry_m3_per_m3": 0.30, "plaster_thickness_m": 0.012,
+          "dry_factor": 1.27, "cement_parts": 1.0, "sand_parts": 6.0, "cement_density": 1440.0}
+
+
+def mortar_materials(bricks_nos, plaster_sqm):
+    """Cement (bags) and sand (m3) for masonry and plaster mortar."""
+    m = MORTAR
+    masonry_dry = bricks_nos / m["bricks_per_m3"] * m["masonry_dry_m3_per_m3"]
+    plaster_dry = plaster_sqm * m["plaster_thickness_m"] * m["dry_factor"]
+    parts = m["cement_parts"] + m["sand_parts"]
+    out = {}
+    for name, dry in (("masonry", masonry_dry), ("plaster", plaster_dry)):
+        out[name] = {"dry_mortar_m3": dry,
+                     "cement_bags": dry * m["cement_parts"] / parts * m["cement_density"] / 50.0,
+                     "sand_m3": dry * m["sand_parts"] / parts}
+    return out
 
 
 def quantities(project, areas, use_takeoff=True):
@@ -335,8 +377,20 @@ def quantities(project, areas, use_takeoff=True):
         rows.append({"key": key, "label": label, "unit": unit, "ratio_key": ratio_key,
                      "ratio": r, "basis": basis, "quantity": qty, "source": source})
 
+    # The take-off's cement and sand are the concrete's alone. Mortar for the brickwork and
+    # plaster is real material on the same lines, so it is added there. Ratio mode already
+    # folds it into its per-m2 cement and sand figures.
+    mortar = None
+    if derived:
+        by = {r["key"]: r for r in rows}
+        mortar = mortar_materials(by["bricks"]["quantity"], by["paint"]["quantity"])
+        for key, field in (("cement", "cement_bags"), ("sand", "sand_m3")):
+            by[key]["quantity"] += math.fsum(m[field] for m in mortar.values())
+            by[key]["source"] = "take-off + mortar"
+
     return {"ratios": ratios, "items": rows, "basis_area_sqm": area, "basis_units": units,
-            "takeoff": derived, "derived": bool(derived), "fallback_reason": fallback_reason}
+            "takeoff": derived, "derived": bool(derived), "fallback_reason": fallback_reason,
+            "mortar": mortar}
 
 
 # Site wastage, as a share of the delivered quantity. Cut-and-bend loss on steel, spillage
@@ -344,7 +398,7 @@ def quantities(project, areas, use_takeoff=True):
 # for but does not end up in the building.
 DEFAULT_WASTAGE_PCT = {
     "concrete": 2.0, "cement": 3.0, "steel": 3.0, "bricks": 5.0, "sand": 6.0,
-    "aggregate": 6.0, "tiles": 8.0, "paint": 5.0, "waterproofing": 5.0, "finishing": 5.0,
+    "aggregate": 6.0, "formwork": 0.0, "tiles": 8.0, "paint": 5.0, "waterproofing": 5.0, "finishing": 5.0,
     "doors": 0.0, "windows": 0.0, "plumbing_fixtures": 2.0, "electrical_points": 2.0,
 }
 
@@ -381,6 +435,13 @@ def boq(project, areas, qty):
         mandays = base_qty / output_per_day if output_per_day else 0
         labour.append({"key": key, "label": label, "unit": "man-days", "quantity": mandays,
                        "rate": wage, "amount": money_product(mandays, wage)})
+    # Skilled trades work with unskilled helpers (beldar / mazdoor) who carry, mix and
+    # clean up. Per skilled man-day, in the proportions a CPWD-style gang uses.
+    helper_days = math.fsum(l["quantity"] * HELPER_RATIO.get(l["key"], 0.0) for l in labour)
+    helper_wage = float(configured(project.get("labour_rates") or {}, "helper", HELPER_WAGE))
+    labour.append({"key": "helper", "label": "Unskilled helpers (beldar / mazdoor)", "unit": "man-days",
+                   "quantity": helper_days, "rate": helper_wage,
+                   "amount": money_product(helper_days, helper_wage)})
     labour_total = round(sum(l["amount"] for l in labour), 2)
 
     equipment = []
@@ -701,10 +762,10 @@ def far_derivation(project, areas):
     # "deducted" because that is what the code does -- these areas are never added.
     excluded = [
         {"item": "Society amenities", "area_sqm": areas.get("society_amenities_sqm", 0),
-         "reason": "Counted in super built-up, never in built-up, so it never enters FAR."},
+         "reason": "Recovered through the common-area loading, never in built-up, so it never enters FAR."},
         {"item": "Common-area loading",
          "area_sqm": round(sum(float(t.get("super_builtup_sqm") or 0)
-                               - float(t.get("builtup_sqm") or 0)
+                               - float(t.get("apartment_builtup_sqm") or 0)
                                for t in (areas.get("towers") or [])), 2),
          "reason": (f"The {loading:.0%} loading that turns built-up into super built-up is a "
                     "sales convention, not floor area, so FAR is measured before it.")},
@@ -816,7 +877,8 @@ def area_derivation(project, areas):
 
         walls_tower = math.fsum((carpet_tower, balcony_tower)) * wall_factor
         t_builtup = math.fsum((carpet_tower, balcony_tower)) * (1 + wall_factor) + core_floor * floors
-        t_super = t_builtup * (1 + loading)
+        t_apartment = math.fsum((carpet_tower, balcony_tower)) * (1 + wall_factor)
+        t_super = t_apartment * (1 + loading)
 
         total_corridor_sqm += corridor_floor * floors
         total_stairs_sqm += stair_floor * floors
@@ -844,13 +906,16 @@ def area_derivation(project, areas):
             "wall_allowance_floor_sqm": round(walls_floor, 2),
             "builtup_per_floor_sqm": round(builtup_floor, 2),
             "builtup_sqm": t_builtup,
+            "apartment_builtup_sqm": t_apartment,
             "super_builtup_sqm": t_super,
             "loading_factor": loading,
-            "loading_added_sqm": round(t_super - t_builtup, 2),
+            "loading_added_sqm": round(t_super - t_apartment, 2),
         })
 
     towers_builtup_total = math.fsum(t["builtup_sqm"] for t in tower_breakdowns)
     towers_super_total = math.fsum(t["super_builtup_sqm"] for t in tower_breakdowns)
+    towers_apartment_total = math.fsum(t["apartment_builtup_sqm"] for t in tower_breakdowns)
+    constructed_sqm = builtup_sqm + society_amenities_sqm
     implied_multiplier = round(super_builtup_sqm / builtup_sqm, 4) if builtup_sqm else 1.0
 
     return {
@@ -864,6 +929,8 @@ def area_derivation(project, areas):
             "society_amenities_sqm": society_amenities_sqm,
             "implied_multiplier": implied_multiplier,
             "implied_loading_pct": round((implied_multiplier - 1.0) * 100, 2),
+            "constructed_area_sqm": constructed_sqm,
+            "super_builtup_exceeds_constructed": super_builtup_sqm > constructed_sqm + 0.01,
         },
         "step_by_step_formulas": [
             {
@@ -896,31 +963,35 @@ def area_derivation(project, areas):
             },
             {
                 "step": 5,
-                "title": "Common Area Loading (Tower Level)",
-                "formula": f"Tower Built-up × (1 + {loading:.0%})",
-                "explanation": f"Commercial loading factor of {loading:.0%} applied to built-up area for common corridors, entrance lobbies, and tower services.",
-                "result": f"= {towers_super_total:,.2f} m² (across towers)",
+                "title": "Apartment Built-up",
+                "formula": f"(Carpet + Balcony) × {1 + wall_factor:g}",
+                "explanation": "Each home's own built-up area: carpet and balcony plus its walls, without the shared core.",
+                "result": f"= {towers_apartment_total:,.2f} m²",
             },
             {
                 "step": 6,
-                "title": "Society Amenities Add-On (Clubhouse, Pool, etc.)",
-                "formula": "Sum of stand-alone society amenities",
-                "explanation": "Shared community structures (Clubhouse, Gym, Swimming pool, etc.) that belong to all residents are added to the saleable pool.",
-                "result": f"+{society_amenities_sqm:,.2f} m²",
+                "title": "Common Area Loading",
+                "formula": f"Apartment Built-up × (1 + {loading:.0%})",
+                "explanation": (f"The {loading:.0%} loading is each home's share of everything shared: corridors, "
+                                "staircases, lifts, lobbies and the society amenities. Those areas are recovered "
+                                "through the loading, so they are not added a second time."),
+                "result": f"= {towers_super_total:,.2f} m²",
             },
             {
                 "step": 7,
                 "title": "Total Super Built-up Area (Saleable Area)",
-                "formula": "Towers Super Built-up + Society Amenities",
-                "explanation": f"{towers_super_total:,.2f} m² + {society_amenities_sqm:,.2f} m²",
+                "formula": "Sum of tower super built-up",
+                "explanation": "Under RERA the sale agreement must also state the carpet area; super built-up is the market convention.",
                 "result": f"= {super_builtup_sqm:,.2f} m²",
             },
             {
                 "step": 8,
-                "title": "Implied / Effective Multiplier Reconciled",
-                "formula": f"Total Super Built-up ÷ Total Built-up = {super_builtup_sqm:,.2f} ÷ {builtup_sqm:,.2f}",
-                "explanation": f"Notice this is {implied_multiplier:g}× (or {(implied_multiplier - 1.0) * 100:.2f}% total loading) instead of exactly {loading * 100:g}%. The difference ({((implied_multiplier - 1.0) - loading) * 100:.2f}%) is precisely the society amenities ({society_amenities_sqm} m²) distributed over the built-up area!",
-                "result": f"{implied_multiplier:g}×",
+                "title": "Check Against What Is Built",
+                "formula": f"Built-up {builtup_sqm:,.2f} + Amenities {society_amenities_sqm:,.2f} = {constructed_sqm:,.2f} m²",
+                "explanation": ("Saleable area is within the constructed area." if super_builtup_sqm <= constructed_sqm + 0.01 else
+                                f"Saleable area exceeds the constructed area by {super_builtup_sqm - constructed_sqm:,.2f} m² - "
+                                f"the {loading:.0%} loading is higher than the common areas it stands for."),
+                "result": f"{implied_multiplier:g}× built-up",
             },
         ],
         "towers": tower_breakdowns,

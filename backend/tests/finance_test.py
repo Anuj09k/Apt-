@@ -17,14 +17,13 @@ def base():
 
 
 def test_saleable_area_is_the_towers_only_never_the_clubhouse(base):
-    """Revenue is priced on the same area the client is sold -- which is the towers'
-    super built-up and NOT the society amenities. The engine folds the clubhouse into
-    super_builtup_area_sqm because it is built; pricing it would sell it twice."""
+    """Revenue is priced on the homes' super built-up. The clubhouse is recovered through
+    the common-area loading, so it is never priced again as a separate area."""
     _, a, r = base
     towers_only = sum(t["super_builtup_sqm"] for t in a["areas"]["towers"])
     assert r["saleable"]["total_sqft"] == pytest.approx(towers_only * F.SQFT_PER_SQM, rel=1e-6)
-    assert a["areas"]["society_amenities_sqm"] > 0        # there is something to exclude
-    assert towers_only < a["areas"]["super_builtup_area_sqm"]
+    assert a["areas"]["society_amenities_sqm"] > 0
+    assert towers_only == pytest.approx(a["areas"]["super_builtup_area_sqm"], rel=1e-9)
     assert r["saleable"]["total_units"] == a["areas"]["total_units"]
 
 

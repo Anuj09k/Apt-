@@ -93,13 +93,17 @@ def test_super_builtup_and_implied_multiplier():
     amenities = s["society_amenities_sqm"]
 
     assert total_tower_bu == pytest.approx(s["builtup_area_sqm"], 0.05)
+    # The loading applies to the homes' own built-up (carpet + balcony + walls), because
+    # the loading IS each home's share of the core and the amenities.
     for t in d["towers"]:
-        assert t["super_builtup_sqm"] == pytest.approx(t["builtup_sqm"] * (1 + loading), 0.05)
+        assert t["super_builtup_sqm"] == pytest.approx(t["apartment_builtup_sqm"] * (1 + loading), 0.05)
 
-    expected_total_super = total_tower_super + amenities
-    assert s["super_builtup_area_sqm"] == pytest.approx(expected_total_super, 0.05)
+    # Amenities are recovered through the loading, not added a second time.
+    assert s["super_builtup_area_sqm"] == pytest.approx(total_tower_super, 0.05)
+    assert amenities > 0
 
     expected_implied_mult = round(s["super_builtup_area_sqm"] / s["builtup_area_sqm"], 4)
     assert s["implied_multiplier"] == pytest.approx(expected_implied_mult, 0.0001)
-    # The implied multiplier exceeds base loading (1.25) due to society amenities
-    assert s["implied_multiplier"] > (1.0 + loading)
+    # What is sold never exceeds what is built.
+    assert s["super_builtup_area_sqm"] <= s["constructed_area_sqm"] + 0.01
+    assert s["super_builtup_exceeds_constructed"] is False

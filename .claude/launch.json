@@ -3,22 +3,42 @@
   "configurations": [
     {
       "name": "backend",
-      "runtimeExecutable": "D:/Sandisk Backup/Workspace/backend/venv/Scripts/python.exe",
+      "runtimeExecutable": "python",
       "runtimeArgs": [
-        "-m", "uvicorn", "server:app",
-        "--app-dir", "D:/Sandisk Backup/Workspace/backend",
+        "-m",
+        "uvicorn",
+        "server:app",
+        "--app-dir",
+        "C:/Users/Anuj1/OneDrive/Desktop/Apt--main/backend",
         "--reload",
-        "--reload-dir", "D:/Sandisk Backup/Workspace/backend",
-        "--host", "127.0.0.1",
-        "--port", "8000"
+        "--reload-dir",
+        "C:/Users/Anuj1/OneDrive/Desktop/Apt--main/backend",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "8000"
       ],
       "port": 8000
     },
     {
       "name": "frontend",
       "runtimeExecutable": "npm.cmd",
-      "runtimeArgs": ["--prefix", "D:/Sandisk Backup/Workspace/frontend", "start"],
+      "runtimeArgs": [
+        "--prefix",
+        "C:/Users/Anuj1/OneDrive/Desktop/Apt--main/frontend",
+        "start"
+      ],
       "port": 3000
+    },
+    {
+      "name": "frontend-prod",
+      "runtimeExecutable": "python",
+      "runtimeArgs": [
+        "C:/Users/Anuj1/AppData/Local/Temp/claude/C--Users-Anuj1-OneDrive-Desktop-Apt--main/224960c2-baac-4dc3-b858-868556fcd59c/scratchpad/spa_server.py",
+        "C:/Users/Anuj1/AppData/Local/Temp/claude/C--Users-Anuj1-OneDrive-Desktop-Apt--main/224960c2-baac-4dc3-b858-868556fcd59c/scratchpad/fe_prod",
+        "3001"
+      ],
+      "port": 3001
     }
   ]
 }

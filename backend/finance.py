@@ -194,10 +194,28 @@ def cash_flow(cfg: FinanceConfig, construction_cost: float, revenue: float,
     return rows, net
 
 
+IRR_MEANINGFUL_MAX_PCT = 100.0
+
+
 def analyse(project: Dict[str, Any], analysis: Dict[str, Any],
             config: Dict[str, Any] | None = None) -> Dict[str, Any]:
     """Full financial picture for a project the engine has already analysed."""
     cfg = FinanceConfig.from_dict(config)
+    # The build period drives the cost S-curve and the interest. Unless the user set one,
+    # it is the programme's own duration -- a fixed 30 months disagreed with the schedule
+    # the app had just computed for the same project.
+    months_source = "configured"
+    if "construction_months" not in (config or {}):
+        months_source = "default"
+        try:
+            import schedule as schedulelib
+            programme = schedulelib.plan_schedule(project, analysis, summary=True)
+            months = float(programme.get("duration_months") or 0)
+            if programme.get("ok", True) and months > 0:
+                cfg.construction_months = max(1, math.ceil(months))
+                months_source = "programme"
+        except Exception:
+            pass
     areas = analysis["areas"]
     sale = saleable_areas(project, areas)
 
@@ -236,8 +254,23 @@ def analyse(project: Dict[str, Any], analysis: Dict[str, Any],
 
     units = sale["total_units"] or 0
     revenue_per_unit = (gross_revenue / units) if units else 0.0
+
+    warnings = []
+    if cfg.land_cost <= 0:
+        warnings.append({"severity": "warning", "field": "land_cost",
+                         "text": "Land cost is not entered, so profit, ROI, NPV and IRR leave out the "
+                                 "largest cost of most Indian projects and will be overstated."})
+    if cfg.approval_cost <= 0:
+        warnings.append({"severity": "info", "field": "approval_cost",
+                         "text": "Approval and sanction costs are not entered."})
+    if irr_pct is not None and irr_pct > IRR_MEANINGFUL_MAX_PCT:
+        warnings.append({"severity": "warning", "field": "irr_pct",
+                         "text": f"IRR of {irr_pct:,.0f}% is not a meaningful return. It happens when "
+                                 "little money goes in before sales cash comes back (typically land "
+                                 "left at zero); judge the scheme on margin and NPV instead."})
     return {
         "ok": True,
+        "warnings": warnings,
         "config": cfg.to_dict(),
         "saleable": sale,
         "revenue": {
@@ -275,6 +308,7 @@ def analyse(project: Dict[str, Any], analysis: Dict[str, Any],
             "payback_month": payback,
             "peak_funding_need": round(abs(peak), 2),
             "construction_months": cfg.construction_months,
+            "construction_months_source": months_source,
         },
         "cash_flow": rows,
         "currency": analysis["cost"].get("currency", "INR"),

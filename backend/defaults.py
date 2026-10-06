@@ -20,6 +20,7 @@ def floor_layout_entry(tower, floor, nonce=0):
         "rooms": rooms,
         "validation": validation,
         "seed": nonce,
+        "planner_version": aifloorplan.PLANNER_VERSION,
         "unit_mix_hash": layoutlib.unit_mix_hash(tower),
         "generated_at": datetime.now(timezone.utc).isoformat(),
     }

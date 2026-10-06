@@ -307,13 +307,70 @@ def export_siteplan_dxf(project: Dict) -> bytes:
     return buf.getvalue().encode("utf-8")
 
 
-def export_siteplan_dwg(project: Dict) -> bytes:
-    """Export scheme as an AutoCAD R2018 CAD drawing stream.
-    
-    Uses standard AutoCAD R2018 DXF/DWG interchange format with complete layer definitions,
-    spatial coordinates, and block attributes readable by all AutoCAD releases (2000-2024).
+class DwgConverterUnavailable(RuntimeError):
+    """True DWG needs the ODA File Converter; without it only DXF can be written."""
+
+
+def find_odafc() -> str:
+    """Path to ODAFileConverter, or "" when it is not installed.
+
+    Looks at ODAFC_PATH first, then the Windows installer's versioned folders
+    (C:\\Program Files\\ODA\\ODAFileConverter 25.x.0\\), then PATH (the Linux .deb).
     """
-    return export_siteplan_dxf(project)
+    import glob
+    import os
+    import shutil
+    explicit = os.environ.get("ODAFC_PATH", "").strip()
+    if explicit and os.path.isfile(explicit):
+        return explicit
+    if os.name == "nt":
+        roots = [os.environ.get("ProgramFiles", r"C:\Program Files"), os.environ.get("ProgramFiles(x86)", "")]
+        hits = []
+        for root in filter(None, roots):
+            hits += glob.glob(os.path.join(root, "ODA", "ODAFileConverter*", "ODAFileConverter.exe"))
+        if hits:
+            return sorted(hits)[-1]          # newest version folder sorts last
+    return shutil.which("ODAFileConverter") or ""
+
+
+def _configure_odafc() -> None:
+    import ezdxf
+    path = find_odafc()
+    if path:
+        key = "win_exec_path" if __import__("os").name == "nt" else "unix_exec_path"
+        ezdxf.options.set("odafc-addon", key, path)
+
+
+def export_siteplan_dwg(project: Dict) -> bytes:
+    """A real AutoCAD R2018 DWG, converted from the DXF by the ODA File Converter.
+
+    DWG is a closed binary format that no Python library writes natively. This used to
+    return the DXF text under a .dwg name, which AutoCAD rejects as an invalid drawing. Now
+    it either produces a genuine DWG or raises DwgConverterUnavailable so the caller can
+    hand over the DXF honestly (AutoCAD, BricsCAD and Revit all open DXF directly).
+    """
+    import os
+    import tempfile
+    from ezdxf.addons import odafc
+    _configure_odafc()
+    if not odafc.is_installed():
+        raise DwgConverterUnavailable("ODA File Converter is not installed on the server.")
+    with tempfile.TemporaryDirectory() as tmp:
+        src = os.path.join(tmp, "siteplan.dxf")
+        dst = os.path.join(tmp, "siteplan.dwg")
+        with open(src, "wb") as fh:
+            fh.write(export_siteplan_dxf(project))
+        odafc.convert(src, dst, version="R2018", replace=True)
+        with open(dst, "rb") as fh:
+            return fh.read()
+
+
+def export_siteplan_cad(project: Dict) -> tuple:
+    """(bytes, "dwg") when a true DWG can be made, else (bytes, "dxf")."""
+    try:
+        return export_siteplan_dwg(project), "dwg"
+    except DwgConverterUnavailable:
+        return export_siteplan_dxf(project), "dxf"
 
 
 # --------------------------------------------------------------------------- IFC export

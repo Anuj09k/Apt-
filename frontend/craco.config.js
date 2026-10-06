@@ -76,6 +76,9 @@ let webpackConfig = {
       rules: {
         "react-hooks/rules-of-hooks": "error",
         "react-hooks/exhaustive-deps": "warn",
+        // An undefined identifier is a guaranteed runtime crash the moment that code runs
+        // (19 such calls once shipped in the Planning module), so it fails the build.
+        "no-undef": "error",
       },
     },
   },

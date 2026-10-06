@@ -93,7 +93,7 @@ export default function UtilitiesModule({ project, analysis, update, readOnly, p
                 {netSum.storm_drain_size_mm} mm
               </div>
               <div className="text-[10px] text-cyan-700 mt-0.5">
-                Peak: {num(netSum.peak_storm_runoff_lps, 1)} L/s (Q=10CIA)
+                Peak: {num(netSum.peak_storm_runoff_lps, 1)} L/s (Q = C·I·A / 360)
               </div>
             </div>
 

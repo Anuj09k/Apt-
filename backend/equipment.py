@@ -24,16 +24,27 @@ def plan_equipment(project: Dict[str, Any], boq: Optional[Dict[str, Any]] = None
     
     # Building height and floor metrics
     max_floors = max((int(t.get("floors") or 1) for t in towers), default=10)
-    floor_height_m = float(project.get("floor_height") or 3.0)
+    floor_height_m = max((float(t.get("floor_height") or t.get("floor_height_m") or 3.0) for t in towers), default=3.0)
     building_height_m = max_floors * floor_height_m
-    total_builtup_sqm = sum(float(t.get("builtup_sqm") or 0) for t in towers) or (num_towers * 5000.0)
+    # Built-up from the engine. Project towers carry no "builtup_sqm", so this used to fall
+    # back to 5,000 m² a tower for every project.
+    import engine
+    try:
+        total_builtup_sqm = float(engine.area_metrics(project)["builtup_area_sqm"]) or num_towers * 5000.0
+    except Exception:
+        total_builtup_sqm = num_towers * 5000.0
     
     # Excavation and concrete quantities
-    concrete_cum = float((boq or {}).get("concrete_cum") or (total_builtup_sqm * 0.42))
-    steel_mt = float((boq or {}).get("steel_mt") or (concrete_cum * 0.08))
-    
-    # Project duration in months (from programme or rule of thumb)
-    duration_days = float((programme or {}).get("total_duration_days") or (max_floors * 35 + 120))
+    # Quantities from the BOQ's take-off lines (the engine BOQ lists materials by key).
+    mats = {m.get("key"): m for m in ((boq or {}).get("materials") or [])}
+    concrete_cum = float((boq or {}).get("concrete_cum") or (mats.get("concrete") or {}).get("quantity")
+                         or (total_builtup_sqm * 0.42))
+    steel_mt = float((boq or {}).get("steel_mt") or ((mats.get("steel") or {}).get("quantity") or 0) / 1000.0
+                     or (concrete_cum * 0.08))
+
+    # Project duration from the programme (summary key duration_calendar_days).
+    duration_days = float((programme or {}).get("duration_calendar_days") or (programme or {}).get("total_duration_days")
+                          or (max_floors * 35 + 120))
     duration_months = max(round(duration_days / 30.0, 1), 6.0)
     superstructure_months = max(round((max_floors * 20) / 30.0, 1), 4.0)
     

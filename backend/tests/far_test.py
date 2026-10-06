@@ -76,8 +76,8 @@ def test_excluded_areas_are_real_figures_from_the_analysis(ctx):
     _, a, d = ctx
     by_item = {e["item"]: e["area_sqm"] for e in d["excluded"]}
     assert by_item["Society amenities"] == a["areas"]["society_amenities_sqm"]
-    # The loading gap is the difference between super built-up and built-up, tower by tower.
-    expected = sum(t["super_builtup_sqm"] - t["builtup_sqm"] for t in a["areas"]["towers"])
+    # The loading is what super built-up adds to the homes' own built-up, tower by tower.
+    expected = sum(t["super_builtup_sqm"] - t["apartment_builtup_sqm"] for t in a["areas"]["towers"])
     assert by_item["Common-area loading"] == pytest.approx(expected, abs=0.05)
 
 

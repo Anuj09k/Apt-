@@ -53,6 +53,14 @@ export default function DigitalTwinModule({ project, projectId }) {
   const qs = summary?.quality_safety;
   const fm = summary?.facility_management;
   const liveConc = sensors?.live_telemetry?.concrete_curing_maturity;
+  // Blocks without site records return labelled sample data; say so on screen.
+  const sampleBlocks = [
+    sensors?.registry?.data_source === "sample" && "device registry",
+    liveConc?.data_source === "sample" && "concrete maturity",
+    qs?.data_source === "sample" && "quality & safety",
+    fm?.data_source === "sample" && "facility management",
+  ].filter(Boolean);
+  const show = (v, suffix = "") => (v === null || v === undefined ? "—" : `${v}${suffix}`);
 
   return (
     <div className="space-y-6">
@@ -77,14 +85,25 @@ export default function DigitalTwinModule({ project, projectId }) {
         </div>
       </div>
 
+      {sampleBlocks.length > 0 && (
+        <div className="flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900">
+          <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5 text-amber-600" />
+          <span>
+            <strong>Sample data shown for: {sampleBlocks.join(", ")}.</strong> No site records or sensors are connected
+            to this project, so these panels are illustrative only and must not be used for site decisions.
+            Progress and delay figures are computed from this project's own programme.
+          </span>
+        </div>
+      )}
+
       {/* METRICS STRIP */}
       {prog && (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 md:grid-cols-5">
-          <Metric label="Physical Completion" value={`${prog.project_completion_pct}%`} hint={prog.schedule_status} />
-          <Metric label="Schedule Perf (SPI)" value={`${prog.earned_value_metrics?.schedule_performance_index_spi}`} hint="> 1.0 Ahead of Schedule" />
-          <Metric label="Cost Perf (CPI)" value={`${prog.earned_value_metrics?.cost_performance_index_cpi}`} hint="> 1.0 Under Budget" />
-          <Metric label="Quality Index" value={`${qs?.quality_index_score}/100`} hint="Pass Rate: 100%" />
-          <Metric label="Safety Man-Hours" value={`${num(qs?.safety?.safe_man_hours_worked)}`} hint="Zero LTIs" />
+          <Metric label="Completion" value={show(prog.project_completion_pct, "%")} hint={prog.completion_basis} />
+          <Metric label="Schedule Perf (SPI)" value={show(prog.earned_value_metrics?.schedule_performance_index_spi)} hint={prog.schedule_status} />
+          <Metric label="Cost Perf (CPI)" value={show(prog.earned_value_metrics?.cost_performance_index_cpi)} hint="Needs recorded actual cost" />
+          <Metric label="Quality Index" value={show(qs?.quality_index_score, "/100")} hint="Share of cube results passed" />
+          <Metric label="Safety Man-Hours" value={qs?.safety?.safe_man_hours_worked == null ? "—" : num(qs.safety.safe_man_hours_worked)} hint={`LTIs: ${show(qs?.safety?.lost_time_injuries_lti)}`} />
         </div>
       )}
 
@@ -105,8 +124,10 @@ export default function DigitalTwinModule({ project, projectId }) {
                   <div className="text-[11px] text-slate-500">{d.location} • {d.model}</div>
                 </div>
                 <div className="text-right">
-                  <span className="rounded bg-emerald-100 border border-emerald-200 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-800 uppercase">
-                    {d.status} ({d.battery_pct}%)
+                  <span className={`rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase ${
+                    d.status === "online" ? "bg-emerald-100 border-emerald-200 text-emerald-800" : "bg-amber-100 border-amber-200 text-amber-800"
+                  }`}>
+                    {d.status}{d.battery_pct != null ? ` (${d.battery_pct}%)` : ""}
                   </span>
                   <div className="mt-0.5 text-[10px] text-slate-500 font-mono">{d.telemetry_param}</div>
                 </div>
@@ -118,7 +139,7 @@ export default function DigitalTwinModule({ project, projectId }) {
         {/* CONCRETE MATURITY CARD */}
         <Section
           title="Smart Concrete Maturity Tracker"
-          description="Real-time Arrhenius maturity indexing (ASTM C1074 / IS 456 formwork stripping guidance)"
+          description="ASTM C1074 maturity (Nurse-Saul and Arrhenius) checked against IS 456 Cl. 11.3 minimum stripping times"
         >
           {liveConc ? (
             <div className="rounded-lg border border-purple-200 bg-purple-50/60 p-4 text-xs space-y-3">
@@ -132,12 +153,14 @@ export default function DigitalTwinModule({ project, projectId }) {
               <div className="grid grid-cols-2 gap-3 text-slate-700">
                 <div>Curing Age: <strong className="text-slate-900">{liveConc.curing_age_hours} hrs</strong></div>
                 <div>Equivalent Age: <strong className="text-slate-900">{liveConc.equivalent_age_maturity_index} °C-hrs</strong></div>
-                <div>Est. Compressive Strength: <strong className="text-emerald-700 text-sm font-bold">{liveConc.estimated_compressive_strength_mpa} MPa</strong></div>
-                <div>Target Strength: <strong className="text-slate-900">{liveConc.target_strength_mpa} MPa (M35)</strong></div>
+                <div>Est. Compressive Strength: <strong className="text-slate-900 text-sm font-bold">{show(liveConc.estimated_compressive_strength_mpa, " MPa")}</strong></div>
+                <div>Grade: <strong className="text-slate-900">M{liveConc.target_strength_mpa}</strong></div>
               </div>
 
-              <div className="rounded bg-white p-2.5 text-emerald-800 font-semibold border border-emerald-200 shadow-2xs">
-                ✓ {liveConc.formwork_stripping_advisory}
+              <div className={`rounded bg-white p-2.5 font-semibold border shadow-2xs ${
+                liveConc.strip_ok ? "text-emerald-800 border-emerald-200" : "text-amber-800 border-amber-300"
+              }`}>
+                {liveConc.strip_ok ? "✓ " : "⚠ "}{liveConc.formwork_stripping_advisory}
               </div>
             </div>
           ) : (
@@ -150,7 +173,7 @@ export default function DigitalTwinModule({ project, projectId }) {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Section
           title="4D BIM Progress Tracking"
-          description="Floor-by-floor physical status mapped to CPM milestones"
+          description="Floor-by-floor status from the CPM programme (recorded progress where entered)"
         >
           <div className="max-h-64 overflow-y-auto space-y-1.5 pr-1">
             {prog?.floor_4d_breakdown?.map((f) => (
@@ -170,7 +193,7 @@ export default function DigitalTwinModule({ project, projectId }) {
                   >
                     {f.status.replace("_", " ")} ({f.completion_pct}%)
                   </span>
-                  <span className="text-[11px] text-slate-500 font-mono">{f.actual_date}</span>
+                  <span className="text-[11px] text-slate-500 font-mono">{f.planned_date || f.actual_date}</span>
                 </div>
               </div>
             ))}
@@ -180,24 +203,25 @@ export default function DigitalTwinModule({ project, projectId }) {
         {/* DELAYS & MONTE CARLO */}
         <Section
           title="Schedule Delay Risk Simulation"
-          description="1,000-iteration Monte Carlo forecast and critical path sensitivity"
+          description={delays?.method || "Monte Carlo forecast over this project's programme"}
         >
           {delays && (
             <div className="space-y-3 text-xs">
               <div className="flex items-center justify-between rounded bg-slate-50 border border-slate-200 p-3 text-slate-700">
                 <div>Baseline: <strong className="text-slate-900">{delays.baseline_completion_date}</strong></div>
-                <div>Predicted: <strong className="text-emerald-700 font-bold">{delays.predicted_completion_date}</strong></div>
+                <div>Predicted (P50): <strong className="text-slate-900 font-bold">{delays.predicted_completion_date}</strong></div>
+                <div>P80: <strong className="text-slate-900">{delays.p80_completion_date}</strong></div>
                 <div>On-Time Probability: <strong className="text-slate-900 text-sm font-bold">{delays.on_time_probability_pct}%</strong></div>
               </div>
 
               <div className="border border-slate-200 rounded p-3 bg-white shadow-2xs">
-                <div className="font-semibold text-slate-900 mb-2">Simulated Risk Mitigations:</div>
+                <div className="font-semibold text-slate-900 mb-2">Activities driving the delay:</div>
                 <ul className="space-y-1.5 text-slate-700">
                   {delays.risk_factors_analyzed?.map((r, i) => (
                     <li key={i} className="flex items-start gap-1.5">
                       <AlertTriangle className="h-3.5 w-3.5 text-amber-600 shrink-0 mt-0.5" />
                       <span>
-                        <strong className="text-slate-900">{r.factor}</strong> ({r.probability_pct}% prob, +{r.impact_days}d): {r.mitigation}
+                        <strong className="text-slate-900">{r.factor}</strong> (drives completion in {r.probability_pct}% of runs, +{r.impact_days}d when it does): {r.mitigation}
                       </span>
                     </li>
                   ))}
@@ -265,7 +289,7 @@ export default function DigitalTwinModule({ project, projectId }) {
                   }`}>
                     {a.status} ({a.health_score_pct}%)
                   </span>
-                  <div className="text-[10px] text-slate-500 mt-0.5 font-mono">Due: {a.next_service_due}</div>
+                  <div className="text-[10px] text-slate-500 mt-0.5 font-mono">Due: {show(a.next_service_due)}</div>
                 </div>
               </div>
             ))}

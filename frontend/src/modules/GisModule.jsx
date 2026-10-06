@@ -38,9 +38,20 @@ const SEVERITY = {
   ok: { cls: "bg-emerald-50 border-emerald-200 text-emerald-800", Icon: CheckCircle2 },
 };
 
+// Why a stored analysis is out of date. The backend returns the reason rather than a bare
+// flag, because "the boundary moved" and "the rules changed" need different answers from
+// the user and blaming the wrong one makes the warning untrustworthy.
+const STALE_MESSAGES = {
+  polygon: "The plot boundary changed since this analysis. Re-run to refresh.",
+  rules: "The site-analysis rules have changed since this was run, so its layer counts, "
+       + "flood risk and suitability may no longer match what the engine would report now. "
+       + "Re-run to bring it up to date.",
+};
+
 export default function GisModule({ project, projectId, readOnly }) {
   const [gis, setGis] = useState(null);
   const [stale, setStale] = useState(false);
+  const [staleReason, setStaleReason] = useState(null);
   const [hasPolygon, setHasPolygon] = useState(true);
   const [radius, setRadius] = useState(500);
   const [busy, setBusy] = useState(false);
@@ -51,6 +62,7 @@ export default function GisModule({ project, projectId, readOnly }) {
       const { data } = await api.get(`/projects/${projectId}/gis`);
       setGis(data.gis);
       setStale(data.stale);
+      setStaleReason(data.stale_reason ?? null);
       setHasPolygon(data.has_polygon);
       if (data.gis?.radius_m) setRadius(data.gis.radius_m);
     } catch (e) {
@@ -68,6 +80,7 @@ export default function GisModule({ project, projectId, readOnly }) {
       const { data } = await api.post(`/projects/${projectId}/gis/analyse`, { radius_m: Number(radius) });
       setGis(data.gis);
       setStale(false);
+      setStaleReason(null);
       toast.success(`Site analysed — suitability ${data.gis.suitability.score}/100`);
     } catch (e) {
       const status = e.response?.status;
@@ -124,12 +137,8 @@ export default function GisModule({ project, projectId, readOnly }) {
         )}
         {stale && (
           <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-sm px-3 py-2 flex items-center gap-2" data-testid="gis-stale-banner">
-            <AlertTriangle className="h-4 w-4" /> The plot boundary changed since this analysis. Re-run to refresh.
-          </p>
-        )}
-        {gis && !gis.seismic && (
-          <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-sm px-3 py-2 flex items-center gap-2" data-testid="gis-outdated-banner">
-            <AlertTriangle className="h-4 w-4" /> This analysis predates the seismic (IS 1893), IS 875-3 design-wind and flood design-response modules. Re-run to include them.
+            <AlertTriangle className="h-4 w-4" />
+            {STALE_MESSAGES[staleReason] || STALE_MESSAGES.polygon}
           </p>
         )}
         {gis && (
@@ -153,7 +162,7 @@ export default function GisModule({ project, projectId, readOnly }) {
 
       {gis && (
         <>
-          <Section title="Detected site context" description="Buildings, roads, green cover, water bodies and transit around the plot" testid="gis-map-section">
+          <Section title="Detected site context" description="Buildings, roads, green cover, water bodies, natural waterways and transit around the plot" testid="gis-map-section">
             <GisMap coordinates={coords} features={gis.features} />
           </Section>
 
@@ -238,7 +247,10 @@ export default function GisModule({ project, projectId, readOnly }) {
                 ))}
               </ul>
               <div className="grid grid-cols-2 gap-3 mt-3">
-                <Metric label="Nearest water body" value={gis.flood.nearest_water_m ?? "none"} unit="m" testid="flood-nearest-water" />
+                {/* Named for what was actually detected — a storm drain crossing the plot is
+                    not a lake, and calling it one is what made this panel look wrong. */}
+                <Metric label={`Nearest ${(gis.flood.nearest_water_label || "water body").toLowerCase()}`}
+                  value={gis.flood.nearest_water_m ?? "none"} unit="m" testid="flood-nearest-water" />
                 <Metric label="Elevation vs surroundings" value={gis.flood.elevation_delta_m ?? "—"} unit="m" testid="flood-delta" />
               </div>
               {(gis.flood.plinth_height_m != null || gis.flood.design_response) && (

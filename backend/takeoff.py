@@ -39,6 +39,7 @@ STEEL_KG_PER_M3 = {"slab": 80.0, "beam": 150.0, "footing": 70.0, "stair": 110.0}
 # real quantity, not a contingency, and it lands on columns and beams only.
 DUCTILE_STEEL_FACTOR = 1.15
 DUCTILE_ZONES = ("III", "IV", "V")
+LAP_ALLOWANCE = 1.05   # laps, chairs and spacers on measured bar weight
 
 # Cores, lift walls, staircases and landings are not on the column grid and are not worth
 # modelling individually at estimate stage; they are a well-known share of frame concrete.
@@ -54,6 +55,26 @@ def column_section(req_area_mm2: float) -> tuple:
     b = max(230.0 if side <= 300 else round(side * 0.65 / 25) * 25, 230.0)
     d = max(round(req_area_mm2 / b / 25) * 25, 300.0)
     return b, d
+
+
+TIE_DIA_MM = 8.0
+TIE_MAIN_BAR_MM = 16.0
+TIE_COVER_M = 0.04
+
+
+def column_ties_kg(b_m: float, d_m: float, clear_h_m: float) -> float:
+    """Lateral ties in one column for one storey (IS 456 Cl. 26.5.3.2).
+
+    8 mm ties at the least of the column's smaller side, 16 x main bar and 300 mm; each
+    tie runs the perimeter inside the cover plus two 10-diameter hooks. Ties are required
+    in every column whatever the zone, and leaving them out understated column steel.
+    """
+    spacing = min(min(b_m, d_m), 16 * TIE_MAIN_BAR_MM / 1000.0, 0.300)
+    if spacing <= 0 or clear_h_m <= 0:
+        return 0.0
+    count = math.floor(clear_h_m / spacing) + 1
+    length = 2 * ((b_m - 2 * TIE_COVER_M) + (d_m - 2 * TIE_COVER_M)) + 2 * 10 * TIE_DIA_MM / 1000.0
+    return count * max(length, 0.0) * TIE_DIA_MM ** 2 / 162.0
 
 
 def column_required_area(load_kn: float, fck: float, fy: float, steel_pct: float) -> float:
@@ -226,7 +247,8 @@ def structural_takeoff(project: Dict[str, Any], areas: Dict[str, Any]) -> Dict[s
     e = {**{"grid_bay_x_m": 5.0, "grid_bay_y_m": 5.0, "slab_thickness_mm": 125,
             "beam_span_m": 5.0, "beam_support": "simply supported", "concrete_grade": 25,
             "steel_grade": 415, "column_steel_pct": 1.0, "exposure_condition": "moderate",
-            "aggregate_size_mm": 20, "finishes_load_kn_sqm": 1.5},
+            "aggregate_size_mm": 20, "finishes_load_kn_sqm": 1.5,
+            "wall_thickness_mm": 230, "wall_material": "brick_masonry"},
           **(project.get("engineering") or {})}
 
     bx, by = float(e["grid_bay_x_m"]), float(e["grid_bay_y_m"])
@@ -247,12 +269,12 @@ def structural_takeoff(project: Dict[str, Any], areas: Dict[str, Any]) -> Dict[s
     soil = C.SOILS.get(e.get("soil_type")) or C.SOILS["dense sand"]
     sbc = float(soil.get("sbc") or 150.0)
 
-    # Service load per m2 of floor -- the same dead + live basis the loads module uses.
+    # Service load per m2 of floor -- the same dead + live basis the loads module uses:
+    # slab, finishes, masonry walls and live load. Walls are worked out per tower below
+    # because their height follows the tower's floor height.
     slab_self = C.UNIT_WEIGHTS["rcc"] * slab_t
     finishes = float(e["finishes_load_kn_sqm"])
     live = C.LIVE_LOADS["residential_room"]
-    service_per_sqm = slab_self + finishes + live
-    factored_per_sqm = 1.5 * service_per_sqm
 
     rows: List[Dict[str, Any]] = []
     tot = {"concrete_m3": 0.0, "steel_kg": 0.0, "formwork_sqm": 0.0}
@@ -265,6 +287,9 @@ def structural_takeoff(project: Dict[str, Any], areas: Dict[str, Any]) -> Dict[s
             continue
         g = grid_counts(foot, bx, by)
         n_col = g["columns"]
+        walls = C.wall_load_kn_sqm(e["wall_material"], e["wall_thickness_mm"], fh, slab_t)
+        service_per_sqm = slab_self + finishes + walls + live
+        factored_per_sqm = 1.5 * service_per_sqm
 
         # Column at the base carries every floor above it; sizing on that governs.
         col_load = factored_per_sqm * trib * floors
@@ -285,7 +310,7 @@ def structural_takeoff(project: Dict[str, Any], areas: Dict[str, Any]) -> Dict[s
         found_c = f_side * f_side * f_depth * n_col
         pcc_c = (f_side + 0.2) ** 2 * PCC_THICKNESS_M * n_col
 
-        col_steel = col_c * (col_pct / 100.0) * STEEL_DENSITY
+        col_steel = col_c * (col_pct / 100.0) * STEEL_DENSITY + column_ties_kg(cb, cd, clear_h) * n_col * floors
         beam_steel = beam_c * STEEL_KG_PER_M3["beam"]
         slab_steel = slab_c * STEEL_KG_PER_M3["slab"]
         core_steel = core_c * STEEL_KG_PER_M3["stair"]
@@ -293,6 +318,10 @@ def structural_takeoff(project: Dict[str, Any], areas: Dict[str, Any]) -> Dict[s
         if ductile:
             col_steel *= DUCTILE_STEEL_FACTOR
             beam_steel *= DUCTILE_STEEL_FACTOR
+        # Bars come in 12 m lengths; a bar-bending schedule measures the laps (IS 456
+        # Cl. 26.2.5), chairs and spacers as well as the bar the drawing shows.
+        col_steel, beam_steel, slab_steel, core_steel, found_steel = (
+            x * LAP_ALLOWANCE for x in (col_steel, beam_steel, slab_steel, core_steel, found_steel))
 
         fw_slab = foot * floors
         fw_beam = g["beam_length_m"] * (2 * max(beam_d - slab_t, 0.05) + beam_w) * floors
@@ -321,6 +350,7 @@ def structural_takeoff(project: Dict[str, Any], areas: Dict[str, Any]) -> Dict[s
             "beam_section_mm": f"{int(beam_w_mm)} x {int(beam_d_mm)}",
             "slab_thickness_mm": round(slab_t * 1000),
             "footing_size_m": round(f_side, 2), "sbc_kn_sqm": sbc,
+            "service_load_kn_sqm": round(service_per_sqm, 2),
             "concrete": c_parts,
             "steel": {"columns": round(col_steel), "beams": round(beam_steel),
                       "slabs": round(slab_steel), "cores_and_stairs": round(core_steel),
@@ -393,6 +423,9 @@ def structural_takeoff(project: Dict[str, Any], areas: Dict[str, Any]) -> Dict[s
 # estimate is issued.
 CONCRETE_BAND_M3_PER_SQM = (0.22, 0.48)
 STEEL_BAND_KG_PER_M3 = (75.0, 135.0)
+# The per-m3 band alone let a take-off at roughly half the usual steel per m2 through
+# without a word, because thin members keep kg/m3 normal while the total is far too low.
+STEEL_BAND_KG_PER_SQM = (28.0, 75.0)
 
 
 def _sanity(concrete_m3: float, steel_kg: float, builtup_sqm: float) -> List[Dict[str, str]]:
@@ -413,4 +446,11 @@ def _sanity(concrete_m3: float, steel_kg: float, builtup_sqm: float) -> List[Dic
                     "text": f"Reinforcement works out at {ratio:.0f} kg per m3 of concrete, "
                             f"outside the usual {slo:.0f}-{shi:.0f} kg/m3. Check the column "
                             "steel percentage and the seismic zone."})
+    kg_sqm = steel_kg / builtup_sqm
+    klo, khi = STEEL_BAND_KG_PER_SQM
+    if not (klo <= kg_sqm <= khi):
+        out.append({"severity": "warning", "metric": "steel_per_sqm",
+                    "text": f"Reinforcement works out at {kg_sqm:.1f} kg per m2 of built-up area, "
+                            f"outside the usual {klo:.0f}-{khi:.0f} kg/m2 for Indian residential RCC. "
+                            "Check the column grid, the member sections and the steel percentages."})
     return out

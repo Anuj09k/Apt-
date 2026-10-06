@@ -26,8 +26,12 @@ def ctx():
 
 
 def text_of(pdf: bytes) -> str:
+    """Page text without the "Generated: dd Mon yyyy HH:MM UTC" stamp: two renders that
+    straddle a minute differ there, which made comparisons fail at random."""
+    import re
     from pypdf import PdfReader
-    return "\n".join(pg.extract_text() or "" for pg in PdfReader(_io.BytesIO(pdf)).pages)
+    text = "\n".join(pg.extract_text() or "" for pg in PdfReader(_io.BytesIO(pdf)).pages)
+    return re.sub(r"Generated: \d{2} \w{3} \d{4} \d{2}:\d{2} UTC", "Generated: <time>", text)
 
 
 def flat(pdf: bytes) -> str:

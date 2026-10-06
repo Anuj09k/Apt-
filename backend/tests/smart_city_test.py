@@ -18,7 +18,7 @@ def test_city_scale_plan(sample_project):
     res = smartcitylib.city_scale_plan(sample_project)
     assert res["ok"] is True
     assert len(res["land_use_distribution"]) == 5
-    assert res["urban_fabric_metrics"]["permeability_index"] > 0
+    assert res["density_guidelines"]["compliance_status"]
 
 
 def test_simulate_traffic(sample_project):
@@ -26,7 +26,8 @@ def test_simulate_traffic(sample_project):
     assert res["ok"] is True
     assert res["trip_generation"]["peak_am_trips_per_hour"] > 0
     assert res["level_of_service"]["volume_capacity_ratio"] > 0
-    assert "PASS" in res["emergency_vehicle_clearance"]["status"]
+    # The plan holds no measured road geometry, so access is never passed by assumption.
+    assert "NOT VERIFIED" in res["emergency_vehicle_clearance"]["status"]
 
 
 def test_optimize_utility_network(sample_project):
@@ -41,8 +42,8 @@ def test_optimize_utility_network(sample_project):
 def test_urban_digital_twin(sample_project):
     res = smartcitylib.urban_digital_twin(sample_project)
     assert res["ok"] is True
-    assert res["microclimate_simulation"]["annual_sun_exposure_hours"] > 2000
-    assert res["microclimate_simulation"]["urban_heat_island_score"] > 50
+    assert res["data_source"] == "indicative"
+    assert res["microclimate_simulation"]["urban_heat_island_score"] is None
     assert len(res["gis_boundary_layers"]) >= 3
 
 
@@ -50,5 +51,7 @@ def test_forecast_infrastructure_demand(sample_project):
     res = smartcitylib.forecast_infrastructure_demand(sample_project)
     assert res["ok"] is True
     assert len(res["forecast_timeline"]) == 5
-    assert res["forecast_timeline"][-1]["year"] == 2040
+    import datetime
+    assert res["forecast_timeline"][-1]["year"] == datetime.date.today().year + 14
+    assert res["civic_services_adequacy"]["nearest_fire_station_km"] is None
     assert res["forecast_timeline"][-1]["water_demand_mld"] > 0

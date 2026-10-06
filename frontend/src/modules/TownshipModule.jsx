@@ -103,7 +103,7 @@ export default function TownshipModule({ project, projectId }) {
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
             <Metric label="Total Township Area" value={`${num(plan.township_area_sqm)} m²`} hint={`${(plan.township_area_sqm / 4046.86).toFixed(1)} Acres`} />
             <Metric label="Potential Built-Up" value={`${num(plan.master_plan_metrics?.total_potential_builtup_sqm)} m²`} hint={`Blended FAR: ${plan.master_plan_metrics?.blended_far}`} />
-            <Metric label="Estimated Dwellings" value={`${plan.master_plan_metrics?.estimated_dwelling_units}`} hint="~4,000 Population" />
+            <Metric label="Estimated Dwellings" value={`${plan.master_plan_metrics?.estimated_dwelling_units}`} hint={plan.master_plan_metrics?.estimated_population ? `~${plan.master_plan_metrics.estimated_population.toLocaleString("en-IN")} people` : undefined} />
             <Metric label="Commercial Leasable" value={`${num(plan.master_plan_metrics?.commercial_leasable_sqm)} m²`} hint="GLA Capacity" />
             <Metric label="Open Space Ratio" value={`${plan.master_plan_metrics?.open_space_ratio_pct}%`} hint="Parks & Recreation" />
           </div>

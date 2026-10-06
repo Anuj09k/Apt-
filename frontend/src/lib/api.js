@@ -109,11 +109,21 @@ export async function downloadFile(path, filename) {
       }
     }
 
+    // The server can hand back a different format than asked for (a DXF when it cannot
+    // write DWG); keep the caller's name but take the extension the server actually sent.
+    const disposition = res.headers?.["content-disposition"] || "";
+    const served = /filename="?([^";]+)"?/i.exec(disposition)?.[1];
+    const servedExt = served && served.includes(".") ? served.split(".").pop() : null;
+    let name = filename || served || "download";
+    if (servedExt && !name.toLowerCase().endsWith(`.${servedExt.toLowerCase()}`)) {
+      name = name.includes(".") ? name.replace(/\.[^.]+$/, `.${servedExt}`) : `${name}.${servedExt}`;
+    }
+
     const blob = res.data instanceof Blob ? res.data : new Blob([res.data]);
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = filename || "download";
+    link.download = name;
     link.style.display = "none";
     document.body.appendChild(link);
     link.click();
@@ -125,6 +135,7 @@ export async function downloadFile(path, filename) {
       }
       window.URL.revokeObjectURL(url);
     }, 45000);
+    return name;
   } catch (err) {
     if (err.response && err.response.data instanceof Blob) {
       try {

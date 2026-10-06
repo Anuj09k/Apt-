@@ -473,10 +473,28 @@ export const terrainHeights = (gis, origin, bounds, seg = 24) => {
   return { heights, relief: gis.terrain.relief_m, seg };
 };
 
-/** Feature footprints (buildings/green/water) converted to local metres. */
+/** Is this feature a centreline rather than an area? A river, stream, canal or drain is
+ *  mapped as an open line; a lake, pond or building is a closed ring. Reads `geom` when
+ *  the backend supplied it and falls back to the ring itself for older analyses. */
+export const isLinearFeature = (f = {}) => {
+  if (f.geom) return f.geom === "line";
+  const g = f.geometry || [];
+  if (g.length < 3) return true;
+  const first = g[0];
+  const last = g[g.length - 1];
+  return !(first && last && first[0] === last[0] && first[1] === last[1]);
+};
+
+/** Feature footprints (buildings/green/water) converted to local metres.
+ *
+ *  Centrelines are dropped: a drain or a river has no footprint, and closing its line
+ *  into a ring put a solid block of "water" through the middle of the massing model. */
 export const featureShapes = (gis, origin, key, limit = 60) =>
-  (gis?.features?.[key] || []).slice(0, limit).map((f) => {
-    const pts = f.geometry.map((g) => toLocal(g, origin));
-    const b = localBounds(pts);
-    return { id: f.id, name: f.name || f.kind, pts, ...b, distance: f.distance_m };
-  });
+  (gis?.features?.[key] || [])
+    .filter((f) => !isLinearFeature(f))
+    .slice(0, limit)
+    .map((f) => {
+      const pts = f.geometry.map((g) => toLocal(g, origin));
+      const b = localBounds(pts);
+      return { id: f.id, name: f.name || f.kind, pts, ...b, distance: f.distance_m };
+    });

@@ -116,8 +116,7 @@ def m1_structural_loads(project, base, e, city):
     finishes = float(e["finishes_load_kn_sqm"])
     wall_uw = C.UNIT_WEIGHTS.get(e["wall_material"], C.UNIT_WEIGHTS["brick_masonry"])
     wall_h = max(float(b["floor_height"]) - t, 2.4)
-    wall_udl = wall_uw * (float(e["wall_thickness_mm"]) / 1000.0) * wall_h
-    wall_load_raw = wall_udl * 0.35  # 0.35 m of wall per m² of floor plate (typical residential)
+    wall_load_raw = C.wall_load_kn_sqm(e["wall_material"], e["wall_thickness_mm"], b["floor_height"], t)
     wall_load = round(wall_load_raw, 2)
     dead_raw = slab + finishes + wall_load_raw
     dead = round(dead_raw, 2)
@@ -308,8 +307,11 @@ def m2_seismic(project, base, e, city, loads):
     sa_raw = sa_g(ta_raw, soil_type)
     sa = round(sa_raw, 3)
     r = C.RESPONSE_R.get(e["structural_system"], 5.0)
-    imp = C.IMPORTANCE_I.get(e["importance"], 1.0)
-    ah_raw = z * imp * sa_raw / (2 * r)
+    # Table 8 is decided per building: the most heavily occupied tower sets I for the
+    # site-level figure, and each tower is re-checked on its own occupancy below.
+    peak_occupants = max((float(t.get("occupants") or 0) for t in b["towers"]), default=0.0)
+    imp, imp_basis = C.importance_factor(e["importance"], peak_occupants)
+    ah_raw, ah_floored = C.ah_with_minimum(z * imp * sa_raw / (2 * r), zone)
     ah = round(ah_raw, 5)
     dead_for_seismic = loads["derived"].get("dead_raw", loads["derived"]["dead"])
     seismic_load = dead_for_seismic + 0.25 * loads["derived"]["live"]
@@ -355,27 +357,30 @@ def m2_seismic(project, base, e, city, loads):
                  "under-states base shear") if frame_type != "bare_frame" else ""),
             out("Spectral acceleration Sa/g", sa, "", "seismic_sa"),
             out("Response reduction R", r, "", "seismic_R", e["structural_system"]),
-            out("Importance factor I", imp, "", "seismic_I", e["importance"]),
-            out("Design horizontal coefficient Ah", ah, "", "base_shear", "Z·I·(Sa/g) ÷ 2R"),
+            out("Importance factor I", imp, "", "seismic_I", imp_basis),
+            out("Design horizontal coefficient Ah", ah, "", "base_shear",
+                f"Table 7 minimum for Zone {zone} governs" if ah_floored else "Z·I·(Sa/g) ÷ 2R"),
             out("Seismic weight W", w, "kN", "seismic_weight", "DL + 25% LL over built-up area"),
             out("Design base shear VB", v, "kN", "base_shear"),
             out("Base shear as % of W", round(ah_raw * 100, 2), "%", "base_shear"),
         ],
         "recommendation": {"label": "Recommended lateral system", "value": system, "clause": C.clause("seismic_R")},
-        "per_tower": [_tower_seismic(t, z, soil_type, r, imp, sa_g, loads, frame_type)
+        "per_tower": [_tower_seismic(t, z, soil_type, r,
+                                     C.importance_factor(e["importance"], t.get("occupants") or 0)[0],
+                                     sa_g, loads, frame_type, zone)
                       for t in b["towers"]],
         "derived": {"base_shear": v, "vb_kn": v, "ah": ah, "seismic_weight": w},
     }
 
 
-def _tower_seismic(t, z, soil_type, r, imp, sa_g, loads, frame_type="brick_infill"):
+def _tower_seismic(t, z, soil_type, r, imp, sa_g, loads, frame_type="brick_infill", zone=""):
     h = max(t["height_m"], 3.0)
     base_dim = math.sqrt(max(t["footprint_sqm"], 1.0)) if t["footprint_sqm"] else 0.0
     ta_raw = C.seismic_period(h, base_dim, frame_type)[0]
     ta = round(ta_raw, 3)
     sa_raw = sa_g(ta_raw, soil_type)
     sa = round(sa_raw, 3)
-    ah_raw = z * imp * sa_raw / (2 * r)
+    ah_raw = C.ah_with_minimum(z * imp * sa_raw / (2 * r), zone)[0]
     ah = round(ah_raw, 5)
     dead_for_seismic = loads["derived"].get("dead_raw", loads["derived"]["dead"])
     w_raw = (dead_for_seismic + 0.25 * loads["derived"]["live"]) * t["builtup_sqm"]
@@ -573,9 +578,11 @@ def m5_water(project, base, e):
         "warnings": water_warnings,
         "outputs": [
             out("Population", persons, "persons", "water_demand", "per-unit-type occupancy from Apartment Planning"),
-            out("Domestic demand @135 lpcd", round(dom), "litre/day", "water_demand"),
-            out("Flushing demand @45 lpcd", round(flush), "litre/day", "water_demand"),
-            out("External / gardening @15 lpcd", round(ext), "litre/day", "water_demand"),
+            # Labels carry the per-capita figure actually used: the 135 lpcd total is split
+            # in the 135:45:15 proportions, so no line runs at its nominal table value.
+            out(f"Domestic demand @{_lpcd(dom, persons)} lpcd", round(dom), "litre/day", "water_demand"),
+            out(f"Flushing demand @{_lpcd(flush, persons)} lpcd", round(flush), "litre/day", "water_demand"),
+            out(f"External / gardening @{_lpcd(ext, persons)} lpcd", round(ext), "litre/day", "water_demand"),
             out("Total daily demand", round(total), "litre/day", "water_demand"),
             out("Fire reserve in sump", fire_reserve, "litre", "fire_water", tall_note),
             out("Underground sump capacity", round(sump_l), "litre", "sump", "1 day demand + fire reserve"),
@@ -591,6 +598,10 @@ def m5_water(project, base, e):
         "derived": {"total_lpd": total, "stp_kld": stp_kld, "persons": persons,
                     "reuse_potential_lpd": round(sewage * 0.8)},
     }
+
+
+def _lpcd(litres_per_day, persons):
+    return round(litres_per_day / persons, 1) if persons else 0
 
 
 # ================================================================ 6. storm water & RWH
@@ -662,7 +673,9 @@ def m6_storm_rwh(project, base, e, city):
 # ================================================================ 7. parking (NBC)
 def _ecs_required(b):
     """ECS demand — one definition, used by the Parking and Accessibility modules alike."""
-    return math.ceil(b["super_builtup"] / C.PARKING["ecs_per_sqm"]) if b["super_builtup"] else 0
+    # The clause is per 100 m² of built-up (floor) area; super built-up adds a sales
+    # loading that is not floor area and overstated the demand.
+    return math.ceil(b["builtup"] / C.PARKING["ecs_per_sqm"]) if b["builtup"] else 0
 
 
 def _accessible_bays_required(b):
@@ -712,11 +725,11 @@ def m7_parking_nbc(project, base, e):
 
     return {
         "id": "parking_nbc", "title": "Parking Compliance (NBC / SP:21)", "codes": ["NBC 2016 Part 4", "SP:21"],
-        "missing": [] if b["super_builtup"] else ["Super built-up area (Apartment Planning)"],
+        "missing": [] if b["builtup"] else ["Built-up area (Apartment Planning)"],
         "checks": checks, "passed": passed, "total": len(checks),
         "score": round(passed / len(checks) * 100, 1),
         "outputs": [
-            out("Super built-up area", round(b["super_builtup"], 1), "m²", "parking_ecs"),
+            out("Built-up area", round(b["builtup"], 1), "m²", "parking_ecs"),
             out("ECS required", ecs_required, "ECS", "parking_ecs", "1 ECS per 100 m² residential"),
             out("Car spaces provided", provided, "nos", "parking_ecs", "from the Parking module"),
             out("Accessible bays required", accessible_req, "nos", "parking_accessible"),

@@ -2,6 +2,7 @@
 Update values here when a code is revised — no module hardcodes its own numbers.
 """
 import math
+from typing import Tuple
 
 # ---------------------------------------------------------------- code version
 # NBC 2016 was withdrawn on 30 April 2026 and replaced by SP 7:2026. Both facts matter and
@@ -124,7 +125,7 @@ CLAUSES = {
     "mix_cement": {"code": "IS 456:2000", "clause": "Table 5", "topic": "Minimum cement content by exposure"},
     "mix_water": {"code": "IS 10262:2019", "clause": "Table 4", "topic": "Water content for 25–50 mm slump"},
     "mix_ca": {"code": "IS 10262:2019", "clause": "Table 5", "topic": "Coarse aggregate volume (Zone II sand)"},
-    "water_demand": {"code": "IS 1172:1993", "clause": "Cl. 4.1", "topic": "135 lpcd domestic + flushing + external"},
+    "water_demand": {"code": "IS 1172:1993", "clause": "Cl. 4.1", "topic": "135 lpcd in total, split domestic / flushing / external"},
     "sewage": {"code": "IS 1172:1993", "clause": "Cl. 5", "topic": "Sewage generation = 80% of water supply"},
     "sump": {"code": "NBC 2016 Part 9", "clause": "Cl. 4.1.2", "topic": "Underground storage — one day demand"},
     "oht": {"code": "NBC 2016 Part 9", "clause": "Cl. 4.1.3", "topic": "Overhead tank — one-third day, min 2 compartments"},
@@ -190,7 +191,8 @@ LIVE_LOADS = {  # kN/m²
 # ---------------------------------------------------------------- IS 875 Part 3
 WIND_K2 = [(10, 1.00), (15, 1.05), (20, 1.07), (30, 1.12), (50, 1.17), (100, 1.24), (150, 1.28), (200, 1.30)]
 WIND_KD = 0.90  # Cl. 7.2.1 wind directionality
-WIND_KA = 0.90  # Cl. 7.2.2 area averaging (typical > 100 m²)
+WIND_KA = 0.90  # Cl. 7.2.2 / Table 4 area averaging: 0.90 is the 25 m² value, kept conservatively
+                # (Table 4 allows 0.80 at 100 m² and above, subject to Kd·Ka·Kc >= 0.70).
 WIND_KC = 0.90  # Cl. 7.3.3.13 combination factor
 
 # ---------------------------------------------------------------- IS 875-3 Cl. 7.4
@@ -277,6 +279,41 @@ SOIL_SEISMIC_TYPE = {
 }
 RESPONSE_R = {"OMRF": 3.0, "SMRF": 5.0, "Shear wall": 4.0, "Dual system": 5.0, "Flat slab": 3.0}
 IMPORTANCE_I = {"residential": 1.0, "important": 1.2, "critical": 1.5}
+# IS 1893 (Part 1):2016 Table 8: a building that can host more than 200 persons takes
+# I = 1.2 even when it is "just" residential. A typical apartment tower crosses that line,
+# so the plain residential 1.0 only survives for small blocks.
+IMPORTANCE_OCCUPANCY_LIMIT = 200
+# IS 1893 (Part 1):2016 Cl. 7.2.2, Table 7: minimum design horizontal coefficient. Long
+# period towers on firm ground fall below it from Z·I·(Sa/g)/2R alone.
+AH_MIN = {"II": 0.007, "III": 0.011, "IV": 0.016, "V": 0.024}
+
+
+def importance_factor(choice: str, occupants: float) -> Tuple[float, str]:
+    """(I, basis) for the chosen category, raised to 1.2 where occupancy exceeds 200."""
+    base = IMPORTANCE_I.get(choice, 1.0)
+    if base < 1.2 and float(occupants or 0) > IMPORTANCE_OCCUPANCY_LIMIT:
+        return 1.2, f"{choice}, {int(occupants)} occupants > {IMPORTANCE_OCCUPANCY_LIMIT} (Table 8)"
+    return base, choice
+
+
+WALL_LENGTH_PER_SQM = 0.35   # metres of wall per m² of floor plate, typical Indian residential
+
+
+def wall_load_kn_sqm(material: str, thickness_mm: float, floor_height_m: float, slab_t_m: float) -> float:
+    """Masonry walls smeared over the floor plate, kN/m².
+
+    Shared by the loads module and the quantity take-off. The take-off once left walls out
+    of the column and footing load and under-sized both by about 40 %.
+    """
+    uw = UNIT_WEIGHTS.get(material, UNIT_WEIGHTS["brick_masonry"])
+    wall_h = max(float(floor_height_m) - float(slab_t_m), 2.4)
+    return uw * (float(thickness_mm) / 1000.0) * wall_h * WALL_LENGTH_PER_SQM
+
+
+def ah_with_minimum(ah: float, zone: str) -> Tuple[float, bool]:
+    """Ah floored at the Table 7 minimum for the zone; flag says whether the floor governed."""
+    floor = AH_MIN.get(str(zone), 0.0)
+    return (floor, True) if ah < floor else (ah, False)
 
 # ---------------------------------------------------------------- IS 6403 / IS 1904
 SOILS = {
@@ -704,7 +741,7 @@ CODE_LIBRARY = [
     {"id": "is13920", "code": "IS 13920:2016", "topic": "Ductile detailing of RC structures",
      "key_value": "Mandatory for Zone III, IV, V and for all important structures", "clause": "Cl. 1.1"},
     {"id": "is1172", "code": "IS 1172:1993", "topic": "Water supply & drainage requirements",
-     "key_value": "135 lpcd domestic (+45 flushing, +15 external); sewage = 80% of supply", "clause": "Cl. 4.1, 5"},
+     "key_value": "135 lpcd in total (flushing within it, not on top); sewage = 80% of supply", "clause": "Cl. 4.1, 5"},
     {"id": "is10262", "code": "IS 10262:2019", "topic": "Concrete mix proportioning",
      "key_value": "f'ck = fck + 1.65S; water 186 l/m³ for 20 mm agg; CA volume 0.62 (Zone II, w/c 0.50)",
      "clause": "Cl. 4.2, Table 4, Table 5"},

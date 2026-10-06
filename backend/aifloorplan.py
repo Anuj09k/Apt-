@@ -22,6 +22,7 @@ from floorplan.design_guide import (
     room_zone_kind,
 )
 from floorplan.realistic import generate_unit as generate_realistic_unit
+from floorplan import unit_planner
 
 logger = logging.getLogger(__name__)
 
@@ -454,6 +455,12 @@ def _apply_guide_metadata(rooms: List[Dict[str, Any]], box: Dict[str, Any], entr
             source["slab_drop_mm"] = 20
 
 
+# Bumped whenever the deterministic planner changes what it draws, so stored layouts made by an
+# older planner are reported stale (and offered for regeneration) rather than silently replaced
+# -- a stored layout may carry the user's own room edits.
+PLANNER_VERSION = 2
+
+
 def generate_architectural_template(tower: Dict[str, Any], floor: int) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
     """A floor plate packed to the Generative Architecture & Vastu Logic Manual."""
     total_floors = max(int(tower.get("floors") or 1), 1)
@@ -478,22 +485,9 @@ def generate_architectural_template(tower: Dict[str, Any], floor: int) -> Tuple[
     south_units = expanded_units[(n + 1) // 2:]
 
     def dims(u):
-        prog = vastu.unit_programme(u["type"], u["carpet"])
-        if prog["beds"] <= 4 and not prog["is_penthouse"]:
-            gross = u["carpet"] * (1.18 if prog["beds"] <= 3 else 1.28)
-            if prog["beds"] == 1:
-                w = max(math.sqrt(gross * 1.15), 9.0)
-                h = max(gross / w, 8.2)
-                return round(w, 1), round(h, 1)
-            w = max(math.sqrt(gross * 1.45), (prog["beds"] + 2) * 3.1, prog["beds"] * 5.0)
-            h = max(gross / w, 8.0)
-            min_depth = {2: 8.2, 3: 8.8, 4: 9.4}[prog["beds"]]
-            return round(w, 1), round(min(max(h, min_depth), 9.0), 1)
-
-        facade_rooms = prog["beds"] + 2 + (2 if prog["is_penthouse"] else 0)
-        needed = (facade_rooms + 2.6) * (vastu.MIN_COLUMN_W + 0.35) + 2.4   # + pooja strip
-        w = max(round(math.sqrt(u["carpet"] * 1.15), 1), round(needed, 1), 7.5)
-        return w, max(round(u["carpet"] / w, 1), 7.5)
+        # The flat's envelope is what its room brief adds up to (see unit_planner), so no
+        # planner has to stretch rooms to fill a box sized by a square root of the area.
+        return unit_planner.envelope(u["type"], u["carpet"])
 
     north_dims = [dims(u) for u in north_units]
     south_dims = [dims(u) for u in south_units]
@@ -527,12 +521,14 @@ def generate_architectural_template(tower: Dict[str, Any], floor: int) -> Tuple[
                 exterior.append("E")
             candidates = []
             planners = (
+                ("realistic planner", unit_planner.plan_unit),
+                ("realistic planner (mirrored)", unit_planner.plan_unit_mirrored),
                 ("room planner", generate_realistic_unit),
                 ("Vastu guide packer", vastu.pack_unit),
             )
             for planner_order, (source, planner) in enumerate(planners):
                 try:
-                    if source == "room planner":
+                    if source != "Vastu guide packer":
                         candidate, candidate_notes = planner(
                             box, u["type"], u["carpet"], entry_edge, uid, idx, exterior
                         )
@@ -554,9 +550,16 @@ def generate_architectural_template(tower: Dict[str, Any], floor: int) -> Tuple[
                     expected_beds = vastu.unit_programme(u["type"], u["carpet"])["beds"]
                     actual_beds = sum(1 for room in candidate if room.get("type") == "bedroom")
                     bedroom_misses = abs(expected_beds - actual_beds)
+                    # Livability first: a plan with corridor-shaped rooms loses to any plan
+                    # without them, however many soft Vastu placements it ticks.
                     quality = (
+                        len(unit_planner.livability_defects(candidate)),
                         len(hard["violations"]),
                         len(program_violations),
+                        # A rule-clean realistic plan wins; the soft Vastu placements below
+                        # only choose between its two mirror images.
+                        0 if source.startswith("realistic planner") else 1,
+                        len(zones.get("violations") or []),     # forbidden zones (kitchen in NE...)
                         zones["preference_misses"],
                         anchor_misses,
                         bedroom_misses,

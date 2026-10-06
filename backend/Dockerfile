@@ -12,6 +12,18 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends curl \
     && rm -rf /var/lib/apt/lists/*
 
+# True DWG export needs the ODA File Converter (free, from opendesign.com, under the ODA
+# licence). Pass the Linux .deb download URL to bake it in; without it the API still
+# serves DXF and says so. xvfb lets the converter run headless.
+#   docker build --build-arg ODAFC_DEB_URL="https://.../ODAFileConverter_QT6_lnxX64_8.3dll_25.12.deb" .
+ARG ODAFC_DEB_URL=""
+RUN if [ -n "$ODAFC_DEB_URL" ]; then \
+      apt-get update && apt-get install -y --no-install-recommends xvfb \
+      && curl -fsSL "$ODAFC_DEB_URL" -o /tmp/odafc.deb \
+      && apt-get install -y --no-install-recommends /tmp/odafc.deb \
+      && rm -f /tmp/odafc.deb && rm -rf /var/lib/apt/lists/*; \
+    fi
+
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 

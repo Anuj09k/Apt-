@@ -85,6 +85,7 @@ logger = logging.getLogger("aptimizer")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    authlib.check_secret()
     try:
         await db.users.create_index("email", unique=True)
         await db.login_attempts.create_index("identifier")
@@ -791,7 +792,9 @@ async def floor_layout(project_id: str, tower_id: str, body: FloorLayoutIn,
     if existing and not body.regenerate and not body.use_ai:
         return {"tower": tower, "towers": towers, "rooms": existing["rooms"],
                 "validation": existing.get("validation") or {},
-                "stale": existing.get("unit_mix_hash") != current_hash}
+                "stale": (existing.get("unit_mix_hash") != current_hash
+                          or (not existing.get("ai_generated")
+                              and int(existing.get("planner_version") or 1) < aifloorplan.PLANNER_VERSION))}
 
     if body.use_ai:
         rooms, validation = await aifloorplan.generate_ai_floor_layout(tower, body.floor)
@@ -1223,8 +1226,12 @@ async def get_gis(project_id: str, user: dict = Depends(get_current_user)):
     proj = await load_project(project_id, user)
     stored = proj.get("gis")
     coords = (proj.get("plot") or {}).get("coordinates") or []
-    stale = bool(stored) and stored.get("polygon_signature") != gislib._signature(coords)
-    return {"gis": stored, "stale": stale, "has_polygon": len(coords) >= 3}
+    # "polygon" (the boundary moved) or "rules" (the analysis rules changed) or None.
+    # The reason is returned, not just a flag, so the UI can say which one applies rather
+    # than blaming the boundary for a rule change.
+    stale_reason = gislib.staleness(stored, coords)
+    return {"gis": stored, "stale": stale_reason is not None, "stale_reason": stale_reason,
+            "has_polygon": len(coords) >= 3}
 
 
 @api.post("/projects/{project_id}/gis/analyse")
@@ -1238,7 +1245,7 @@ async def run_gis(project_id: str, body: GisIn, user: dict = Depends(get_current
                                  {"$inc": {"rev": 1}, "$set": {"gis": result, "updated_at": now_iso()}})
     await log_activity(project_id, user, "gis.analysed",
                        f"radius {result['radius_m']} m · suitability {result['suitability']['score']}")
-    return {"gis": result, "stale": False, "has_polygon": True}
+    return {"gis": result, "stale": False, "stale_reason": None, "has_polygon": True}
 
 
 # ---------------------------------------------------------------- AI assistance
@@ -2399,6 +2406,18 @@ async def list_approvals(project_id: str, user: dict = Depends(get_current_user)
     return docs
 
 
+@api.get("/projects/{project_id}/approvals/{approval_id}/verify")
+async def verify_approval_certificate(project_id: str, approval_id: str, user: dict = Depends(get_current_user)):
+    """Check an approval stamp's HMAC signature: true only if unaltered since sign-off."""
+    await load_project(project_id, user)
+    approval = await db.approvals.find_one({"id": approval_id, "project_id": project_id}, {"_id": 0})
+    if not approval:
+        raise HTTPException(status_code=404, detail="Approval not found")
+    stamp = approval.get("stamp") or {}
+    return {"approval_id": approval_id, "certificate_id": stamp.get("certificate_id"),
+            "signed": bool(stamp.get("signature")), "valid": collablib.verify_stamp(stamp)}
+
+
 @api.post("/projects/{project_id}/approvals/{approval_id}/action")
 async def approval_action(project_id: str, approval_id: str, body: ApprovalActionIn, user: dict = Depends(get_current_user)):
     proj = await load_project(project_id, user, write=True)
@@ -2749,10 +2768,23 @@ async def download_all_floorplan_images_zip(
     )
 
 
+AI_RENDER_VIEWS = ("floorplan_3d", "exterior_3d", "interior_living")
+# Billed per image on the server's own key, so the client may only pick from these.
+AI_RENDER_MODELS = ("nano-banana-pro-preview", "gemini-3-pro-image", "gemini-2.5-flash-image",
+                    "gemini-3.1-flash-image-preview")
+
+
 class TowerAIRenderIn(BaseModel):
-    view_type: str = "floorplan_3d"  # "floorplan_3d", "exterior_3d", "interior_living"
-    custom_prompt: Optional[str] = None
+    view_type: str = "floorplan_3d"
+    custom_prompt: Optional[str] = Field(default=None, max_length=2000)
     model: Optional[str] = "nano-banana-pro-preview"
+
+
+def _render_view(view_type: str) -> str:
+    # The view name becomes part of a cache file name; only known values get that far.
+    if view_type not in AI_RENDER_VIEWS:
+        raise HTTPException(status_code=400, detail=f"view_type must be one of {', '.join(AI_RENDER_VIEWS)}")
+    return view_type
 
 
 @api.post("/projects/{project_id}/towers/{tower_id}/ai-render")
@@ -2763,7 +2795,11 @@ async def generate_tower_ai_render(
     user: dict = Depends(get_current_user),
 ):
     """Generate or retrieve a 3D architectural render using Google Nano Banana or Gemini image models."""
-    proj = await load_project(project_id, user)
+    proj = await load_project(project_id, user, write=True)
+    view_type = _render_view(req.view_type)
+    model = (req.model or "nano-banana-pro-preview").removeprefix("models/")
+    if model not in AI_RENDER_MODELS:
+        raise HTTPException(status_code=400, detail=f"model must be one of {', '.join(AI_RENDER_MODELS)}")
     towers = proj.get("towers") or []
     tower = next((t for t in towers if t.get("id") == tower_id), None)
     if not tower:
@@ -2774,9 +2810,9 @@ async def generate_tower_ai_render(
         tower=tower,
         project_id=project_id,
         project_name=proj.get("name", ""),
-        view_type=req.view_type,
+        view_type=view_type,
         custom_prompt=req.custom_prompt,
-        model=req.model or "nano-banana-pro-preview",
+        model=model,
     )
     return res
 
@@ -2790,6 +2826,7 @@ async def get_tower_ai_render_info(
 ):
     """Get metadata and generated status for an AI render."""
     proj = await load_project(project_id, user)
+    view_type = _render_view(view_type)
     towers = proj.get("towers") or []
     tower = next((t for t in towers if t.get("id") == tower_id), None)
     if not tower:
@@ -2815,6 +2852,8 @@ async def get_tower_ai_render_image(
     user: dict = Depends(get_current_user),
 ):
     """Serve the raw PNG image of the generated 3D AI render."""
+    await load_project(project_id, user)   # same access rule as every other project read
+    view_type = _render_view(view_type)
     import ai_render
     png_bytes = ai_render.get_cached_render_bytes(project_id, tower_id, view_type=view_type)
     if not png_bytes:
@@ -2878,13 +2917,30 @@ class BoundaryImportIn(BaseModel):
     area_sqm: Optional[float] = None
 
 
+MAX_UPLOAD_BYTES = 20 * 1024 * 1024   # a site DXF is a few MB; 20 MB is generous
+
+
+async def read_upload(file: UploadFile, limit: int = MAX_UPLOAD_BYTES) -> bytes:
+    """Read an upload in chunks and stop at `limit`, so one request cannot exhaust memory."""
+    chunks, size = [], 0
+    while True:
+        chunk = await file.read(1024 * 1024)
+        if not chunk:
+            break
+        size += len(chunk)
+        if size > limit:
+            raise HTTPException(status_code=413, detail=f"File is larger than {limit // (1024 * 1024)} MB.")
+        chunks.append(chunk)
+    return b"".join(chunks)
+
+
 @api.post("/bim/dxf/inspect")
 async def bim_dxf_inspect(file: UploadFile = File(...), user: dict = Depends(get_current_user)):
     """Inventory an uploaded DXF: layers, entity counts, closed rings, areas."""
     if not (file.filename or "").lower().endswith((".dxf", ".dwg")):
         raise HTTPException(status_code=400, detail="Upload a .dxf drawing (DWG is not readable — "
                                                     "re-save it from AutoCAD as DXF first).")
-    data = await file.read()
+    data = await read_upload(file)
     try:
         inv = await run_in_threadpool(bimlib.inspect_dxf, data)
     except ValueError as e:
@@ -2898,7 +2954,7 @@ async def bim_dxf_import_boundary(project_id: str, file: UploadFile = File(...),
                                   user: dict = Depends(get_current_user)):
     """DXF layer's largest closed ring -> the project's plot boundary (saved)."""
     proj = await load_project(project_id, user, write=True)
-    data = await file.read()
+    data = await read_upload(file)
     # A project that already has a plot keeps its position: the imported ring is
     # centred on the existing centroid so roads, towers and the 3D view do not jump.
     existing = (proj.get("plot") or {}).get("coordinates") or []
@@ -2951,10 +3007,14 @@ async def bim_export_ifc(project_id: str, user: dict = Depends(get_current_user)
 @api.get("/projects/{project_id}/bim/export/dwg")
 async def bim_export_dwg(project_id: str, user: dict = Depends(get_current_user)):
     proj = await load_project(project_id, user)
-    data = await run_in_threadpool(bimlib.export_siteplan_dwg, proj)
+    data, fmt = await run_in_threadpool(bimlib.export_siteplan_cad, proj)
     safe = re.sub(r"[^A-Za-z0-9_-]+", "_", (proj.get("name") or "siteplan"))[:40]
-    return Response(content=data, media_type="application/acad",
-                    headers={"Content-Disposition": f'attachment; filename="{safe}_siteplan.dwg"'})
+    # Without the ODA converter the server can only write DXF, so it says so in the file
+    # name and a header instead of passing DXF off as DWG.
+    media = "application/acad" if fmt == "dwg" else "application/dxf"
+    return Response(content=data, media_type=media,
+                    headers={"Content-Disposition": f'attachment; filename="{safe}_siteplan.{fmt}"',
+                             "X-Export-Format": fmt})
 
 
 # --------------------------------------------------------------------------- Autonomous Engineering & Intelligent Planning
@@ -3139,13 +3199,15 @@ async def get_knowledge_graph_route(project_id: str, user: dict = Depends(get_cu
 @api.get("/projects/{project_id}/ai-os/memory")
 async def get_engineering_memory_route(project_id: str, user: dict = Depends(get_current_user)):
     proj = await load_project(project_id, user)
-    return await run_in_threadpool(aioslib.get_engineering_memory, proj)
+    activity = await db.activity.find({"project_id": project_id}, {"_id": 0}).sort("at", 1).to_list(1000)
+    return await run_in_threadpool(aioslib.get_engineering_memory, proj, activity)
 
 
 @api.get("/projects/{project_id}/ai-os/decision-log")
 async def get_decision_log_route(project_id: str, user: dict = Depends(get_current_user)):
     proj = await load_project(project_id, user)
-    return await run_in_threadpool(aioslib.audit_decision_log, proj)
+    activity = await db.activity.find({"project_id": project_id}, {"_id": 0}).sort("at", 1).to_list(1000)
+    return await run_in_threadpool(aioslib.audit_decision_log, proj, activity)
 
 
 @api.post("/projects/{project_id}/ai-os/sandbox")
@@ -3168,8 +3230,8 @@ async def get_live_prices_route(metro: str = "Delhi-NCR"):
 
 
 @api.get("/procurement/forecast")
-async def get_price_forecast_route(material: str = "steel", horizon: int = 12):
-    return await run_in_threadpool(procurementlib.forecast_material_prices, material, horizon)
+async def get_price_forecast_route(material: str = "steel", horizon: int = 12, metro: str = "Delhi-NCR"):
+    return await run_in_threadpool(procurementlib.forecast_material_prices, material, horizon, metro)
 
 
 @api.get("/procurement/suppliers")
@@ -3279,6 +3341,8 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    # The browser hides these from scripts unless exposed; downloads read the real file name.
+    expose_headers=["Content-Disposition", "X-Export-Format"],
 )
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')

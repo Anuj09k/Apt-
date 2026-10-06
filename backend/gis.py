@@ -20,6 +20,15 @@ OVERPASS_ENDPOINTS = [
 ELEVATION_URL = "https://api.open-elevation.com/api/v1/lookup"
 EARTH_R = 6371000.0
 
+# The rules that turn raw OSM and elevation data into what is on screen: which tags count
+# as water, how the flood score is weighted, what the design response says. A stored
+# analysis is only reusable while those rules are unchanged, so EVERY edit to them must
+# bump this number. A stale result is then reported as out of date and re-run, instead of
+# sitting on the project disagreeing with the map drawn beside it.
+#
+#   1 — drains, ditches and sewage are no longer water; waterways draw as centrelines.
+ANALYSIS_RULES_VERSION = 1
+
 
 # ------------------------------------------------------------------ geometry
 def haversine(a, b):
@@ -101,13 +110,31 @@ def _overpass_query(bb, radius_m):
   way["leisure"~"^(park|garden|pitch|playground)$"]({box});
   way["landuse"~"^(grass|forest|meadow|recreation_ground|village_green|orchard)$"]({box});
   way["natural"~"^(wood|scrub|water|wetland)$"]({box});
-  way["waterway"~"^(river|stream|canal|drain)$"]({box});
+  way["waterway"~"^(river|stream|canal)$"]({box});
   relation["natural"="water"]({box});
   node["public_transport"="station"]({box});
   node["highway"="bus_stop"]({box});
   node["railway"~"^(station|halt|subway_entrance)$"]({box});
 );
 out geom 900;"""
+
+
+# Storm drains, ditches and sewage channels are built infrastructure, not water bodies.
+# In a built-up block they run under and beside the buildings, so treating them as
+# "water" put a water feature on top of developed land and let a storm drain drive the
+# flood score and the design response. They are dropped entirely: not drawn, not
+# counted, not scored. (The Overpass query no longer asks for drains either; this guard
+# also catches a drain or treatment pond reached through the `natural=water` clause.)
+ENGINEERED_WATERWAYS = {"drain", "ditch", "wastewater", "sewage", "sewer", "storm_drain"}
+ENGINEERED_WATER_TYPES = {"wastewater", "sewage", "sewer", "drain", "ditch",
+                          "stormwater", "storm_water"}
+
+
+def _is_engineered_water(tags):
+    """True for a drainage or sewage conveyance tagged as water on OSM."""
+    if str(tags.get("waterway") or "").lower() in ENGINEERED_WATERWAYS:
+        return True
+    return str(tags.get("water") or "").lower() in ENGINEERED_WATER_TYPES
 
 
 def _classify(tags):
@@ -118,10 +145,50 @@ def _classify(tags):
     if tags.get("highway") == "bus_stop" or tags.get("public_transport") == "station" or "railway" in tags:
         return "transit"
     if tags.get("natural") in ("water", "wetland") or "waterway" in tags:
-        return "water"
+        return None if _is_engineered_water(tags) else "water"
     if tags.get("leisure") or tags.get("landuse") or tags.get("natural") in ("wood", "scrub"):
         return "green"
     return None
+
+
+# OSM puts areas and centrelines in the same tag space. `natural=water` is a CLOSED RING
+# (a lake, a pond, a wetland); `waterway=stream|river|canal|drain` is a CENTRELINE. The
+# two cannot be drawn the same way: a map library closes whatever ring it is handed, so
+# painting a centreline as an area turns a storm drain running the length of a built-up
+# block into a filled "water body" lying across every plot it passes. Which renderer a
+# feature gets is therefore a property of its geometry, not of the layer it sits in.
+LINE_TAGS = ("waterway", "highway")
+
+
+def _geometry_role(tags, element_type="way"):
+    """How the geometry must be drawn: a node is a point, a waterway or road is a line,
+    everything else this module fetches is an area."""
+    if element_type == "node":
+        return "point"
+    if any(tags.get(k) for k in LINE_TAGS):
+        return "line"
+    return "area"
+
+
+def _cap_geometry(points, role, limit=240):
+    """Bound the stored vertex count WITHOUT changing what the shape is.
+
+    Truncating a ring to its first N vertices and letting the map close it silently
+    redraws the feature somewhere else: a 400-node lake ring cut at 60 becomes a
+    different polygon spanning ground the lake does not cover, and an open centreline
+    cut short stops describing the channel it came from. Decimate uniformly instead, so
+    the first vertex, the last vertex and the overall extent all survive.
+    """
+    n = len(points)
+    if n <= limit or limit < 3:
+        return points
+    if role == "area" and points[0] == points[-1]:
+        body = points[:-1]
+        step = (len(body) - 1) / float(limit - 2)
+        picked = [body[int(round(i * step))] for i in range(limit - 1)]
+        return picked + [points[-1]]
+    step = (n - 1) / float(limit - 1)
+    return [points[int(round(i * step))] for i in range(limit)]
 
 
 def fetch_overpass(coords, radius_m):
@@ -149,6 +216,7 @@ def _parse_overpass(data, coords, radius_m):
         cat = _classify(tags)
         if not cat:
             continue
+        role = _geometry_role(tags, el.get("type") or "way")
         if el.get("type") == "node":
             geometry = [[el["lat"], el["lon"]]]
         else:
@@ -163,7 +231,8 @@ def _parse_overpass(data, coords, radius_m):
             "name": tags.get("name", ""),
             "kind": tags.get("building") or tags.get("highway") or tags.get("waterway")
             or tags.get("natural") or tags.get("leisure") or tags.get("landuse") or tags.get("railway") or cat,
-            "geometry": geometry[:60],
+            "geom": role,
+            "geometry": _cap_geometry(geometry, role),
             "distance_m": dist,
             "on_plot": dist == 0.0,
         }
@@ -262,20 +331,37 @@ def terrain_analysis(coords):
 
 
 # ------------------------------------------------------------------ flood risk
+# What the nearest water feature actually is. A lake on the boundary and a stream
+# running through the plot are different hazards with different responses, so the label
+# is derived from the OSM tag the feature was classified from rather than calling every
+# one of them "a water body".
+WATER_KIND_LABEL = {
+    "water": "Water body", "wetland": "Wetland", "bay": "Bay", "reservoir": "Reservoir",
+    "river": "River", "stream": "Stream", "canal": "Canal", "riverbank": "River",
+    "dam": "Dam",
+}
+
+
+def _water_label(item):
+    return WATER_KIND_LABEL.get(str((item or {}).get("kind") or "").lower(), "Water body")
+
+
 def flood_risk(terrain, water):
     reasons = []
     score = 0
-    nearest_water = water[0]["distance_m"] if water else None
+    nearest = water[0] if water else None
+    nearest_water = nearest["distance_m"] if nearest else None
+    label = _water_label(nearest)
     if nearest_water is not None:
         if nearest_water <= 50:
             score += 45
-            reasons.append(f"Water body within {nearest_water:.0f} m of the plot boundary")
+            reasons.append(f"{label} within {nearest_water:.0f} m of the plot boundary")
         elif nearest_water <= 150:
             score += 30
-            reasons.append(f"Water body {nearest_water:.0f} m from the plot")
+            reasons.append(f"{label} {nearest_water:.0f} m from the plot")
         elif nearest_water <= 400:
             score += 15
-            reasons.append(f"Water body {nearest_water:.0f} m away")
+            reasons.append(f"{label} {nearest_water:.0f} m away")
     if terrain.get("available") and terrain.get("ring_mean_m") is not None:
         delta = round(terrain["mean_m"] - terrain["ring_mean_m"], 2)
         if delta <= -2.0:
@@ -318,6 +404,8 @@ def flood_risk(terrain, water):
     ]
     return {"score": score, "level": level, "reasons": reasons,
             "nearest_water_m": nearest_water,
+            "nearest_water_kind": (nearest or {}).get("kind"),
+            "nearest_water_label": label if nearest_water is not None else None,
             "elevation_delta_m": (round(terrain["mean_m"] - terrain["ring_mean_m"], 2)
                                   if terrain.get("available") and terrain.get("ring_mean_m") is not None else None),
             "plinth_height_m": plinth,
@@ -901,6 +989,7 @@ async def analyse_site(project, radius_m=500):
 
     return {
         "generated_at": datetime.now(timezone.utc).isoformat(),
+        "rules_version": ANALYSIS_RULES_VERSION,
         "radius_m": radius_m,
         "centroid": [round(c[0], 6), round(c[1], 6)],
         "polygon_signature": _signature(coords),
@@ -917,13 +1006,33 @@ async def analyse_site(project, radius_m=500):
         "suitability": suit,
         "buildability": build,
         "sources": {"overpass": ov_status, "elevation": el_status},
+        # The stored narrative describes numbers computed under specific rules. Carrying
+        # it across a re-run is only safe while the boundary AND the rules are unchanged;
+        # otherwise the report quotes a flood level the engine no longer reports.
         "ai_summary": (project.get("gis") or {}).get("ai_summary")
-        if (project.get("gis") or {}).get("polygon_signature") == _signature(coords) else None,
+        if staleness(project.get("gis"), coords) is None else None,
     }
 
 
 def _signature(coords):
     return "|".join(f"{round(c[0], 6)},{round(c[1], 6)}" for c in coords)
+
+
+def staleness(stored, coords, rules_version=ANALYSIS_RULES_VERSION):
+    """Why a stored analysis can no longer be trusted, or None while it still holds.
+
+    Two independent things invalidate one: the plot boundary it was measured against has
+    moved (`polygon`), or the rules that produced its numbers have changed (`rules`). An
+    analysis written before this stamp existed carries no version and is therefore
+    treated as out of date, which is the honest reading — nobody knows what rules made it.
+    """
+    if not stored:
+        return None
+    if stored.get("polygon_signature") != _signature(coords):
+        return "polygon"
+    if int(stored.get("rules_version") or 0) != int(rules_version):
+        return "rules"
+    return None
 
 
 def ai_context(project, gis):

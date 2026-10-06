@@ -14,6 +14,9 @@ Implements enterprise-grade collaboration capabilities:
 from datetime import datetime, timezone
 import uuid
 from typing import Any, Dict, List, Optional
+import hashlib
+import hmac
+import json
 
 STAGES = ["Site", "Design", "Engineering", "Cost & BOQ", "Deliver"]
 
@@ -30,6 +33,25 @@ DOWNSTREAM_OF_LAYOUT = ["Engineering", "Cost & BOQ", "Deliver"]
 
 def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+STAMP_FIELDS = ("signoff_stage", "signer", "role", "verified_at", "approval_id", "notes")
+
+
+def _stamp_key() -> bytes:
+    import auth
+    return auth._secret().encode("utf-8")
+
+
+def sign_stamp(stamp: Dict[str, Any]) -> str:
+    payload = json.dumps({k: stamp.get(k) for k in STAMP_FIELDS}, sort_keys=True, separators=(",", ":"))
+    return hmac.new(_stamp_key(), payload.encode("utf-8"), hashlib.sha256).hexdigest()
+
+
+def verify_stamp(stamp: Dict[str, Any]) -> bool:
+    """True when the stamp is unaltered since it was signed by this server."""
+    sig = (stamp or {}).get("signature")
+    return bool(sig) and hmac.compare_digest(sig, sign_stamp(stamp))
+
 
 
 def make_id() -> str:
@@ -135,13 +157,20 @@ class ApprovalWorkflow:
             approval["reviewed_at"] = timestamp
             approval["reviewer_role"] = role
             approval["notes"] = notes
-            approval["stamp"] = {
-                "certificate_id": f"CERT-{uuid.uuid4().hex[:8].upper()}",
+            stamp = {
                 "signoff_stage": approval["stage"],
                 "signer": user_name,
                 "role": role,
-                "verified_at": timestamp
+                "verified_at": timestamp,
+                "approval_id": approval.get("id"),
+                "notes": notes,
             }
+            # A real signature: HMAC-SHA256 over the stamp with the server's signing key, so a
+            # certificate can be checked with verify_stamp() and any edit to it is detectable.
+            # (It used to be a random id with nothing behind it.)
+            stamp["signature"] = sign_stamp(stamp)
+            stamp["certificate_id"] = f"CERT-{stamp['signature'][:8].upper()}"
+            approval["stamp"] = stamp
             approval["history"].append({
                 "action": "approved",
                 "by": user_name,

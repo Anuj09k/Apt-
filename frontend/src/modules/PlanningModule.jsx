@@ -954,7 +954,7 @@ export default function PlanningModule({ project, analysis, update, readOnly, pr
         <Section title="Unit mix (per typical floor)" testid="unit-mix-section"
           actions={!readOnly && (
             <Button size="sm" variant="outline" className="h-7 rounded-sm text-xs" data-testid="add-unit-button"
-              onClick={() => setList("units", [...(t.units || []), { id: uid(), type: "2bhk", count: 1, carpet_area: 75, balcony_area: 7 }])}>
+              onClick={() => setT("units", [...(t.units || []), { id: uid(), type: "2bhk", count: 1, carpet_area: 75, balcony_area: 7 }])}>
               <Plus className="h-3 w-3 mr-1" /> Add unit type
             </Button>
           )}>
@@ -975,7 +975,7 @@ export default function PlanningModule({ project, analysis, update, readOnly, pr
                     <Select
                       value={u.type}
                       disabled={readOnly}
-                      onValueChange={(v) => setList("units", t.units.map((x, idx) => (idx === i ? { ...x, type: v } : x)))}
+                      onValueChange={(v) => setT("units", t.units.map((x, idx) => (idx === i ? { ...x, type: v } : x)))}
                     >
                       <SelectTrigger className="h-8 rounded-sm text-xs" data-testid={`unit-type-${i}`}>
                         <SelectValue />
@@ -995,14 +995,14 @@ export default function PlanningModule({ project, analysis, update, readOnly, pr
                         className="h-8 font-mono text-xs text-right rounded-sm"
                         data-testid={`unit-${k}-${i}`}
                         value={u[k]}
-                        onChange={(e) => setList("units", t.units.map((x, idx) => (idx === i ? { ...x, [k]: Number(e.target.value) } : x)))}
+                        onChange={(e) => setT("units", t.units.map((x, idx) => (idx === i ? { ...x, [k]: Number(e.target.value) } : x)))}
                       />
                     </TableCell>
                   ))}
                   <TableCell className="py-1">
                     {!readOnly && (
                       <Button size="sm" variant="ghost" className="h-7 px-1 text-red-600" data-testid={`unit-delete-${i}`}
-                        onClick={() => setList("units", t.units.filter((_, idx) => idx !== i))}>
+                        onClick={() => setT("units", t.units.filter((_, idx) => idx !== i))}>
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
                     )}
@@ -1022,7 +1022,7 @@ export default function PlanningModule({ project, analysis, update, readOnly, pr
         <Section title="Staircases" testid="staircase-section"
           actions={!readOnly && (
             <Button size="sm" variant="outline" className="h-7 rounded-sm text-xs" data-testid="add-staircase-button"
-              onClick={() => setList("staircases", [...(t.staircases || []), { id: uid(), count: 1, width: 1.5, type: "dog-legged", location: "core" }])}>
+              onClick={() => setT("staircases", [...(t.staircases || []), { id: uid(), count: 1, width: 1.5, type: "dog-legged", location: "core" }])}>
               <Plus className="h-3 w-3" />
             </Button>
           )}>
@@ -1030,21 +1030,21 @@ export default function PlanningModule({ project, analysis, update, readOnly, pr
             <div key={s.id} className="border border-slate-200 rounded-sm p-2.5 mb-2 space-y-2" data-testid={`staircase-${i}`}>
               <div className="grid grid-cols-2 gap-2">
                 <NumField label="Count" value={s.count} disabled={readOnly} testid={`staircase-count-${i}`}
-                  onChange={(v) => setList("staircases", t.staircases.map((x, idx) => (idx === i ? { ...x, count: v } : x)))} />
+                  onChange={(v) => setT("staircases", t.staircases.map((x, idx) => (idx === i ? { ...x, count: v } : x)))} />
                 <NumField label="Width" suffix="m" step={0.1} value={s.width} disabled={readOnly} testid={`staircase-width-${i}`}
-                  onChange={(v) => setList("staircases", t.staircases.map((x, idx) => (idx === i ? { ...x, width: v } : x)))} />
+                  onChange={(v) => setT("staircases", t.staircases.map((x, idx) => (idx === i ? { ...x, width: v } : x)))} />
               </div>
               <Select value={s.type} disabled={readOnly}
-                onValueChange={(v) => setList("staircases", t.staircases.map((x, idx) => (idx === i ? { ...x, type: v } : x)))}>
+                onValueChange={(v) => setT("staircases", t.staircases.map((x, idx) => (idx === i ? { ...x, type: v } : x)))}>
                 <SelectTrigger className="h-8 rounded-sm text-xs" data-testid={`staircase-type-${i}`}><SelectValue /></SelectTrigger>
                 <SelectContent>{STAIR_TYPES.map((st) => <SelectItem key={st} value={st}>{st}</SelectItem>)}</SelectContent>
               </Select>
               <div className="flex items-center justify-between">
                 <TextField label="Location" value={s.location} disabled={readOnly} testid={`staircase-location-${i}`}
-                  onChange={(v) => setList("staircases", t.staircases.map((x, idx) => (idx === i ? { ...x, location: v } : x)))} />
+                  onChange={(v) => setT("staircases", t.staircases.map((x, idx) => (idx === i ? { ...x, location: v } : x)))} />
                 {!readOnly && (
                   <Button size="sm" variant="ghost" className="h-7 px-1 mt-4 text-red-600" data-testid={`staircase-delete-${i}`}
-                    onClick={() => setList("staircases", t.staircases.filter((_, idx) => idx !== i))}>
+                    onClick={() => setT("staircases", t.staircases.filter((_, idx) => idx !== i))}>
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>
                 )}
@@ -1056,7 +1056,7 @@ export default function PlanningModule({ project, analysis, update, readOnly, pr
         <Section title="Lifts" testid="lift-section"
           actions={!readOnly && (
             <Button size="sm" variant="outline" className="h-7 rounded-sm text-xs" data-testid="add-lift-button"
-              onClick={() => setList("lifts", [...(t.lifts || []), { id: uid(), count: 1, capacity: 8, location: "core" }])}>
+              onClick={() => setT("lifts", [...(t.lifts || []), { id: uid(), count: 1, capacity: 8, location: "core" }])}>
               <Plus className="h-3 w-3" />
             </Button>
           )}>
@@ -1064,16 +1064,16 @@ export default function PlanningModule({ project, analysis, update, readOnly, pr
             <div key={l.id} className="border border-slate-200 rounded-sm p-2.5 mb-2 space-y-2" data-testid={`lift-${i}`}>
               <div className="grid grid-cols-2 gap-2">
                 <NumField label="Lifts" value={l.count} disabled={readOnly} testid={`lift-count-${i}`}
-                  onChange={(v) => setList("lifts", t.lifts.map((x, idx) => (idx === i ? { ...x, count: v } : x)))} />
+                  onChange={(v) => setT("lifts", t.lifts.map((x, idx) => (idx === i ? { ...x, count: v } : x)))} />
                 <NumField label="Capacity (persons)" value={l.capacity} disabled={readOnly} testid={`lift-capacity-${i}`}
-                  onChange={(v) => setList("lifts", t.lifts.map((x, idx) => (idx === i ? { ...x, capacity: v } : x)))} />
+                  onChange={(v) => setT("lifts", t.lifts.map((x, idx) => (idx === i ? { ...x, capacity: v } : x)))} />
               </div>
               <div className="flex items-end justify-between gap-2">
                 <TextField label="Location" value={l.location} disabled={readOnly} testid={`lift-location-${i}`}
-                  onChange={(v) => setList("lifts", t.lifts.map((x, idx) => (idx === i ? { ...x, location: v } : x)))} />
+                  onChange={(v) => setT("lifts", t.lifts.map((x, idx) => (idx === i ? { ...x, location: v } : x)))} />
                 {!readOnly && (
                   <Button size="sm" variant="ghost" className="h-8 px-1 text-red-600" data-testid={`lift-delete-${i}`}
-                    onClick={() => setList("lifts", t.lifts.filter((_, idx) => idx !== i))}>
+                    onClick={() => setT("lifts", t.lifts.filter((_, idx) => idx !== i))}>
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>
                 )}
@@ -1086,7 +1086,7 @@ export default function PlanningModule({ project, analysis, update, readOnly, pr
           description="Building-specific spaces for this tower (entrance/lift lobby etc). Shared society-wide amenities like clubhouse, gym or pool go in the Society amenities section above."
           actions={!readOnly && (
             <Button size="sm" variant="outline" className="h-7 rounded-sm text-xs" data-testid="add-common-space-button"
-              onClick={() => setList("common_spaces", [...(t.common_spaces || []), { id: uid(), name: "New amenity", type: "amenity", area: 30 }])}>
+              onClick={() => setT("common_spaces", [...(t.common_spaces || []), { id: uid(), name: "New amenity", type: "amenity", area: 30 }])}>
               <Plus className="h-3 w-3" />
             </Button>
           )}>
@@ -1097,15 +1097,15 @@ export default function PlanningModule({ project, analysis, update, readOnly, pr
               <div key={c.id} className="flex items-end gap-2" data-testid={`common-space-${i}`}>
                 <div className="flex-1">
                   <TextField label="Name" value={c.name} disabled={readOnly} testid={`common-space-name-${i}`}
-                    onChange={(v) => setList("common_spaces", t.common_spaces.map((x, idx) => (idx === i ? { ...x, name: v } : x)))} />
+                    onChange={(v) => setT("common_spaces", t.common_spaces.map((x, idx) => (idx === i ? { ...x, name: v } : x)))} />
                 </div>
                 <div className="w-24">
                   <NumField label="Area" suffix="m²" value={c.area} disabled={readOnly} testid={`common-space-area-${i}`}
-                    onChange={(v) => setList("common_spaces", t.common_spaces.map((x, idx) => (idx === i ? { ...x, area: v } : x)))} />
+                    onChange={(v) => setT("common_spaces", t.common_spaces.map((x, idx) => (idx === i ? { ...x, area: v } : x)))} />
                 </div>
                 {!readOnly && (
                   <Button size="sm" variant="ghost" className="h-9 px-1 text-red-600" data-testid={`common-space-delete-${i}`}
-                    onClick={() => setList("common_spaces", t.common_spaces.filter((_, idx) => idx !== i))}>
+                    onClick={() => setT("common_spaces", t.common_spaces.filter((_, idx) => idx !== i))}>
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>
                 )}
@@ -1123,7 +1123,7 @@ export default function PlanningModule({ project, analysis, update, readOnly, pr
           <div className="flex items-center gap-2">
             {floorStale && (
               <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded-sm bg-amber-50 text-amber-700" data-testid="floor-layout-stale-badge">
-                unit mix changed
+                outdated - regenerate
               </span>
             )}
             {!readOnly && (

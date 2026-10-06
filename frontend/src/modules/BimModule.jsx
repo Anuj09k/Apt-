@@ -88,8 +88,12 @@ export default function BimModule({ project, projectId, readOnly }) {
 
   const exportDwg = async () => {
     try {
-      await downloadFile(`/projects/${projectId}/bim/export/dwg`, `${project?.name || "siteplan"}_siteplan.dwg`);
-      toast.success("AutoCAD DWG downloaded — opens in AutoCAD, BricsCAD, DraftSight");
+      const saved = await downloadFile(`/projects/${projectId}/bim/export/dwg`, `${project?.name || "siteplan"}_siteplan.dwg`);
+      if (saved?.toLowerCase().endsWith(".dwg")) {
+        toast.success("AutoCAD DWG downloaded - opens in AutoCAD, BricsCAD, DraftSight");
+      } else {
+        toast.info("Saved as DXF: the server has no DWG converter (ODA File Converter). AutoCAD, BricsCAD and Revit open DXF directly.");
+      }
     } catch (e) {
       toast.error(apiError(e.message || e.response?.data?.detail, "AutoCAD DWG export failed"));
     }

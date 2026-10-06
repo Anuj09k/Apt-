@@ -362,7 +362,7 @@ export default function CollaborationModule({ projectId, setProject, readOnly })
                   {app.stamp && isApproved && (
                     <div className="mt-2 p-1.5 bg-white/80 border border-emerald-200 rounded text-[10px] text-emerald-900 space-y-0.5">
                       <div className="flex items-center gap-1 font-semibold">
-                        <ShieldCheck className="h-3 w-3 text-emerald-600" /> Audit Certified
+                        <ShieldCheck className="h-3 w-3 text-emerald-600" /> Signed sign-off (HMAC-SHA256)
                       </div>
                       <div className="font-mono text-[9px] text-emerald-700 truncate">
                         Cert: {app.stamp.certificate_id}

@@ -14,7 +14,7 @@ Deleting the bad ones silently would be worse, not better: the reader would see 
 answer with a hole in it. They are returned alongside the text so the UI can mark them,
 and the reader can see exactly which reference to check before relying on it.
 
-The registry has two tiers. The 62 curated entries are the ones that ship, and they are a
+The registry has two tiers. The 66 curated entries are the ones that ship, and they are a
 list of clause numbers and topics, not of code text. Whatever corpus the operator has
 loaded is the second: codesearch knows every clause it holds the text of, and a citation to
 one of those is as real as a citation gets -- often it is the app quoting a passage it just

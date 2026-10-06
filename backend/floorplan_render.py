@@ -377,6 +377,7 @@ def render_floorplan_image(
 
     fig = Figure(figsize=(fig_w, fig_h), dpi=dpi, facecolor="#F8FAFC")
     ax = fig.add_subplot(111)
+    fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
     ax.set_facecolor("#FFFFFF")
 
     # Y increases downward: North = top, South = bottom
@@ -445,214 +446,293 @@ def render_floorplan_image(
             color="#1E40AF", family="monospace", zorder=8
         )
 
-    # Central corridor
-    corridor_w = float(tower.get("corridor_width") or 0)
-    if corridor_w > 0:
-        corr_y = max_y - corridor_w
-        corr_rect = Rectangle(
-            (min_x, corr_y), span_x, corridor_w,
-            facecolor="#E2E8F0", edgecolor="#64748B",
-            linewidth=1.5, zorder=2
-        )
-        ax.add_patch(corr_rect)
-        ax.text(
-            min_x + span_x / 2.0, corr_y + corridor_w / 2.0,
-            "CENTRAL CORRIDOR / CIRCULATION LOBBY",
-            ha="center", va="center",
-            fontsize=7.5, fontweight="bold",
-            color="#475569", family="sans-serif", zorder=3
-        )
+    # ------------------------------------------------------------------ drawing scale
+    # Walls, openings and lettering are drawn at true size, so everything is converted from
+    # metres to points with the drawing's actual scale.
+    ppm = min(fig_w * 72.0 / total_w, fig_h * 72.0 / total_h)      # points per metre
+    WALL_EXT, WALL_INT, RAIL = 0.23, 0.115, 0.05
+    POCHE = "#1E293B"
 
-    # Draw room floors, poché walls, and furniture
+    def lw_of(metres: float) -> float:
+        return max(metres * ppm, 0.4)
+
+    def fit_pt(text: str, width_m: float, height_m: float, max_pt: float, min_pt: float = 3.4,
+               bold: bool = False):
+        if not text:
+            return None
+        char = 0.64 if bold else 0.56
+        by_w = width_m * ppm * 0.88 / (len(text) * char)
+        by_h = height_m * ppm * 0.42
+        pt = min(max_pt, by_w, by_h)
+        return pt if pt >= min_pt else None
+
+    by_id = {str(r.get("id")): r for r in rooms}
+    has_corridor_room = any(str(r.get("type")) == "common" for r in rooms)
+
+    # Unit envelopes and their corridor side, from the rooms' own metadata.
+    unit_box: Dict[Any, Tuple[float, float, float, float]] = {}
+    unit_entry: Dict[Any, str] = {}
+    for uid, urooms in unit_map.items():
+        ux = min(float(r.get("x", 0)) for r in urooms)
+        uy = min(float(r.get("y", 0)) for r in urooms)
+        ux2 = max(float(r.get("x", 0)) + float(r.get("w", 0)) for r in urooms)
+        uy2 = max(float(r.get("y", 0)) + float(r.get("h", 0)) for r in urooms)
+        unit_box[uid] = (ux, uy, ux2, uy2)
+        entry = next((r for r in urooms if r.get("main_entrance")), None)
+        unit_entry[uid] = str((entry or {}).get("entry_edge") or "S").upper()
+
+    def edges_of(r):
+        x, y, w, h = float(r["x"]), float(r["y"]), float(r["w"]), float(r["h"])
+        return {"N": ((x, y), (x + w, y)), "S": ((x, y + h), (x + w, y + h)),
+                "W": ((x, y), (x, y + h)), "E": ((x + w, y), (x + w, y + h))}
+
+    def on_unit_side(r, side, eps=0.05):
+        box = unit_box.get(r.get("unit_id"))
+        if not box:
+            return False
+        ux, uy, ux2, uy2 = box
+        x, y, w, h = float(r["x"]), float(r["y"]), float(r["w"]), float(r["h"])
+        return {"N": abs(y - uy) < eps, "S": abs(y + h - uy2) < eps,
+                "W": abs(x - ux) < eps, "E": abs(x + w - ux2) < eps}[side]
+
+    def shared_edge(a, b, eps=0.05):
+        """(side of a, start, end) of the wall a and b share, or None."""
+        ax_, ay, aw, ah = float(a["x"]), float(a["y"]), float(a["w"]), float(a["h"])
+        bx, by_, bw, bh = float(b["x"]), float(b["y"]), float(b["w"]), float(b["h"])
+        xo0, xo1 = max(ax_, bx), min(ax_ + aw, bx + bw)
+        yo0, yo1 = max(ay, by_), min(ay + ah, by_ + bh)
+        if xo1 - xo0 > 0.3:
+            if abs(ay + ah - by_) < eps:
+                return "S", xo0, xo1
+            if abs(ay - (by_ + bh)) < eps:
+                return "N", xo0, xo1
+        if yo1 - yo0 > 0.3:
+            if abs(ax_ + aw - bx) < eps:
+                return "E", yo0, yo1
+            if abs(ax_ - (bx + bw)) < eps:
+                return "W", yo0, yo1
+        return None
+
+    def target_of(r):
+        t = r.get("door_to") or r.get("door_child_of")
+        if not t:
+            return None
+        uid = r.get("unit_id")
+        for key in (f"{uid}-{t}", str(t)):
+            if key in by_id and by_id[key] is not r:
+                return by_id[key]
+        return next((c for c in rooms if c is not r and c.get("unit_id") == uid
+                     and str(c.get("name", "")).lower() == str(t).lower()), None)
+
+    # ------------------------------------------------------------------ corridor (fallback only)
+    corridor_w = float(tower.get("corridor_width") or 0)
+    if corridor_w > 0 and not has_corridor_room:
+        corr_y = max_y - corridor_w
+        ax.add_patch(Rectangle((min_x, corr_y), span_x, corridor_w, facecolor="#E2E8F0",
+                               edgecolor="none", zorder=2))
+
+    # ------------------------------------------------------------------ floors and furniture
     for r in rooms:
-        rx = float(r.get("x", 0))
-        ry = float(r.get("y", 0))
-        rw = max(float(r.get("w", 3)), 0.5)
-        rh = max(float(r.get("h", 3)), 0.5)
+        rx, ry = float(r.get("x", 0)), float(r.get("y", 0))
+        rw, rh = max(float(r.get("w", 3)), 0.3), max(float(r.get("h", 3)), 0.3)
         rtype = str(r.get("type") or "common").lower()
         rname = str(r.get("name") or rtype.replace("_", " ").title())
-        area_sqm = rw * rh
-        area_sqft = area_sqm * 10.7639
-
-        fill_color = ROOM_COLORS.get(rtype, DEFAULT_ROOM_COLOR)
-
-        # Room Floor Surface
-        room_rect = Rectangle(
-            (rx, ry), rw, rh,
-            facecolor=fill_color,
-            edgecolor="#0F172A",
-            linewidth=2.0,  # Solid architectural wall line
-            zorder=3
-        )
-        ax.add_patch(room_rect)
-
-        # Shaft cross
+        ax.add_patch(Rectangle((rx, ry), rw, rh, facecolor=ROOM_COLORS.get(rtype, DEFAULT_ROOM_COLOR),
+                               edgecolor="none", zorder=3))
+        if rtype in ("balcony", "terrace"):
+            for i in range(1, int(rw / 0.15)):
+                ax.plot([rx + i * 0.15, rx + i * 0.15], [ry, ry + rh], color="#E7E5E4", linewidth=0.4, zorder=3)
         if rtype == "shaft":
-            ax.plot([rx, rx + rw], [ry, ry + rh], color="#94A3B8", linewidth=0.9, zorder=4)
-            ax.plot([rx, rx + rw], [ry + rh, ry], color="#94A3B8", linewidth=0.9, zorder=4)
+            ax.plot([rx, rx + rw], [ry, ry + rh], color="#94A3B8", linewidth=0.8, zorder=4)
+            ax.plot([rx, rx + rw], [ry + rh, ry], color="#94A3B8", linewidth=0.8, zorder=4)
+        if rtype not in ("passage", "common", "shaft", "storage", "balcony", "terrace"):
+            _draw_furniture_blocks(ax, rx, ry, rw, rh, rtype, rname)
 
-        # Realistic Architectural Furniture Block
-        _draw_furniture_blocks(ax, rx, ry, rw, rh, rtype, rname)
+    # ------------------------------------------------------------------ walls (poché)
+    for r in rooms:
+        rtype = str(r.get("type") or "").lower()
+        if rtype in ("balcony", "terrace"):
+            continue
+        rx, ry, rw, rh = float(r["x"]), float(r["y"]), float(r["w"]), float(r["h"])
+        ax.add_patch(Rectangle((rx, ry), rw, rh, fill=False, edgecolor=POCHE,
+                               linewidth=lw_of(WALL_INT), joinstyle="miter", zorder=6))
+    for r in rooms:
+        rtype = str(r.get("type") or "").lower()
+        if not r.get("unit_id"):
+            continue
+        for side, (p0, p1) in edges_of(r).items():
+            if not on_unit_side(r, side):
+                continue
+            if rtype in ("balcony", "terrace"):
+                # Railing: two thin lines at the slab edge, no masonry.
+                off = 0.06 if side in ("N", "W") else -0.06
+                if side in ("N", "S"):
+                    ax.plot([p0[0], p1[0]], [p0[1], p1[1]], color=POCHE, linewidth=lw_of(RAIL), zorder=6)
+                    ax.plot([p0[0], p1[0]], [p0[1] + off, p1[1] + off], color=POCHE, linewidth=0.5, zorder=6)
+                else:
+                    ax.plot([p0[0], p1[0]], [p0[1], p1[1]], color=POCHE, linewidth=lw_of(RAIL), zorder=6)
+                    ax.plot([p0[0] + off, p1[0] + off], [p0[1], p1[1]], color=POCHE, linewidth=0.5, zorder=6)
+            else:
+                ax.plot([p0[0], p1[0]], [p0[1], p1[1]], color=POCHE, linewidth=lw_of(WALL_EXT),
+                        solid_capstyle="projecting", zorder=6)
+    # Balcony side walls are low parapets: thin.
+    for r in rooms:
+        if str(r.get("type")) in ("balcony", "terrace"):
+            rx, ry, rw, rh = float(r["x"]), float(r["y"]), float(r["w"]), float(r["h"])
+            ax.add_patch(Rectangle((rx, ry), rw, rh, fill=False, edgecolor=POCHE,
+                                   linewidth=lw_of(RAIL), zorder=6))
 
-        # Windows: crisp double cyan/blue glazing lines
-        has_window = r.get("has_window") or rtype in ("living", "bedroom", "study")
-        if has_window:
-            eps = 0.3
-            if abs(ry - min_y) < eps:
-                ax.plot([rx + rw * 0.18, rx + rw * 0.82], [ry, ry], color="#0284C7", linewidth=3.0, zorder=6)
-                ax.plot([rx + rw * 0.18, rx + rw * 0.82], [ry + 0.08, ry + 0.08], color="#38BDF8", linewidth=1.0, zorder=6)
-            elif abs(ry + rh - max_y) < eps:
-                ax.plot([rx + rw * 0.18, rx + rw * 0.82], [ry + rh, ry + rh], color="#0284C7", linewidth=3.0, zorder=6)
-                ax.plot([rx + rw * 0.18, rx + rw * 0.82], [ry + rh - 0.08, ry + rh - 0.08], color="#38BDF8", linewidth=1.0, zorder=6)
-            elif abs(rx - min_x) < eps:
-                ax.plot([rx, rx], [ry + rh * 0.18, ry + rh * 0.82], color="#0284C7", linewidth=3.0, zorder=6)
-                ax.plot([rx + 0.08, rx + 0.08], [ry + rh * 0.18, ry + rh * 0.82], color="#38BDF8", linewidth=1.0, zorder=6)
-            elif abs(rx + rw - max_x) < eps:
-                ax.plot([rx + rw, rx + rw], [ry + rh * 0.18, ry + rh * 0.82], color="#0284C7", linewidth=3.0, zorder=6)
-                ax.plot([rx + rw - 0.08, rx + rw - 0.08], [ry + rh * 0.18, ry + rh * 0.82], color="#38BDF8", linewidth=1.0, zorder=6)
+    # ------------------------------------------------------------------ windows / glazed doors
+    def glaze(side, a0, a1, at, thick):
+        gap_lw = lw_of(thick) + 0.6
+        if side in ("N", "S"):
+            ax.plot([a0, a1], [at, at], color="#FFFFFF", linewidth=gap_lw, zorder=7, solid_capstyle="butt")
+            for d in (-thick / 4.0, 0.0, thick / 4.0):
+                ax.plot([a0, a1], [at + d, at + d], color="#0284C7", linewidth=0.6, zorder=8)
+            for e in (a0, a1):
+                ax.plot([e, e], [at - thick / 2, at + thick / 2], color=POCHE, linewidth=0.7, zorder=8)
+        else:
+            ax.plot([at, at], [a0, a1], color="#FFFFFF", linewidth=gap_lw, zorder=7, solid_capstyle="butt")
+            for d in (-thick / 4.0, 0.0, thick / 4.0):
+                ax.plot([at + d, at + d], [a0, a1], color="#0284C7", linewidth=0.6, zorder=8)
+            for e in (a0, a1):
+                ax.plot([at - thick / 2, at + thick / 2], [e, e], color=POCHE, linewidth=0.7, zorder=8)
 
-        # Doors and door swing arcs (Mindful and realistic placement on verified shared walls)
-        target_name = r.get("door_to")
-        main_entry = r.get("main_entrance") is True or r.get("service_access") is True
-        door_info = None
+    glazed_types = ("living", "bedroom", "kitchen", "study", "office", "family", "dining", "servant")
+    for r in rooms:
+        rtype = str(r.get("type") or "").lower()
+        if rtype not in glazed_types or not r.get("unit_id"):
+            continue
+        entry_side = unit_entry.get(r.get("unit_id"), "S")
+        done = False
+        for b in rooms:
+            if b.get("unit_id") != r.get("unit_id") or str(b.get("type")) not in ("balcony", "terrace"):
+                continue
+            se = shared_edge(r, b)
+            if se:
+                side, s0, s1 = se
+                at = float(r["y"]) if side == "N" else float(r["y"]) + float(r["h"]) if side == "S" else \
+                    float(r["x"]) if side == "W" else float(r["x"]) + float(r["w"])
+                span = s1 - s0
+                glaze(side, s0 + span * 0.15, s1 - span * 0.15, at, WALL_INT)   # glazed door to balcony
+                done = True
+        for side, (p0, p1) in edges_of(r).items():
+            if side == entry_side or not on_unit_side(r, side):
+                continue
+            if side in ("N", "S"):
+                span = p1[0] - p0[0]
+                glaze(side, p0[0] + span * 0.2, p1[0] - span * 0.2, p0[1], WALL_EXT)
+            else:
+                span = p1[1] - p0[1]
+                glaze(side, p0[1] + span * 0.2, p1[1] - span * 0.2, p0[0], WALL_EXT)
+            done = True
+        _ = done
 
-        if main_entry:
-            door_edge = r.get("entry_edge") or "S"
-            door_len = min(1.05, max(0.90, rw * 0.35 if door_edge in ("N", "S") else rh * 0.35))
-            if door_edge == "S":
-                hx, hy = rx + 0.35, ry + rh
-                door_info = ("S", hx, hy, door_len)
-            elif door_edge == "N":
-                hx, hy = rx + 0.35, ry
-                door_info = ("N", hx, hy, door_len)
-            elif door_edge == "E":
-                hx, hy = rx + rw, ry + 0.35
-                door_info = ("E", hx, hy, door_len)
-            elif door_edge == "W":
-                hx, hy = rx, ry + 0.35
-                door_info = ("W", hx, hy, door_len)
-        elif target_name:
-            target = next((
-                c for c in rooms
-                if c.get("id") != r.get("id") and (
-                    c.get("id") == f"{r.get('unit_id')}-{target_name}" or
-                    c.get("id") == target_name or
-                    (r.get("unit_id") and c.get("unit_id") == r.get("unit_id") and str(c.get("id", "")).endswith(f"-{target_name}")) or
-                    (str(c.get("name", "")).lower() == str(target_name).lower())
-                )
-            ), None)
-            if target:
-                tx = float(target.get("x", 0))
-                ty = float(target.get("y", 0))
-                tw = float(target.get("w", 3))
-                th = float(target.get("h", 3))
-                eps = 0.35
+    # ------------------------------------------------------------------ doors
+    def door(side, hinge_x, hinge_y, leaf, thick):
+        """Opening cut through the wall plus a leaf swinging into the room on `side`'s inside."""
+        if side in ("N", "S"):
+            ax.plot([hinge_x, hinge_x + leaf], [hinge_y, hinge_y], color="#FFFFFF",
+                    linewidth=lw_of(thick) + 0.8, zorder=7, solid_capstyle="butt")
+            sgn = 1 if side == "N" else -1
+            ax.plot([hinge_x, hinge_x], [hinge_y, hinge_y + sgn * leaf], color=POCHE, linewidth=0.9, zorder=8)
+            ax.add_patch(Arc((hinge_x, hinge_y), leaf * 2, leaf * 2, theta1=0 if side == "N" else 270,
+                             theta2=90 if side == "N" else 360, color="#64748B", linewidth=0.6, zorder=8))
+        else:
+            ax.plot([hinge_x, hinge_x], [hinge_y, hinge_y + leaf], color="#FFFFFF",
+                    linewidth=lw_of(thick) + 0.8, zorder=7, solid_capstyle="butt")
+            sgn = 1 if side == "W" else -1
+            ax.plot([hinge_x, hinge_x + sgn * leaf], [hinge_y, hinge_y], color=POCHE, linewidth=0.9, zorder=8)
+            ax.add_patch(Arc((hinge_x, hinge_y), leaf * 2, leaf * 2, theta1=0 if side == "W" else 90,
+                             theta2=90 if side == "W" else 180, color="#64748B", linewidth=0.6, zorder=8))
 
-                x_overlap_start = max(rx, tx)
-                x_overlap_end = min(rx + rw, tx + tw)
-                x_overlap = x_overlap_end - x_overlap_start
+    leaf_of = {"bedroom": 0.9, "bathroom": 0.75, "kitchen": 0.8, "servant": 0.75, "closet": 0.75}
+    for r in rooms:
+        rtype = str(r.get("type") or "").lower()
+        rx, ry, rw, rh = float(r["x"]), float(r["y"]), float(r["w"]), float(r["h"])
+        if r.get("main_entrance") or (r.get("service_access") and rtype == "servant"):
+            side = str(r.get("entry_edge") or "S").upper()
+            leaf = 1.1 if r.get("main_entrance") else 0.9
+            if side in ("N", "S"):
+                hx = rx + max((rw - leaf) / 2.0, 0.1)
+                door(side, hx, ry if side == "N" else ry + rh, min(leaf, rw - 0.2), WALL_EXT)
+            else:
+                hy = ry + max((rh - leaf) / 2.0, 0.1)
+                door(side, rx if side == "W" else rx + rw, hy, min(leaf, rh - 0.2), WALL_EXT)
+            continue
+        if rtype in ("balcony", "terrace", "passage", "common", "shaft") or r.get("unit_id") is None:
+            continue
+        t = target_of(r)
+        if not t:
+            continue
+        se = shared_edge(r, t)
+        if not se:
+            continue
+        side, s0, s1 = se
+        leaf = min(leaf_of.get(rtype, 0.9), s1 - s0 - 0.25)
+        if leaf < 0.55:
+            continue
+        a0 = s0 + 0.12
+        if side == "N":
+            door("N", a0, ry, leaf, WALL_INT)
+        elif side == "S":
+            door("S", a0, ry + rh, leaf, WALL_INT)
+        elif side == "W":
+            door("W", rx, a0, leaf, WALL_INT)
+        else:
+            door("E", rx + rw, a0, leaf, WALL_INT)
 
-                y_overlap_start = max(ry, ty)
-                y_overlap_end = min(ry + rh, ty + th)
-                y_overlap = y_overlap_end - y_overlap_start
-
-                if x_overlap >= 0.75:
-                    door_len = min(0.90, max(0.75, x_overlap * 0.7))
-                    # Check South of r (touches target's North)
-                    if abs((ry + rh) - ty) < eps:
-                        hx = x_overlap_start + 0.25
-                        hy = ry + rh
-                        door_info = ("S", hx, hy, door_len)
-                    # Check North of r (touches target's South)
-                    elif abs(ry - (ty + th)) < eps:
-                        hx = x_overlap_start + 0.25
-                        hy = ry
-                        door_info = ("N", hx, hy, door_len)
-                if not door_info and y_overlap >= 0.75:
-                    door_len = min(0.90, max(0.75, y_overlap * 0.7))
-                    # Check East of r (touches target's West)
-                    if abs((rx + rw) - tx) < eps:
-                        hx = rx + rw
-                        hy = y_overlap_start + 0.25
-                        door_info = ("E", hx, hy, door_len)
-                    # Check West of r (touches target's East)
-                    elif abs(rx - (tx + tw)) < eps:
-                        hx = rx
-                        hy = y_overlap_start + 0.25
-                        door_info = ("W", hx, hy, door_len)
-
-        if door_info:
-            edge, dx, dy, dlen = door_info
-            if edge == "S":
-                # Opening along horizontal south wall
-                ax.plot([dx, dx + dlen], [dy, dy], color="#FFFFFF", linewidth=3.2, zorder=6)
-                # Door leaf swings into room r (North, -Y direction)
-                ax.plot([dx, dx], [dy, dy - dlen], color="#1E293B", linewidth=1.5, zorder=6)
-                # 90° arc connecting leaf to closed position
-                arc = Arc((dx, dy), dlen * 2, dlen * 2, angle=0, theta1=270, theta2=360, color="#475569", linewidth=1.0, linestyle="--", zorder=6)
-                ax.add_patch(arc)
-            elif edge == "N":
-                # Opening along horizontal north wall
-                ax.plot([dx, dx + dlen], [dy, dy], color="#FFFFFF", linewidth=3.2, zorder=6)
-                # Door leaf swings into room r (South, +Y direction)
-                ax.plot([dx, dx], [dy, dy + dlen], color="#1E293B", linewidth=1.5, zorder=6)
-                # 90° arc connecting closed position to leaf
-                arc = Arc((dx, dy), dlen * 2, dlen * 2, angle=0, theta1=0, theta2=90, color="#475569", linewidth=1.0, linestyle="--", zorder=6)
-                ax.add_patch(arc)
-            elif edge == "E":
-                # Opening along vertical east wall
-                ax.plot([dx, dx], [dy, dy + dlen], color="#FFFFFF", linewidth=3.2, zorder=6)
-                # Door leaf swings into room r (West, -X direction)
-                ax.plot([dx - dlen, dx], [dy, dy], color="#1E293B", linewidth=1.5, zorder=6)
-                # 90° arc connecting closed position to leaf
-                arc = Arc((dx, dy), dlen * 2, dlen * 2, angle=0, theta1=90, theta2=180, color="#475569", linewidth=1.0, linestyle="--", zorder=6)
-                ax.add_patch(arc)
-            elif edge == "W":
-                # Opening along vertical west wall
-                ax.plot([dx, dx], [dy, dy + dlen], color="#FFFFFF", linewidth=3.2, zorder=6)
-                # Door leaf swings into room r (East, +X direction)
-                ax.plot([dx, dx + dlen], [dy, dy], color="#1E293B", linewidth=1.5, zorder=6)
-                # 90° arc connecting leaf to closed position
-                arc = Arc((dx, dy), dlen * 2, dlen * 2, angle=0, theta1=0, theta2=90, color="#475569", linewidth=1.0, linestyle="--", zorder=6)
-                ax.add_patch(arc)
-
-        # Translucent Architectural Room Name & Area Badge
+    # ------------------------------------------------------------------ labels sized to fit
+    for r in rooms:
+        rx, ry = float(r.get("x", 0)), float(r.get("y", 0))
+        rw, rh = max(float(r.get("w", 3)), 0.3), max(float(r.get("h", 3)), 0.3)
+        rtype = str(r.get("type") or "common").lower()
+        rname = str(r.get("name") or rtype.replace("_", " ").title())
+        if rtype == "common":
+            rname = "Corridor"
         cx = rx + rw / 2.0
-        # For bedrooms, shift badge towards bottom/circulation area away from bed
-        if rtype == "bedroom" and rh >= 3.4:
-            cy = ry + rh * 0.72
+        cy = ry + rh * (0.70 if rtype == "bedroom" and rh >= 3.4 else 0.5)
+        dims = f"{rw:.2f} × {rh:.2f} m"
+        short = (rname.replace("Bathroom", "Bath").replace("Bedroom", "Bed").replace("Ensuite", "Ens.")
+                 .replace("Master", "Mstr").replace("Entrance ", "").replace("Private ", ""))
+        name_pt = fit_pt(rname.upper(), rw, rh, 6.8, bold=True)
+        label = rname.upper()
+        if name_pt is None:
+            name_pt = fit_pt(short.upper(), rw, rh, 6.0, min_pt=3.0, bold=True)
+            label = short.upper()
+        if name_pt is None:
+            continue
+        dim_pt = fit_pt(dims, rw, rh * 0.5, min(name_pt * 0.82, 5.6), min_pt=3.0)
+        gap = name_pt / ppm * 0.75
+        if dim_pt:
+            ax.text(cx, cy - gap * 0.55, label, ha="center", va="center", fontsize=name_pt,
+                    fontweight="bold", color="#0F172A", family="sans-serif", zorder=9,
+                    bbox=dict(boxstyle="round,pad=0.15", facecolor="#FFFFFF", edgecolor="none", alpha=0.75))
+            ax.text(cx, cy + gap * 0.75, dims, ha="center", va="center", fontsize=dim_pt,
+                    color="#475569", family="sans-serif", zorder=9)
         else:
-            cy = ry + rh / 2.0
-        min_dim = min(rw, rh)
+            ax.text(cx, cy, label, ha="center", va="center", fontsize=name_pt, fontweight="bold",
+                    color="#0F172A", family="sans-serif", zorder=9,
+                    bbox=dict(boxstyle="round,pad=0.12", facecolor="#FFFFFF", edgecolor="none", alpha=0.75))
 
-        if min_dim >= 2.0:
-            badge_rw = min(max(rw * 0.65, 2.2), rw - 0.3, 4.5)
-            badge_rh = 0.95
-            badge = FancyBboxPatch(
-                (cx - badge_rw / 2.0, cy - badge_rh / 2.0), badge_rw, badge_rh,
-                boxstyle="round,pad=0.04,rounding_size=0.12",
-                facecolor="#FFFFFF", edgecolor="#CBD5E1",
-                linewidth=0.7, alpha=0.92, zorder=7
-            )
-            ax.add_patch(badge)
-            ax.text(cx, cy - 0.18, rname.upper(), ha="center", va="center", fontsize=7.2, fontweight="bold", color="#0F172A", family="sans-serif", zorder=8)
-            ax.text(cx, cy + 0.18, f"{rw:.2f}m × {rh:.2f}m  ·  {area_sqm:.1f} m²", ha="center", va="center", fontsize=5.8, color="#475569", family="sans-serif", zorder=8)
-        elif min_dim >= 1.2:
-            badge_rw = min(rw - 0.15, 2.2)
-            badge_rh = 0.62
-            badge = FancyBboxPatch(
-                (cx - badge_rw / 2.0, cy - badge_rh / 2.0), badge_rw, badge_rh,
-                boxstyle="round,pad=0.03,rounding_size=0.08",
-                facecolor="#FFFFFF", edgecolor="#CBD5E1",
-                linewidth=0.6, alpha=0.9, zorder=7
-            )
-            ax.add_patch(badge)
-            short_rname = rname.replace("Bathroom", "Bath").replace("Bedroom", "Bed").replace("Ensuite", "Ens.")
-            ax.text(cx, cy - 0.1, short_rname.upper(), ha="center", va="center", fontsize=5.4, fontweight="bold", color="#0F172A", family="sans-serif", zorder=8)
-            ax.text(cx, cy + 0.12, f"{area_sqm:.1f} m²", ha="center", va="center", fontsize=4.8, color="#64748B", family="sans-serif", zorder=8)
+    # ------------------------------------------------------------------ overall dimensions
+    def dim_line(x0, y0, x1, y1, text, horizontal):
+        ax.plot([x0, x1], [y0, y1], color="#475569", linewidth=0.6, zorder=8)
+        tick = 0.25
+        for (px, py) in ((x0, y0), (x1, y1)):
+            ax.plot([px - tick, px + tick], [py + tick, py - tick], color="#475569", linewidth=0.8, zorder=8)
+            if horizontal:
+                ax.plot([px, px], [py - 0.15, py + 0.6], color="#94A3B8", linewidth=0.4, zorder=8)
+            else:
+                ax.plot([px - 0.15, px + 0.6], [py, py], color="#94A3B8", linewidth=0.4, zorder=8)
+        if horizontal:
+            ax.text((x0 + x1) / 2, y0 - 0.2, text, ha="center", va="bottom", fontsize=6, color="#334155", zorder=8)
         else:
-            short_name = rname[:6] + ".." if len(rname) > 7 else rname
-            ax.text(cx, cy, short_name.upper(), ha="center", va="center", fontsize=4.8, color="#0F172A", family="sans-serif", zorder=8)
+            ax.text(x0 - 0.2, (y0 + y1) / 2, text, ha="right", va="center", fontsize=6, color="#334155",
+                    rotation=90, zorder=8)
+
+    dim_line(min_x, min_y - 1.9, max_x, min_y - 1.9, f"{max_x - min_x:.2f} m", True)
+    dim_line(min_x - 1.0, min_y, min_x - 1.0, max_y, f"{max_y - min_y:.2f} m", False)
 
     # -------------------------------------------------------------
     # Architectural Compass / North Arrow (Top Left)
@@ -686,6 +766,11 @@ def render_floorplan_image(
     # -------------------------------------------------------------
     if show_title_block:
         tb_w = max(min(span_x * 0.65, 12.0), 7.5)
+        # Wide enough for its longest line at the drawing's scale (the header used to run
+        # out of the box on small plates).
+        longest = max(len(f"{tower_name.upper()} — FURNISHED PROPOSED FLOOR PLATE") * 8.5,
+                      len("APTIMIZER · ARCHITECTURAL PRESENTATION DRAWING") * 6.5, 62 * 7.0)
+        tb_w = max(tb_w, longest * 0.62 / ppm + 0.8)
         tb_h = 3.2
         tb_x = max_x + pad_right - tb_w - 0.5
         tb_y = max_y + pad_bottom - tb_h - 0.4
@@ -714,13 +799,13 @@ def render_floorplan_image(
 
         proj_str = project_name if project_name else "RESIDENTIAL SCHEME"
         now_str = datetime.now(timezone.utc).strftime("%d %b %Y")
-        footprint = float(tower.get("footprint_area") or span_x * span_y)
+        plate_area = (max_x - min_x) * (max_y - min_y)
 
         ax.text(tb_x + 0.3, tb_y + 1.25, f"{tower_name.upper()} — FURNISHED PROPOSED FLOOR PLATE",
                 ha="left", va="center", fontsize=8.5, fontweight="bold", color="#0F172A", family="sans-serif", zorder=10)
-        ax.text(tb_x + 0.3, tb_y + 1.8, f"Level: Floor {floor_num} (Typical Level)  |  Units: {len(unit_map)} Flats",
+        ax.text(tb_x + 0.3, tb_y + 1.8, f"Level: Floor {floor_num}{' (top floor)' if floor_num == int(tower.get('floors') or 0) else ''}  |  Units: {len(unit_map)} Flats",
                 ha="left", va="center", fontsize=7, color="#334155", family="sans-serif", zorder=10)
-        ax.text(tb_x + 0.3, tb_y + 2.3, f"Gross Footprint: {footprint:,.1f} m²  |  Total Rooms: {len(rooms)}",
+        ax.text(tb_x + 0.3, tb_y + 2.3, f"Plate drawn: {max_x - min_x:.1f} x {max_y - min_y:.1f} m ({plate_area:,.0f} m²)  |  Rooms: {len(rooms)}",
                 ha="left", va="center", fontsize=7, color="#475569", family="sans-serif", zorder=10)
         ax.text(tb_x + 0.3, tb_y + 2.8, f"Project: {proj_str}  |  Date: {now_str}  |  Status: SCHEMATIC DESIGN",
                 ha="left", va="center", fontsize=6.5, color="#64748B", family="sans-serif", zorder=10)

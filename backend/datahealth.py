@@ -201,13 +201,19 @@ def _freshness(project: Dict[str, Any]) -> List[Dict[str, Any]]:
 
     gis = project.get("gis") or {}
     if gis:
-        fresh = gis.get("polygon_signature") == gislib._signature(coords)
+        # One staleness rule for the whole app: the boundary moved, or the rules that
+        # produced the numbers changed. Checking only the boundary (as this did) reported
+        # a GIS artefact as fresh while the GIS module itself flagged it out of date.
+        reason = gislib.staleness(gis, coords)
         out.append({
             "key": "gis",
-            "label": "GIS analysis vs current boundary",
-            "state": "fresh" if fresh else "stale",
-            "detail": "Re-run the site analysis — it was sampled around a different boundary."
-                      if not fresh else "Sampled around the boundary as it stands.",
+            "label": "GIS analysis vs current boundary & rules",
+            "state": "stale" if reason else "fresh",
+            "detail": {
+                "polygon": "Re-run the site analysis — it was sampled around a different boundary.",
+                "rules": "Re-run the site analysis — the detection and scoring rules have "
+                         "changed since it ran.",
+            }.get(reason, "Sampled around the boundary as it stands, under the current rules."),
         })
 
     stale_plates = []

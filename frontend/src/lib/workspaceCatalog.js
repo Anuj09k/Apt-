@@ -37,14 +37,6 @@ export const WORKSPACE_CATALOG = [
       computed("Genetic refinement run", "generations / score", "Off-grid search telemetry when the layout engine refines the greedy packing."),
       computed("Genetic refinement evaluations, fitness score & NBC spacing check", "evaluations / fitness / status", "Off-grid genetic algorithm evaluation count, seed vs. final fitness score, tower count delta, and NBC Part 3 inter-building clearance verification."),
     ] },
-    { id: "planning", name: "Tower & Unit Planning", icon: Building2, note: "Configure each tower separately: floors, building shape, unit mix, 5BHK penthouse, and society amenities.", parameters: [
-      input("Tower floor count & height", "floors / m", "Building vertical envelope."),
-      input("Building architectural form / shape", "shape", "Curved, cylindrical, chamfered, stepped or rectangular."),
-      input("Top-floor 5BHK penthouse", "0 - 2", "Luxury 5BHK penthouses at building pinnacle with private terrace."),
-      input("Unit mix per typical floor", "units / m²", "1BHK to 5BHK unit distribution, carpet areas and balconies."),
-      input("Society amenities (shared)", "amenities / m²", "Clubhouse, gym, swimming pool, community halls."),
-      computed("Tower built-up & carpet area", "m²", "Total built-up and net carpet areas."),
-    ] },
     { id: "gis", name: "GIS Intelligence", icon: Globe2, note: "Terrain, surroundings and environmental context.", parameters: [
       input("Study radius", "m", "Surroundings query radius."),
       estimate("Elevation, slope & flood context", "m / %", "Depends on external data coverage and resolution."),
@@ -82,6 +74,14 @@ export const WORKSPACE_CATALOG = [
     ] },
   ] },
   { id: "design", label: "Design", icon: Building2, modules: [
+    { id: "planning", name: "Tower & Unit Planning", icon: Building2, note: "Configure each tower separately: floors, building shape, unit mix, 5BHK penthouse, and society amenities.", parameters: [
+      input("Tower floor count & height", "floors / m", "Building vertical envelope."),
+      input("Building architectural form / shape", "shape", "Curved, cylindrical, chamfered, stepped or rectangular."),
+      input("Top-floor 5BHK penthouse", "0 - 2", "Luxury 5BHK penthouses at building pinnacle with private terrace."),
+      input("Unit mix per typical floor", "units / m²", "1BHK to 5BHK unit distribution, carpet areas and balconies."),
+      input("Society amenities (shared)", "amenities / m²", "Clubhouse, gym, swimming pool, community halls."),
+      computed("Tower built-up & carpet area", "m²", "Total built-up and net carpet areas."),
+    ] },
     { id: "autonomous-studio", name: "Quick Generation", icon: Sparkles, note: "Rapid concept schemes from project constraints.", parameters: [
       input("Generation brief", "text", "Site and scheme constraints."),
       estimate("Generated scheme", "concept", "Candidate layout, not an approved construction drawing."),
