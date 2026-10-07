@@ -310,8 +310,14 @@ def structural_takeoff(project: Dict[str, Any], areas: Dict[str, Any]) -> Dict[s
         found_c = f_side * f_side * f_depth * n_col
         pcc_c = (f_side + 0.2) ** 2 * PCC_THICKNESS_M * n_col
 
-        col_steel = col_c * (col_pct / 100.0) * STEEL_DENSITY + column_ties_kg(cb, cd, clear_h) * n_col * floors
-        beam_steel = beam_c * STEEL_KG_PER_M3["beam"]
+        col_long = col_c * (col_pct / 100.0) * STEEL_DENSITY
+        col_ties = column_ties_kg(cb, cd, clear_h) * n_col * floors
+        col_steel = col_long + col_ties
+        # Beam bars run the full beam depth, through the slab zone the concrete line leaves
+        # out (that concrete is counted in the slab), so the steel rate applies to the full
+        # section, not just the web below the slab.
+        beam_full_c = g["beam_length_m"] * beam_w * beam_d * floors
+        beam_steel = beam_full_c * STEEL_KG_PER_M3["beam"]
         slab_steel = slab_c * STEEL_KG_PER_M3["slab"]
         core_steel = core_c * STEEL_KG_PER_M3["stair"]
         found_steel = found_c * STEEL_KG_PER_M3["footing"]
@@ -351,6 +357,10 @@ def structural_takeoff(project: Dict[str, Any], areas: Dict[str, Any]) -> Dict[s
             "slab_thickness_mm": round(slab_t * 1000),
             "footing_size_m": round(f_side, 2), "sbc_kn_sqm": sbc,
             "service_load_kn_sqm": round(service_per_sqm, 2),
+            # How the column steel figure is built, so it can be checked by hand.
+            "column_steel_detail": {"longitudinal_kg": round(col_long, 1), "ties_kg": round(col_ties, 1),
+                                    "ductile_factor": DUCTILE_STEEL_FACTOR if ductile else 1.0,
+                                    "lap_allowance": LAP_ALLOWANCE},
             "concrete": c_parts,
             "steel": {"columns": round(col_steel), "beams": round(beam_steel),
                       "slabs": round(slab_steel), "cores_and_stairs": round(core_steel),
@@ -425,7 +435,10 @@ CONCRETE_BAND_M3_PER_SQM = (0.22, 0.48)
 STEEL_BAND_KG_PER_M3 = (75.0, 135.0)
 # The per-m3 band alone let a take-off at roughly half the usual steel per m2 through
 # without a word, because thin members keep kg/m3 normal while the total is far too low.
-STEEL_BAND_KG_PER_SQM = (28.0, 75.0)
+# The band is for the FRAME this take-off measures (footings, columns, beams, slabs,
+# cores). Whole-building rules of thumb (35-45 kg/m2) also carry lintels, chajjas, plinth
+# beams, parapets and stair flights, which are not in it.
+STEEL_BAND_KG_PER_SQM = (20.0, 75.0)
 
 
 def _sanity(concrete_m3: float, steel_kg: float, builtup_sqm: float) -> List[Dict[str, str]]:
@@ -451,6 +464,6 @@ def _sanity(concrete_m3: float, steel_kg: float, builtup_sqm: float) -> List[Dic
     if not (klo <= kg_sqm <= khi):
         out.append({"severity": "warning", "metric": "steel_per_sqm",
                     "text": f"Reinforcement works out at {kg_sqm:.1f} kg per m2 of built-up area, "
-                            f"outside the usual {klo:.0f}-{khi:.0f} kg/m2 for Indian residential RCC. "
+                            f"outside the usual {klo:.0f}-{khi:.0f} kg/m2 for an Indian residential RCC frame. "
                             "Check the column grid, the member sections and the steel percentages."})
     return out

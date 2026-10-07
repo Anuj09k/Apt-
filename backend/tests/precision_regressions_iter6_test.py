@@ -18,7 +18,7 @@ def _base_project():
 def test_zero_config_factors_and_zero_rates_are_respected_without_fallbacks():
     p = _base_project()
     p["config"].update({"wall_thickness_factor": 0.0, "common_area_loading": 0.0, "fsi_factor": 0.0})
-    p["labour_rates"] = {"mason": 0.0, "carpenter": 0.0, "bar_bender": 0.0, "concretor": 0.0,
+    p["labour_rates"] = {"mason": 0.0, "plasterer": 0.0, "helper": 0.0, "carpenter": 0.0, "bar_bender": 0.0, "concretor": 0.0,
                          "tiler": 0.0, "painter": 0.0, "plumber": 0.0, "electrician": 0.0}
     p["equipment_rates"] = {"mixer": 0.0, "vibrator": 0.0, "hoist": 0.0, "crane": 0.0, "scaffold": 0.0}
 

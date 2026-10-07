@@ -790,7 +790,9 @@ def autonomous_compliance_audit(project: Dict[str, Any]) -> Dict[str, Any]:
         margin = None
         if isinstance(thr, (int, float)) and isinstance(act, (int, float)):
             margin = round((thr - act) if r.get("operator") == "max" else (act - thr), 2)
-        checks.append({"id": r.get("id"), "rule": r.get("label"), "clause": r.get("code"),
+        # The FAR check keeps the id API consumers already key on.
+        cid = "far_check" if r.get("param") == "far" else r.get("id")
+        checks.append({"id": cid, "rule": r.get("label"), "clause": r.get("code"),
                        "permissible": thr, "achieved": round(act, 2) if isinstance(act, float) else act,
                        "unit": r.get("unit"), "status": "pass" if ok else "fail", "margin": margin,
                        "remediation": None if ok else r.get("message")})

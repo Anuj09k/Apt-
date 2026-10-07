@@ -404,7 +404,10 @@ def render_floorplan_image(
             unit_map.setdefault(uid, []).append(r)
 
     # Draw unit boundary outlines and badges
-    for uid, urooms in unit_map.items():
+    # Numbered across the whole plate: unit_index restarts on each side of the corridor,
+    # which labelled two different flats "UNIT 1".
+    for unit_no, (uid, urooms) in enumerate(sorted(unit_map.items(), key=lambda kv: (
+            min(float(r.get("y", 0)) for r in kv[1]), min(float(r.get("x", 0)) for r in kv[1]))), 1):
         uxs = [float(r.get("x", 0)) for r in urooms]
         uys = [float(r.get("y", 0)) for r in urooms]
         ux2s = [float(r.get("x", 0)) + max(float(r.get("w", 3)), 0.5) for r in urooms]
@@ -412,7 +415,6 @@ def render_floorplan_image(
         ux, uy = min(uxs), min(uys)
         uw, uh = max(ux2s) - ux, max(uy2s) - uy
         u_type = str(urooms[0].get("unit_type") or "").upper()
-        u_idx = urooms[0].get("unit_index", 0)
 
         # Architectural unit border (Blue dashed line)
         unit_rect = Rectangle(
@@ -437,7 +439,7 @@ def render_floorplan_image(
             linewidth=1.0, zorder=7
         )
         ax.add_patch(badge_box)
-        unit_label = f"UNIT {u_idx + 1} · {u_type}" if u_type else f"UNIT {u_idx + 1}"
+        unit_label = f"UNIT {unit_no} · {u_type}" if u_type else f"UNIT {unit_no}"
         ax.text(
             badge_x + badge_w / 2.0, badge_y + badge_h / 2.0,
             unit_label,
@@ -514,7 +516,9 @@ def render_floorplan_image(
         return None
 
     def target_of(r):
-        t = r.get("door_to") or r.get("door_child_of")
+        # `door_via` names the room a door physically opens into when `door_to` is its role
+        # (a bedroom's door gives onto the passage, through the bedroom's own lobby).
+        t = r.get("door_via") or r.get("door_to") or r.get("door_child_of")
         if not t:
             return None
         uid = r.get("unit_id")
@@ -693,8 +697,10 @@ def render_floorplan_image(
         cx = rx + rw / 2.0
         cy = ry + rh * (0.70 if rtype == "bedroom" and rh >= 3.4 else 0.5)
         dims = f"{rw:.2f} × {rh:.2f} m"
-        short = (rname.replace("Bathroom", "Bath").replace("Bedroom", "Bed").replace("Ensuite", "Ens.")
-                 .replace("Master", "Mstr").replace("Entrance ", "").replace("Private ", ""))
+        short = (rname.replace("Utility / Dry Balcony", "Utility").replace("Breakfast & Crockery", "Breakfast")
+                 .replace("Bathroom", "Bath").replace("Bedroom", "Bed").replace("Ensuite", "Ens.")
+                 .replace("Master", "Mstr").replace("Entrance ", "").replace("Private ", "")
+                 .replace("Kitchen Store", "Store").replace(" Lobby", " Lby"))
         name_pt = fit_pt(rname.upper(), rw, rh, 6.8, bold=True)
         label = rname.upper()
         if name_pt is None:

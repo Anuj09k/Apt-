@@ -124,9 +124,14 @@ def test_a_high_seismic_zone_adds_confinement_steel():
 def test_column_steel_is_arithmetic_not_a_thumb_rule():
     _, r = run(column_steel_pct=2.0)
     t = r["towers"][0]
-    expected = t["concrete"]["columns"] * 0.02 * T.STEEL_DENSITY
-    if not t["ductile_detailing"]:
-        assert t["steel"]["columns"] == pytest.approx(expected, rel=0.01)
+    d = t["column_steel_detail"]
+    # Main bars are exactly the specified percentage of the column concrete...
+    assert d["longitudinal_kg"] == pytest.approx(t["concrete"]["columns"] * 0.02 * T.STEEL_DENSITY, rel=0.01)
+    # ...lateral ties are always present (IS 456 Cl. 26.5.3.2)...
+    assert d["ties_kg"] > 0
+    # ...and the bill is bars plus ties, with confinement and laps applied on top.
+    expected = (d["longitudinal_kg"] + d["ties_kg"]) * d["ductile_factor"] * d["lap_allowance"]
+    assert t["steel"]["columns"] == pytest.approx(expected, rel=0.01)
 
 
 def test_the_parts_add_up_to_the_total():
@@ -160,8 +165,11 @@ def test_structural_items_are_flagged_as_taken_off():
     a = engine.analyse(proj())
     by = {i["key"]: i for i in a["quantities"]["items"]}
     assert a["quantities"]["derived"] is True
-    for k in ("concrete", "steel", "cement", "sand", "aggregate"):
+    for k in ("concrete", "steel", "aggregate", "formwork"):
         assert by[k]["source"] == "take-off"
+    # Cement and sand also carry the brick and plaster mortar the mix design does not see.
+    for k in ("cement", "sand"):
+        assert by[k]["source"] == "take-off + mortar"
     for k in ("tiles", "paint", "doors"):
         assert by[k]["source"] == "ratio", f"{k} genuinely scales with area or units"
 

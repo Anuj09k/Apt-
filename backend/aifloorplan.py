@@ -520,9 +520,7 @@ def generate_architectural_template(tower: Dict[str, Any], floor: int) -> Tuple[
             if idx == last:
                 exterior.append("E")
             candidates = []
-            planners = (
-                ("realistic planner", unit_planner.plan_unit),
-                ("realistic planner (mirrored)", unit_planner.plan_unit_mirrored),
+            planners = tuple(unit_planner.variants(u["type"], u["carpet"])) + (
                 ("room planner", generate_realistic_unit),
                 ("Vastu guide packer", vastu.pack_unit),
             )
@@ -559,9 +557,14 @@ def generate_architectural_template(tower: Dict[str, Any], floor: int) -> Tuple[
                         # A rule-clean realistic plan wins; the soft Vastu placements below
                         # only choose between its two mirror images.
                         0 if source.startswith("realistic planner") else 1,
-                        len(zones.get("violations") or []),     # forbidden zones (kitchen in NE...)
+                        # Forbidden zones (kitchen in NE...), plus a master bedroom in the NE
+                        # quadrant: the guide's anchors are judged by quadrant, and a master
+                        # there is the one placement Vastu rules out outright.
+                        len(zones.get("violations") or []) + sum(
+                            1 for room in candidate
+                            if str(room.get("id", "")).endswith("-mbed") and vastu.sector_of(room, box) == "NE"),
+                        anchor_misses,          # the guide's primary anchors: kitchen SE, master SW, pooja NE
                         zones["preference_misses"],
-                        anchor_misses,
                         bedroom_misses,
                         planner_order,
                     )

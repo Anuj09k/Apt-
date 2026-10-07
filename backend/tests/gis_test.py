@@ -160,9 +160,12 @@ def test_persisted_and_staleness(project, headers, gis):
 
     proj = requests.get(f"{API}/projects/{project}", headers=headers, timeout=30).json()
     plot = proj["plot"]
-    plot["coordinates"] = plot["coordinates"] + [[plot["coordinates"][0][0] + 0.0004,
-                                                  plot["coordinates"][0][1] + 0.0004]]
-    requests.put(f"{API}/projects/{project}", json={"updates": {"plot": plot}}, headers=headers, timeout=30)
+    # Move the whole boundary ~45 m north-east. (Appending a stray vertex used to be the
+    # move, but that makes the boundary cross itself, which the API now rejects with 422 --
+    # and the test never looked at the response, so it read as a staleness bug.)
+    plot["coordinates"] = [[lat + 0.0004, lng + 0.0004] for lat, lng in plot["coordinates"]]
+    r = requests.put(f"{API}/projects/{project}", json={"updates": {"plot": plot}}, headers=headers, timeout=30)
+    assert r.status_code == 200, r.text
     after = requests.get(f"{API}/projects/{project}/gis", headers=headers, timeout=30).json()
     assert after["stale"] is True, "GIS must be flagged stale after the plot polygon changes"
 

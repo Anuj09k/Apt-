@@ -205,7 +205,14 @@ class TestProjects:
         import engine as _engine
         expected = _engine.polygon_area_sqm(coords)
         assert abs(a["areas"]["plot_area_sqm"] - expected) < max(1.0, expected * 0.001)
-        assert a["areas"]["total_units"] == 48
+        # Same reasoning for units: derived from the project's own towers (homes per floor x
+        # the storeys each home occupies), not the stale literal 48 -- the default tower has
+        # carried 72 homes for as long as this module could not reach a server to run.
+        from residential_defaults import storeys_of
+        expected_units = sum(int(u.get("count") or 0) * storeys_of(u, int(t.get("floors") or 0))
+                             for t in proj.get("towers") or [] for u in t.get("units") or [])
+        assert expected_units > 0
+        assert a["areas"]["total_units"] == expected_units
         assert a["areas"]["far"] > 0
         assert a["parking"]["required_slots"] > 0
         assert a["parking"]["provided_slots"] > 0

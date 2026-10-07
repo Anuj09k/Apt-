@@ -28,8 +28,10 @@ def test_concrete_carbon_does_not_double_count_its_own_cement(eng):
     q = {i["key"]: i for i in base["quantities"]["items"]}
     mix_cement_per_m3 = 372.0
     implied_bags = q["concrete"]["quantity"] * mix_cement_per_m3 / 50.0
-    # The bill's cement IS the concrete's cement, not a separate purchase.
-    assert q["cement"]["quantity"] == pytest.approx(implied_bags, rel=0.02)
+    mortar_bags = sum(m["cement_bags"] for m in base["quantities"]["mortar"].values())
+    # The bill's cement IS the concrete's cement plus the mortar's -- never a ready-mix
+    # purchase on top of either.
+    assert q["cement"]["quantity"] == pytest.approx(implied_bags + mortar_bags, rel=0.02)
     # So the concrete coefficient must be a placing figure, not a ready-mix one.
     assert C.EMBODIED_CARBON["concrete"]["factor"] < 50
     rows = {m["key"]: m for m in r["modules"]["carbon"]["materials"]}

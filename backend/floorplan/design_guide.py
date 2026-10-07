@@ -26,7 +26,8 @@ ROOM_ZONE_PREFERENCES = {
 
 # These rooms must never occupy the northeast or the open central Brahmasthan.
 FORBIDDEN_ROOM_TYPES_BY_ZONE = {
-    "NE": {"bathroom", "kitchen", "shaft", "utility", "storage", "servant"},
+    # The master bedroom belongs in the SW; the NE (Ishanya) is the one sector it may never take.
+    "NE": {"bathroom", "kitchen", "shaft", "utility", "storage", "servant", "master"},
     "CENTER": {"bedroom", "bathroom", "kitchen", "shaft", "closet", "storage", "utility", "servant"},
 }
 
