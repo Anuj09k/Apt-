@@ -330,6 +330,17 @@ def render_floorplan_image(
         bytes: PNG image bytes.
     """
     rooms, floor_num = _get_rooms_for_tower(tower, floor)
+    # Stored layouts are free-form dicts (hand-edited, legacy or AI-written). Every pass
+    # below reads geometry directly, so it is normalised once here with the defaults the
+    # renderer has always used, instead of a missing key crashing the whole drawing.
+    def _num(v, default):
+        try:
+            return float(v)
+        except (TypeError, ValueError):
+            return default
+    rooms = [{**r, "x": _num(r.get("x"), 0.0), "y": _num(r.get("y"), 0.0),
+              "w": max(_num(r.get("w"), 3.0), 0.3), "h": max(_num(r.get("h"), 3.0), 0.3)}
+             for r in rooms if isinstance(r, dict)]
     tower_name = tower.get("name") or "Tower"
 
     if not rooms:
